@@ -30,9 +30,9 @@ const AudioRecorder = ({ onTranscriptSpeech, onIsRecording, disabled = false }) 
 
   const stopRecording = () => {
     if (recognitionRef.current) {
+      setIsRecording(false);
       recognitionRef.current.stop();
       recognitionRef.current = null;  // Limpiar la referencia
-      setIsRecording(false);
     }
   };
 

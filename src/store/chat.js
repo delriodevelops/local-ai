@@ -38,6 +38,8 @@ const useChatStore = create((set, get) => ({
   history: [],
   setHistory: (history) => set({ history }),
 
+  actualConversation: null,
+  setActualConversation: (actualConversation) => set({ actualConversation }),
 
   // increasePopulation: () => set((state) => ({ bears: state.bears + 1 })),
   // removeAllBears: () => set({ bears: 0 }),

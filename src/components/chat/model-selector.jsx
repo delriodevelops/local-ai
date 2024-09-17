@@ -6,14 +6,13 @@ import useChatStore from '@/store/chat';
 // Función para obtener información de la GPU
 function getGPUInfo() {
   const canvas = document.createElement('canvas');
+
   const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-  if (!gl) {
-    return 'No WebGL support';
-  }
+  if (!gl) return 'No WebGL support';
+
   const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-  if (debugInfo) {
-    return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
-  }
+  if (debugInfo) return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+
   return 'Unknown GPU';
 }
 
@@ -42,14 +41,11 @@ const ModelSelector = () => {
 
     const allModels = webllm.prebuiltAppConfig.model_list;
     const filteredModels = filterModels(userSpecs, allModels);
-    console.log(filteredModels, userSpecs)
 
     setAvailableModels(filteredModels);
 
     // Seleccionar el primer modelo por defecto
-    if (filteredModels.length > 0) {
-      setSelectedModel('phi-1_5-q4f32_1-MLC');
-    }
+    if (filteredModels.length > 0) setSelectedModel('Mistral-7B-Instruct-v0.3-q4f32_1-MLC');
   }, []);
 
   function handleSelection(e) {
