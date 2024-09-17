@@ -22,7 +22,6 @@ const useChatStore = create((set, get) => ({
     }
 
     const newEngine = await handleSelectModel()
-    console.log('newEngine', newEngine)
 
     return set({ engine: newEngine })
   },
