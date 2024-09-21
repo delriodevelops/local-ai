@@ -28,7 +28,7 @@ function filterModels(userSpecs, models) {
 
 const ModelSelector = () => {
   const { setEngine, progress } = useChatStore(s => s)
-  const [selectedModel, setSelectedModel] = useState(null)
+  const [selectedModel, setSelectedModel] = useState(undefined)
   const [availableModels, setAvailableModels] = useState([]);
 
   useLayoutEffect(() => {
