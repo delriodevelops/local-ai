@@ -12,6 +12,7 @@ const CHAT = () => {
       </nav>
       <Messages />
       <ChatInput />
+      <small className='mb-1 -mt-1 text-[11px] text-neutral-400 '>The provided information may be inaccurate. Consider verifying important information.</small>
     </section >
   )
 }

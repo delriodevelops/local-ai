@@ -148,7 +148,7 @@ const ChatInput = () => {
         type='submit'
         onClick={() => { sendMessage() }}
         disabled={!engine || isStreaming || isRecording || !chatInput.trim().length}
-        className="text-3xl flex items-center justify-center cursor-pointer disabled:text-neutral-500 disabled:cursor-not-allowed"
+        className="text-4xl flex items-center justify-center cursor-pointer disabled:text-neutral-500 disabled:cursor-not-allowed"
       >
         <ion-icon name="arrow-up-circle"></ion-icon>
       </button>
