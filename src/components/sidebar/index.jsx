@@ -14,7 +14,7 @@ const SIDEBAR = () => {
 
   if (!isHistoryCollapsed) return (
     <section
-      className="bg-neutral-800 px-2 pt-2 pb-3 w-full max-w-64 flex flex-col h-screen gap-2 justify-between"
+      className="bg-neutral-800 px-2 pt-2 pb-3 w-full max-w-64 flex flex-col h-dvh gap-2 justify-between"
     >
       <article
         className="flex flex-col gap-2"

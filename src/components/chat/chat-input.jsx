@@ -130,7 +130,7 @@ const ChatInput = () => {
 
 
   return (
-    <form onSubmit={() => { sendMessage() }} className="w-4/5 overflow-hidden mb-2 bg-neutral-600 rounded-3xl flex justify-end gap-2 items-center p-2">
+    <form onSubmit={() => { sendMessage() }} className=" w-full 2xl:w-3/5 overflow-hidden mb-2 bg-neutral-600 rounded-3xl flex justify-end gap-2 items-center p-2">
       {
         /* <div className="text-2xl p-2 hover:bg-neutral-500 rounded-xl flex items-center justify-center duration-300 ease-in-out cursor-pointer">
           <ion-icon name="attach-outline"></ion-icon>
