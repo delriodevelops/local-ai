@@ -5,6 +5,7 @@ import ChatInput from './chat-input'
 import Messages from './messages'
 
 const CHAT = () => {
+
   return (
     <section className="flex flex-col bg-neutral-700 w-full px-4 items-center h-dvh">
       <nav className="w-full pt-2">

@@ -2,18 +2,11 @@
 import React, { useState } from 'react'
 import Image from 'next/image'
 import ReactMarkdown from 'react-markdown';
+import CopyButton from './copy-button';
+import TTSButton from './tts-button';
 
-const Message = ({ message }) => {
 
-  const [copiedToClipboard, setCopiedToClipboard] = useState(false)
-
-  function copyToClipboard() {
-    navigator.clipboard.writeText(message?.content)
-    setCopiedToClipboard(true)
-    setTimeout(() => {
-      setCopiedToClipboard(false)
-    }, 500)
-  }
+const Message = ({ message, isStreaming }) => {
 
 
   return (
@@ -37,23 +30,10 @@ const Message = ({ message }) => {
 
       {
         message.role !== 'user' && (
-          <button
-            onClick={copyToClipboard}
-            className=' relative text-2xl p-2 hover:bg-neutral-600 rounded-full cursor-pointer flex items-center m-3 ml-12 w-fit h-fit self-start'
-          >
-            {
-              !!copiedToClipboard && (
-                <div className='absolute px-3 py-2 bg-neutral-800 -top-10 -left-4 rounded-3xl text-sm'>
-                  Copied!
-                </div>
-              )
-            }
-            {
-              !copiedToClipboard
-                ? <ion-icon name="copy-outline"></ion-icon>
-                : <ion-icon name="checkmark"></ion-icon>
-            }
-          </button>
+          <div className='flex gap-2 items-center ml-12 m-3'>
+            <TTSButton message={message} isStreaming={isStreaming} />
+            <CopyButton message={message} />
+          </div>
         )
       }
     </div>

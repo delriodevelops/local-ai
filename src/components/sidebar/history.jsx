@@ -31,7 +31,9 @@ const History = () => {
               key={el?.createdAt}
               onClick={() => { handleSelectConversation(el) }}
               className="relative group/delete p-4 hover:bg-neutral-700 rounded-xl duration-300 ease-in-out cursor-pointer truncate">
-              {el.messages.at(-2).content}
+              <span>
+                {el.messages.at(-2).content}
+              </span>
               <button
                 onClick={(e) => { deleteConversation(e, el) }}
                 className='absolute invisible top-2 w-10 h-10 aspect-square right-2 group-hover/delete:visible text-xl hover:text-red-500 hover:bg-neutral-600 flex justify-center items-center p-1 rounded-full duration-300 ease-in-out bg-neutral-700'>
