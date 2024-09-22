@@ -10,9 +10,11 @@
   },
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.64",
+    "@tailwindcss/typography": "^0.5.15",
     "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18",
+    "react-markdown": "^9.0.1",
     "zustand": "^4.5.2"
   },
   "devDependencies": {

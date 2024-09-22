@@ -5,14 +5,13 @@ import AudioRecorder from './audio-recorder'
 
 const ChatInput = () => {
 
-  const { engine, setMessages, messages, actualConversation, setActualConversation, setHistory, history } = useChatStore(s => s)
+  const { engine, setMessages, messages, actualConversation, setActualConversation, setHistory, history, isStreaming, setIsStreaming } = useChatStore(s => s)
 
-  const [isStreaming, setIsStreaming] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [chatInput, setChatInput] = useState('')
 
   function onTranscriptSpeech(e) {
-    return sendMessage(e)
+    return setChatInput(e)
   }
 
   function onIsRecording(e) {
@@ -61,8 +60,8 @@ const ChatInput = () => {
     const chunks = await engine.chat.completions.create({
       messages: userMessages,
       stream: true,
-      temperature: .3,
-      max_tokens: 48,
+      temperature: .2,
+      max_tokens: 1024,
     })
 
     const replyMessages = [...userMessages, reply]
@@ -100,16 +99,19 @@ const ChatInput = () => {
       )
     }
 
+    scrollOnMessage()
 
 
   }
 
-  useEffect(() => {
-  }, [engine])
-
-  useEffect(() => {
+  function scrollOnMessage() {
     const $messagesContainer = document.body.querySelector("#messages-container");
     $messagesContainer?.scrollTo(0, $messagesContainer?.scrollHeight);
+
+  }
+
+  useEffect(() => {
+    scrollOnMessage()
   }, [messages])
 
   useEffect(() => {
@@ -121,10 +123,7 @@ const ChatInput = () => {
   useLayoutEffect(() => {
     const localConversations = localStorage.getItem('past-conversations')
 
-    if (localConversations) {
-      const localHistory = JSON.parse(localConversations)
-      setHistory(localHistory)
-    }
+    if (localConversations) setHistory(JSON.parse(localConversations))
     else localStorage.setItem('past-conversations', JSON.stringify([]))
 
   }, [])
@@ -140,7 +139,7 @@ const ChatInput = () => {
       <textarea
         name="ipt-textarea"
         id="ipt-textarea"
-        className="resize-none overflow-y-auto max-h-56 w-full bg-neutral-600 outline-none h-10 py-2 pr-2"
+        className="resize-none overflow-y-auto max-h-56 w-full bg-neutral-600 outline-none h-10 p-2"
         onKeyDown={handleKeyDown}
         onChange={(e) => { setChatInput(e.target.value) }}
         value={chatInput}></textarea>

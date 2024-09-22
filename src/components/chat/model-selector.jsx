@@ -22,11 +22,17 @@ function filterModels(userSpecs, models) {
     const hasEnoughCPU = userSpecs.cpu >= (model.cpu_required || 4); // Valor por defecto
     const hasEnoughRAM = userSpecs.ram >= (model.ram_required || 8); // Valor por defecto
     const hasGPU = model.vram_required_MB ? userSpecs.gpu !== 'No WebGL support' : true;
-    return hasEnoughCPU && hasEnoughRAM && hasGPU;
-  });
+    const requiredFeatures = !!model.required_features
+    return hasEnoughCPU && hasEnoughRAM && hasGPU && !requiredFeatures;
+  })
+    .sort((a, b) => a.vram_required_MB - b.vram_required_MB);
 }
 
 const ModelSelector = () => {
+
+  const { isStreaming } = useChatStore(s => s)
+
+
   const { setEngine, progress } = useChatStore(s => s)
   const [selectedModel, setSelectedModel] = useState(undefined)
   const [availableModels, setAvailableModels] = useState([]);
@@ -45,7 +51,7 @@ const ModelSelector = () => {
     setAvailableModels(filteredModels);
 
     // Seleccionar el primer modelo por defecto
-    if (filteredModels.length > 0) setSelectedModel('Mistral-7B-Instruct-v0.3-q4f32_1-MLC');
+    if (filteredModels.length > 0) setSelectedModel('TinyLlama-1.1B-Chat-v0.4-q4f32_1-MLC-1k');
   }, []);
 
   function handleSelection(e) {
@@ -59,9 +65,9 @@ const ModelSelector = () => {
 
   return (
     <div className='flex gap-2 items-center'>
-      <select className='bg-neutral-700 hover:bg-neutral-600 outline-none border-none rounded-xl p-3 cursor-pointer' onChange={handleSelection} value={selectedModel}>
+      <select disabled={!!isStreaming} className='disabled:cursor-not-allowed bg-neutral-700 hover:bg-neutral-600 outline-none border-none rounded-xl p-3 cursor-pointer' onChange={handleSelection} value={selectedModel}>
         {
-          !!availableModels?.length && availableModels.map(({ model_id }) => (
+          !!availableModels?.length && availableModels.map(({ model_id, ...el }) => (
             <option value={model_id} key={model_id}>{model_id}</option>
           ))
         }

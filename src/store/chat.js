@@ -17,6 +17,11 @@ const useChatStore = create((set, get) => ({
             get().setProgress(e)
           }
         }, // engineConfig
+        {
+          context_window_size: -1,
+          sliding_window_size: 4096,
+          attention_sink_size: 4,
+        }
       )
       return newEngine
     }
@@ -40,6 +45,9 @@ const useChatStore = create((set, get) => ({
 
   actualConversation: null,
   setActualConversation: (actualConversation) => set({ actualConversation }),
+
+  isStreaming: false,
+  setIsStreaming: (isStreaming) => set({ isStreaming }),
 
   // increasePopulation: () => set((state) => ({ bears: state.bears + 1 })),
   // removeAllBears: () => set({ bears: 0 }),

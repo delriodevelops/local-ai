@@ -8,9 +8,9 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        "linear-gradient":"(to right top, #2f4858, #2c5164, #265b70, #1b657b, #006f85)"
+        "linear-gradient": "(to right top, #2f4858, #2c5164, #265b70, #1b657b, #006f85)"
       },
     },
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/typography')],
 };

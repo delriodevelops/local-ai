@@ -44,3 +44,10 @@ body {
 	background: #666;
 	border-radius: 48px;
 }
+
+code {
+	border-radius: 12px;
+	background-color: #111;
+	display: block;
+	padding: 24px;
+}

@@ -1,6 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import Image from 'next/image'
+import ReactMarkdown from 'react-markdown';
 
 const Message = ({ message }) => {
 
@@ -14,6 +15,7 @@ const Message = ({ message }) => {
     }, 500)
   }
 
+
   return (
     <div className='w-4/5 mx-auto flex flex-col'>
       <div className={` flex gap-3 items-center ${message?.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`} >
@@ -26,9 +28,11 @@ const Message = ({ message }) => {
             )
             : <Image src="/default.png" width={50} height={50} alt="mecha" className='bg-lime-500 rounded-full aspect-square p-1 self-start' />
         }
-        <p className={`break-all ${message.role === 'user' && 'bg-neutral-900 rounded-xl p-3'}`}>
-          {message?.content}
-        </p>
+        <div className={` whitespace-pre-line break-word ${message.role === 'user' && 'bg-neutral-900 rounded-xl p-3'}`}>
+          <ReactMarkdown>
+            {message?.content}
+          </ReactMarkdown>
+        </div>
       </div>
 
       {

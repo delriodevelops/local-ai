@@ -13,7 +13,7 @@ const SIDEBAR = () => {
     setActualConversation(null)
   }
   return (
-    <section className="bg-neutral-800 px-2 pt-2 pb-3 w-full max-w-64 flex flex-col h-full gap-2 justify-between">
+    <section className="bg-neutral-800 px-2 pt-2 pb-3 w-full max-w-64 flex flex-col h-screen gap-2 justify-between">
       <article className="flex flex-col gap-2">
         <div className="self-end hover:bg-neutral-700  p-3 flex items-center justify-center rounded-xl cursor-pointer duration-300 ease-in-out">
           <ion-icon name="chevron-back-outline"></ion-icon>

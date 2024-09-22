@@ -10,7 +10,7 @@ const History = () => {
   }
 
   return (
-    <article className="flex flex-col gap-2 pr-2 w-full overflow-y-auto h-dvh" style={{ maxHeight: "calc(100dvh - 171px)" }}>
+    <article className="pr-2 w-full overflow-y-auto h-full" style={{ maxHeight: "calc(100dvh - 171px)" }}>
       {
         !!history?.length
           ? history.sort((a, b) => b.lastMessage - a.lastMessage).map(el => (
