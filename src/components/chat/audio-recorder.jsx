@@ -8,7 +8,7 @@ const AudioRecorder = ({ onTranscriptSpeech, onIsRecording, disabled = false }) 
 
   const startRecording = () => {
     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'es-ES';
+    recognition.lang = navigator.language || 'en-US';
     recognition.interimResults = false;
 
     recognition.onresult = (event) => {

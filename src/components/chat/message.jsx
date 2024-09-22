@@ -48,7 +48,11 @@ const Message = ({ message }) => {
                 </div>
               )
             }
-            <ion-icon name="copy-outline"></ion-icon>
+            {
+              !copiedToClipboard
+                ? <ion-icon name="copy-outline"></ion-icon>
+                : <ion-icon name="checkmark"></ion-icon>
+            }
           </button>
         )
       }
