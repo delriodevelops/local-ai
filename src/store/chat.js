@@ -49,6 +49,9 @@ const useChatStore = create((set, get) => ({
   isStreaming: false,
   setIsStreaming: (isStreaming) => set({ isStreaming }),
 
+  isHistoryCollapsed: false,
+  setIsHistoryCollapsed: (isHistoryCollapsed) => set({ isHistoryCollapsed })
+
   // increasePopulation: () => set((state) => ({ bears: state.bears + 1 })),
   // removeAllBears: () => set({ bears: 0 }),
   // updateBears: (newBears) => set({ bears: newBears }),

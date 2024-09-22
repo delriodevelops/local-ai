@@ -25,9 +25,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className={inter.className + ' antialiased'} style={{
-        backgroundImage: "linear-gradient(to right top, #2f4858, #2c5164, #265b70, #1b657b, #006f85)"
-      }}>
+      <body className={inter.className + ' antialiased bg-neutral-700 text-white'} >
         {children}
       </body>
     </html>
