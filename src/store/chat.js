@@ -57,7 +57,7 @@ const useChatStore = create((set, get) => ({
   assistants: JSON.parse(getLocalStorage('assistants')) || [],
   createAssistant: (assistant) => set((state) => {
     const newAssistants = [...state.assistants, assistant]
-    setLocalStorage('assistants', JSON.stringify(newAssistants))
+    setLocalStorage('assistants', newAssistants)
     return { assistants: newAssistants }
   }),
 

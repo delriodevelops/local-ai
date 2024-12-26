@@ -109,7 +109,7 @@ const AssistantsSidebar = () => {
         className="w-full h-full overflow-y-auto overflow-x-hidden flex flex-col gap-2 pt-2"
       >
         {
-          assistants.map(el => {
+          assistants?.map(el => {
             const index = chain.findIndex(chel => chel.id === el.id) + 1
             return (
               <button disabled={isStreaming} key={el.id} className={`${!!index ? 'bg-lime-700' : 'hover:bg-neutral-700'} disabled:cursor-not-allowed flex items-center cursor-pointer p-2 rounded-xl gap-2 relative rounded-xl duration-300 ease-in-out cursor-pointer truncate w-full`} onClick={() => handleAssistantClick(el)}>
