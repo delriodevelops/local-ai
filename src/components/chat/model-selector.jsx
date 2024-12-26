@@ -11,6 +11,7 @@ function getGPUInfo() {
   if (!gl) return 'No WebGL support';
 
   const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+  // console.log(gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL))
   if (debugInfo) return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
 
   return 'Unknown GPU';
@@ -64,7 +65,7 @@ const ModelSelector = () => {
   }, [selectedModel]);
 
   return (
-    <div className='flex gap-2 items-center'>
+    <div className='flex gap-2 items-center pt-2'>
       <select disabled={!!isStreaming} className='disabled:cursor-not-allowed bg-neutral-700 hover:bg-neutral-600 outline-none border-none rounded-xl p-3 cursor-pointer' onChange={handleSelection} value={selectedModel}>
         {
           !!availableModels?.length && availableModels.map(({ model_id, ...el }) => (

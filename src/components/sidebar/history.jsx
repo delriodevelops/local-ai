@@ -22,8 +22,8 @@ const History = () => {
 
   return (
     <article
-      className="pr-2 w-full overflow-y-auto h-full"
-      style={{ maxHeight: "calc(100dvh - 171px)" }}>
+      className="w-full h-full overflow-y-auto overflow-x-hidden"
+      >
       {
         !!history?.length
           ? history.sort((a, b) => b.lastMessage - a.lastMessage).map(el => (
@@ -32,7 +32,7 @@ const History = () => {
               onClick={() => { handleSelectConversation(el) }}
               className="relative group/delete p-4 hover:bg-neutral-700 rounded-xl duration-300 ease-in-out cursor-pointer truncate">
               <span>
-                {el.messages.at(-2).content}
+                {el?.messages?.at(-2)?.content || el?.messages?.at(-1)?.content}
               </span>
               <button
                 onClick={(e) => { deleteConversation(e, el) }}

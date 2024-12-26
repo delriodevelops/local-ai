@@ -9,17 +9,27 @@ import TTSButton from './tts-button';
 const Message = ({ message, isStreaming }) => {
 
 
-  return (
+  if (["assistant", "user"].includes(message.role)) return (
     <div className='w-4/5 mx-auto flex flex-col'>
       <div className={` flex gap-3 items-center ${message?.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`} >
         {
-          message.role === 'user'
-            ? (
-              <span className={`overflow-hidden self-start min-w-12 min-h-12 aspect-square rounded-full flex items-center justify-center text-3xl bg-neutral-500`}>
-                <ion-icon name="person"></ion-icon>
-              </span>
-            )
-            : <Image src="/default.png" width={50} height={50} alt="mecha" className='bg-lime-500 rounded-full aspect-square p-1 self-start' />
+          message.role === 'user' && (
+            <span className={`overflow-hidden self-start min-w-12 min-h-12 aspect-square rounded-full flex items-center justify-center text-3xl bg-neutral-500`}>
+              <ion-icon name="person"></ion-icon>
+            </span>
+          )
+
+        }
+        {
+          message.role === 'assistant' && (
+            <span className={`overflow-hidden self-start min-w-12 min-h-12 aspect-square rounded-full flex items-center justify-center text-3xl bg-neutral-800`}>
+              {
+                message?.icon
+                  ? <ion-icon name={message.icon}></ion-icon>
+                  : <Image src={"/default.png"} width={50} height={50} alt="mecha" className='bg-lime-500 rounded-full aspect-square p-1 self-start text-black' />
+              }
+            </span>
+          )
         }
         <div className={` whitespace-pre-line break-word ${message.role === 'user' && 'bg-neutral-900 rounded-xl p-3'}`}>
           <ReactMarkdown>

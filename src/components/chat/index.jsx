@@ -3,13 +3,15 @@ import React, { useState } from 'react'
 import ModelSelector from './model-selector'
 import ChatInput from './chat-input'
 import Messages from './messages'
+import ChainVisualizer from './chain-visualizer'
 
 const CHAT = () => {
 
   return (
     <section className="flex flex-col bg-neutral-700 w-full px-4 items-center h-dvh">
-      <nav className="w-full pt-2">
+      <nav className="w-full flex gap-16 items-start">
         <ModelSelector />
+        <ChainVisualizer />
       </nav>
       <Messages />
       <ChatInput />

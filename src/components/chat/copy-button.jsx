@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const CopyButton = ({message}) => {
+const CopyButton = ({ message }) => {
 
   const [copiedToClipboard, setCopiedToClipboard] = useState(false)
 
@@ -15,7 +15,7 @@ const CopyButton = ({message}) => {
   return (
     <button
       onClick={copyToClipboard}
-      className='relative text-2xl p-2 hover:bg-neutral-600 rounded-full cursor-pointer flex items-center  w-fit h-fit self-start'
+      className='relative text-2xl p-2 hover:bg-neutral-600 rounded-full cursor-pointer flex items-center w-fit h-fit self-start'
     >
       {
         !!copiedToClipboard && (

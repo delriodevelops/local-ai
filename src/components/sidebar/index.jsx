@@ -2,57 +2,35 @@
 import useChatStore from '@/store/chat'
 import React, { useLayoutEffect } from 'react'
 import History from './history'
+import CollapseButton from './collapse-button'
+import NewChatButton from './new-chat-button'
+import AssistantsSidebar from './assistants-sidebar'
+import Divider from '../milascenia/divider'
 
 const SIDEBAR = () => {
-  const { setActualConversation, setMessages, setIsHistoryCollapsed, isHistoryCollapsed } = useChatStore(s => s)
+  const { setIsHistoryCollapsed, isHistoryCollapsed } = useChatStore(s => s)
 
 
-  function handleCreateNewChat() {
-    setMessages([])
-    setActualConversation(null)
-  }
+
 
   if (!isHistoryCollapsed) return (
     <section
-      className="bg-neutral-800 px-2 pt-2 pb-3 w-full max-w-64 flex flex-col h-dvh gap-2 justify-between"
+      className="bg-neutral-800 px-2 pt-2 pb-3 w-full max-w-64 flex flex-col h-dvh gap-2 justify-start"
     >
-      <article
-        className="flex flex-col gap-2"
-      >
-        <button
-          onClick={() => { setIsHistoryCollapsed(true) }}
-          className="self-end hover:bg-neutral-700  p-3 flex items-center justify-center rounded-xl cursor-pointer duration-300 ease-in-out"
-        >
-          <ion-icon name="chevron-back-outline"></ion-icon>
-        </button>
-        <button
-          onClick={handleCreateNewChat}
-          className="flex items-center gap-2 p-4 hover:bg-neutral-600 bg-neutral-700 rounded-xl cursor-pointer duration-300 ease-in-out"
-        >
-          <span
-            className="flex items-center bg-neutral-500 p-2 rounded-full justify-center text-xl"
-          >
-            <ion-icon name="create-outline"></ion-icon>
-          </span>
-          <p>
-            Create new chat
-          </p>
-        </button>
-        <small
-          className="text-neutral-400 font-semibold pl-2"
-        >
-          Past chats
-        </small>
-      </article>
-      <History />
+      <CollapseButton />
+      <NewChatButton />
+      <div className='flex flex-col gap-2 overflow-y-auto overflow-x-hidden bg-neutral-800'>
+        <History />
+        <Divider />
+        <AssistantsSidebar />
+      </div>
     </section>
   )
   else return (
     <button
       onClick={() => { setIsHistoryCollapsed(false) }}
-      className='bg-neutral-800 m-2 w-fit h-fit hover:bg-neutral-900  p-3 flex items-center justify-center rounded-xl cursor-pointer duration-300 ease-in-out'>
+      className='hover:bg-neutral-900 bg-neutral-950 m-2 w-fit h-fit  p-3 flex items-center justify-center rounded-xl cursor-pointer duration-300 ease-in-out'>
       <ion-icon name="chevron-forward-outline"></ion-icon>
-
     </button>
   )
 }
