@@ -1,5 +1,6 @@
 import useChatStore from '@/store/chat'
-import React, { useState, useEffect, use } from 'react'
+import React, { useState } from 'react'
+const availableIcons = ['person', 'chatbubbles', 'heart', 'help', 'bulb', 'hammer', 'leaf', 'medkit', 'musical-notes', 'paw', 'rocket', 'rose', 'school', 'star', 'umbrella', 'wifi', "code", "brush"]
 
 const AssistantsSidebar = () => {
   const { assistants, setSelectedAssistant, toggleFromChain, createAssistant, chain, isStreaming } = useChatStore(s => s);
@@ -60,19 +61,27 @@ const AssistantsSidebar = () => {
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full p-2 rounded-lg bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2 rounded-lg bg-neutral-700 outline-none"
                     required
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm mb-2">Icon</label>
-                  <input
-                    value={formData.icon}
-                    onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                    className="w-full p-2 rounded-lg bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    type='text'
-                  />
+                  <div className='flex gap-2 w-full flex-wrap'>
+                    {
+                      availableIcons.map((icon, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, icon })}
+                          className={`p-4 rounded-full aspect-square flex item-center ${formData.icon === icon ? 'bg-lime-500 text-black' : 'hover:bg-neutral-600 hover:scale-105 bg-neutral-700'} duration-300 ease-in-out`}
+                        >
+                          <ion-icon name={icon}></ion-icon>
+                        </button>
+                      ))
+                    }
+                  </div>
                 </div>
 
                 <div>
@@ -80,7 +89,7 @@ const AssistantsSidebar = () => {
                   <textarea
                     value={formData.instructions}
                     onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
-                    className="w-full p-2 rounded-lg bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
+                    className="w-full p-2 rounded-lg bg-neutral-700 outline-none min-h-[100px]"
                     required
                   />
                 </div>
