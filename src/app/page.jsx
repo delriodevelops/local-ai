@@ -9,11 +9,11 @@ export default function Home() {
   const { setHistory } = useChatStore(s => s)
 
   useLayoutEffect(() => {
-    const localConversations = localStorage.getItem('past-conversations')
+    const localConversations = localStorage?.getItem('past-conversations')
     if (localConversations) {
       const localHistory = JSON.parse(localConversations)
       setHistory(localHistory)
-    } else localStorage.setItem('past-conversations', JSON.stringify([]))
+    } else localStorage?.setItem('past-conversations', JSON.stringify([]))
 
   }, [])
 

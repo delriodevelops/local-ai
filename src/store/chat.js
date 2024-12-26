@@ -53,10 +53,10 @@ const useChatStore = create((set, get) => ({
   isHistoryCollapsed: false,
   setIsHistoryCollapsed: (isHistoryCollapsed) => set({ isHistoryCollapsed }),
 
-  assistants: JSON.parse(localStorage.getItem('assistants')) || [],
+  assistants: JSON.parse(localStorage?.getItem('assistants')) || [],
   createAssistant: (assistant) => set((state) => {
     const newAssistants = [...state.assistants, assistant]
-    localStorage.setItem('assistants', JSON.stringify(newAssistants))
+    localStorage?.setItem('assistants', JSON.stringify(newAssistants))
     return { assistants: newAssistants }
   }),
 
