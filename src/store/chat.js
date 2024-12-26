@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import * as webllm from "@mlc-ai/web-llm";
+import { getLocalStorage, setLocalStorage } from '@/utils/custom-storage';
 
 const useChatStore = create((set, get) => ({
   // model: null,
@@ -53,10 +54,10 @@ const useChatStore = create((set, get) => ({
   isHistoryCollapsed: false,
   setIsHistoryCollapsed: (isHistoryCollapsed) => set({ isHistoryCollapsed }),
 
-  assistants: JSON.parse(localStorage?.getItem('assistants')) || [],
+  assistants: JSON.parse(getLocalStorage('assistants')) || [],
   createAssistant: (assistant) => set((state) => {
     const newAssistants = [...state.assistants, assistant]
-    localStorage?.setItem('assistants', JSON.stringify(newAssistants))
+    setLocalStorage('assistants', JSON.stringify(newAssistants))
     return { assistants: newAssistants }
   }),
 
