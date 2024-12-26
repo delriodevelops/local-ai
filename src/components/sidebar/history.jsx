@@ -17,7 +17,7 @@ const History = () => {
       setMessages([])
       setActualConversation(null)
     }
-    localStorage.setItem('past-conversations', JSON.stringify(newHistory))
+    localStorage?.setItem('past-conversations', JSON.stringify(newHistory))
   }
 
   return (

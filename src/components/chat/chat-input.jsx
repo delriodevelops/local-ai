@@ -122,7 +122,7 @@ const ChatInput = () => {
     }
 
     setHistory(updatedHistory)
-    localStorage.setItem('past-conversations', JSON.stringify(updatedHistory))
+    localStorage?.setItem('past-conversations', JSON.stringify(updatedHistory))
     setActualConversation(conversationId)
   }
 
@@ -142,9 +142,9 @@ const ChatInput = () => {
   }, [chatInput])
 
   useLayoutEffect(() => {
-    const localConversations = localStorage.getItem('past-conversations')
+    const localConversations = localStorage?.getItem('past-conversations')
     if (localConversations) setHistory(JSON.parse(localConversations))
-    else localStorage.setItem('past-conversations', JSON.stringify([]))
+    else localStorage?.setItem('past-conversations', JSON.stringify([]))
   }, [])
 
   return (
