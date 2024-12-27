@@ -1,6 +1,8 @@
 import useChatStore from '@/store/chat'
 import React, { useState } from 'react'
+import DropdownSelector from '../dropdown-selector';
 const availableIcons = ['person', 'chatbubbles', 'heart', 'help', 'bulb', 'hammer', 'leaf', 'medkit', 'musical-notes', 'paw', 'rocket', 'rose', 'school', 'star', 'umbrella', 'wifi', "code", "brush"]
+const availableColors = ["red", "amber", "emerald", "lime", "blue", "indigo", "purple", "pink", "rose", "cyan", "teal", "green", "yellow", "orange"]
 
 const AssistantsSidebar = () => {
   const { assistants, setSelectedAssistant, toggleFromChain, createAssistant, chain, isStreaming } = useChatStore(s => s);
@@ -13,8 +15,9 @@ const AssistantsSidebar = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
-    icon: 'person',
-    instructions: ''
+    icon: { value: 'person', label: 'person', icon: 'person' },
+    instructions: '',
+    color: { value: 'lime', label: 'lime', color: 'bg-lime-500' }
   })
 
   const handleSubmit = (e) => {
@@ -25,7 +28,7 @@ const AssistantsSidebar = () => {
     }
     createAssistant(newAssistant)
     setIsModalOpen(false)
-    setFormData({ name: '', icon: 'person', instructions: '' })
+    setFormData({ name: '', icon: { value: 'person', label: 'person', icon: 'person' }, instructions: '', color: { value: 'lime', label: 'lime', color: 'bg-lime-500' } })
   }
 
   return (
@@ -68,8 +71,23 @@ const AssistantsSidebar = () => {
 
                 <div>
                   <label className="block text-sm mb-2">Icon</label>
-                  <div className='flex gap-2 w-full flex-wrap'>
-                    {
+                  <div className='flex gap-2 w-full flex-nowrap items-center'>
+                    <span className={`p-4 text-6xl rounded-full h-full aspect-square flex item-center text-black duration-300 ease-in-out ${formData.color.color} `}>
+                      <ion-icon name={formData.icon.icon}></ion-icon>
+                    </span>
+                    <div className='flex flex-col gap-2 w-full'>
+                      <DropdownSelector
+                        onChange={(icon) => setFormData({ ...formData, icon })}
+                        value={formData.icon}
+                        options={availableIcons.map(option => ({ label: option, value: option, icon: option }))}
+                      />
+                      <DropdownSelector
+                        options={availableColors.map(option => ({ label: option, value: option, color: `bg-${option}-500` }))}
+                        value={formData.color}
+                        onChange={(color) => setFormData({ ...formData, color })}
+                      />
+                    </div>
+                    {/* {
                       availableIcons.map((icon, index) => (
                         <button
                           key={index}
@@ -79,8 +97,9 @@ const AssistantsSidebar = () => {
                         >
                           <ion-icon name={icon}></ion-icon>
                         </button>
+
                       ))
-                    }
+                    } */}
                   </div>
                 </div>
 
@@ -113,9 +132,9 @@ const AssistantsSidebar = () => {
             const index = chain.findIndex(chel => chel.id === el.id) + 1
             return (
               <button disabled={isStreaming} key={el.id} className={`${!!index ? 'bg-lime-700' : 'hover:bg-neutral-700'} disabled:cursor-not-allowed flex items-center cursor-pointer p-2 rounded-xl gap-2 relative rounded-xl duration-300 ease-in-out cursor-pointer truncate w-full`} onClick={() => handleAssistantClick(el)}>
-                <span className='text-xl text-center h-8 w-8 p-2 bg-neutral-900 aspect-square rounded-full flex items-center justify-center'>
+                <span className={`text-xl text-center h-8 w-8 p-2 ${index ? "bg-neutral-900" : (el?.color?.color || "bg-neutral-900")} aspect-square rounded-full flex items-center justify-center`}>
                   {
-                    index || <ion-icon name={el.icon}></ion-icon>
+                    index || <ion-icon name={el?.icon?.icon}></ion-icon>
                   }
                 </span>
                 <span className='truncate'>{el.name}</span>

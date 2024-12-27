@@ -22,7 +22,7 @@ const Message = ({ message, isStreaming }) => {
         }
         {
           message.role === 'assistant' && (
-            <span className={`overflow-hidden self-start min-w-12 min-h-12 aspect-square rounded-full flex items-center justify-center text-3xl bg-neutral-800`}>
+            <span className={`overflow-hidden self-start min-w-12 min-h-12 aspect-square rounded-full flex items-center justify-center text-3xl ${message.color || "bg-neutral-800"}`}>
               {
                 message?.icon
                   ? <ion-icon name={message.icon}></ion-icon>

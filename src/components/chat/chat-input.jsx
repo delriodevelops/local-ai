@@ -60,7 +60,8 @@ const ChatInput = () => {
     const reply = {
       role: 'assistant',
       content: '',
-      icon: chain?.at(assistantIndex)?.icon
+      icon: chain?.at(assistantIndex)?.icon?.icon,
+      color: chain?.at(assistantIndex)?.color?.color
     }
 
     try {

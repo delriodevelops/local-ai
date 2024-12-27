@@ -10,18 +10,18 @@ const ChainVisualizer = () => {
   const handleDragStart = (e, index, assistant) => {
     if (isStreaming) return;
     setDraggedId(assistant.id);
-    
+
     try {
       const dragPreview = document.createElement('div');
       dragPreview.innerHTML = `
         <div class="flex items-center gap-3 p-4 rounded-xl bg-neutral-800 shadow-xl" style="width: ${e.target.offsetWidth}px">
           <span class="text-xl">
-            <ion-icon name="${assistant?.icon}"></ion-icon>
+            <ion-icon name="${assistant?.icon?.icon}"></ion-icon>
           </span>
           <span class="font-medium">${assistant.name}</span>
         </div>
       `;
-      
+
       dragPreview.style.cssText = `
         position: fixed;
         top: -1000px;
@@ -29,16 +29,16 @@ const ChainVisualizer = () => {
         pointer-events: none;
         z-index: 100;
       `;
-      
+
       document.body.appendChild(dragPreview);
-      
+
       const rect = e.target.getBoundingClientRect();
       const offsetX = e.clientX - rect.left;
       const offsetY = e.clientY - rect.top;
-      
+
       e.dataTransfer.setDragImage(dragPreview.firstElementChild, offsetX, offsetY);
       setTimeout(() => document.body.removeChild(dragPreview), 0);
-    
+
       e.dataTransfer.setData('text/plain', index.toString());
       setIsDragging(true);
     } catch (error) {
@@ -55,7 +55,7 @@ const ChainVisualizer = () => {
   const handleDrop = (e, dropIndex) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     try {
       const dragIndex = parseInt(e.dataTransfer.getData('text/plain'));
       if (dragIndex === dropIndex || isNaN(dragIndex)) return;
@@ -90,23 +90,23 @@ const ChainVisualizer = () => {
             transition-all duration-300 ease-out
             select-none backdrop-blur-sm
             transform-gpu will-change-transform
-            ${isStreaming 
-              ? 'cursor-not-allowed opacity-80' 
-              : isDragging 
-                ? 'cursor-grabbing' 
+            ${isStreaming
+              ? 'cursor-not-allowed opacity-80'
+              : isDragging
+                ? 'cursor-grabbing'
                 : 'cursor-grab hover:cursor-grab active:cursor-grabbing'
             }
             ${draggedId === assistant.id ? 'opacity-50 scale-95' : 'opacity-100'}
-            ${isDragging && dragOverIndex === index 
-              ? 'translate-x-4 bg-neutral-600/50 scale-105 border-2 border-neutral-500/50' 
+            ${isDragging && dragOverIndex === index
+              ? 'translate-x-4 bg-neutral-600/50 scale-105 border-2 border-neutral-500/50'
               : ''
             }
-            ${isDragging && dragOverIndex !== null && index > dragOverIndex 
-              ? '-translate-x-4 rotate-1' 
+            ${isDragging && dragOverIndex !== null && index > dragOverIndex
+              ? '-translate-x-4 rotate-1'
               : ''
             }
-            ${isDragging && dragOverIndex !== null && index < dragOverIndex 
-              ? 'translate-x-4 -rotate-1' 
+            ${isDragging && dragOverIndex !== null && index < dragOverIndex
+              ? 'translate-x-4 -rotate-1'
               : ''
             }
             ${isStreaming && activeChainIndex === index
@@ -116,7 +116,7 @@ const ChainVisualizer = () => {
           `}
         >
           <span className="text-xl">
-            <ion-icon name={assistant.icon}></ion-icon>
+            <ion-icon name={assistant?.icon?.icon}></ion-icon>
           </span>
           <span className="font-medium">{assistant.name}</span>
         </div>
