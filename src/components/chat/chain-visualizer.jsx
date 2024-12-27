@@ -15,8 +15,8 @@ const ChainVisualizer = () => {
       const dragPreview = document.createElement('div');
       dragPreview.innerHTML = `
         <div class="flex items-center gap-3 p-4 rounded-xl bg-neutral-800 shadow-xl" style="width: ${e.target.offsetWidth}px">
-          <span class="text-xl p-2 rounded-lg bg-neutral-900">
-            <ion-icon name="${assistant.icon}"></ion-icon>
+          <span class="text-xl">
+            <ion-icon name="${assistant?.icon}"></ion-icon>
           </span>
           <span class="font-medium">${assistant.name}</span>
         </div>

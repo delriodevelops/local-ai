@@ -29,7 +29,7 @@ const AssistantsSidebar = () => {
   }
 
   return (
-    <section className='w-full  bg-neutral-800 h-full overflow-y-auto'>
+    <section className='w-full h-full bg-neutral-800 overflow-y-auto self-start'>
       <button
         onClick={() => setIsModalOpen(true)}
         className='flex items-center gap-2 p-4 w-full rounded-xl hover:bg-neutral-600 bg-neutral-700 duration-300 ease-in-out cursor-pointer sticky top-0 z-50'

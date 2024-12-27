@@ -15,13 +15,14 @@ const SIDEBAR = () => {
 
   if (!isHistoryCollapsed) return (
     <section
-      className="bg-neutral-800 px-2 pt-2 pb-3 w-full max-w-64 flex flex-col h-dvh gap-2 justify-start"
+      className="bg-neutral-800 px-2 pt-2 pb-3 w-full max-w-64 flex flex-col min-h-dvh max-h-dvh gap-2 justify-between overflow-hidden"
     >
-      <CollapseButton />
-      <NewChatButton />
-      <div className='flex flex-col gap-2 overflow-y-auto overflow-x-hidden bg-neutral-800'>
+      <div className='flex flex-col gap-2 items-center justify-between'>
+        <CollapseButton />
+        <NewChatButton />
+      </div>
+      <div className='grid grid-cols-1 gap-2 grid-rows-2 h-full'>
         <History />
-        <Divider />
         <AssistantsSidebar />
       </div>
     </section>
