@@ -47,18 +47,14 @@ const ModelSelector = () => {
     };
 
     const allModels = webllm.prebuiltAppConfig.model_list;
+    console.log('allModels', allModels);
     const filteredModels = filterModels(userSpecs, allModels);
 
     setAvailableModels(filteredModels);
 
     // Seleccionar el primer modelo por defecto
-    if (filteredModels.length > 0) setSelectedModel('TinyLlama-1.1B-Chat-v0.4-q4f32_1-MLC-1k');
+    if (filteredModels.length > 0) setSelectedModel('snowflake-arctic-embed-s-q0f32-MLC-b4');
   }, []);
-
-  function handleSelection(e) {
-    const model = e.target.value;
-    setSelectedModel(model);
-  }
 
   useEffect(() => {
     if (selectedModel) setEngine(selectedModel);
@@ -66,13 +62,13 @@ const ModelSelector = () => {
 
   return (
     <div className='flex gap-2 items-center pt-2'>
-      <select disabled={!!isStreaming} className='disabled:cursor-not-allowed bg-neutral-700 hover:bg-neutral-600 outline-none border-none rounded-xl p-3 cursor-pointer' onChange={handleSelection} value={selectedModel}>
-        {
-          !!availableModels?.length && availableModels.map(({ model_id, ...el }) => (
-            <option value={model_id} key={model_id}>{model_id}</option>
-          ))
-        }
-      </select>
+      <CustomModelSelector
+        availableModels={availableModels}
+        allModels={webllm.prebuiltAppConfig.model_list}
+        selectedModel={selectedModel}
+        onModelSelect={setSelectedModel}
+        isStreaming={isStreaming}
+      />
       {!!progress && (
         <small className='text-sm text-neutral-400'>
           {progress.progress !== 1 && progress.text}
@@ -83,3 +79,119 @@ const ModelSelector = () => {
 }
 
 export default ModelSelector;
+
+
+
+const CustomModelSelector = ({
+  availableModels,
+  allModels,
+  selectedModel,
+  onModelSelect,
+  isStreaming
+}) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [showAllModels, setShowAllModels] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const models = showAllModels ? allModels : availableModels
+  const filteredModels = models.filter(model =>
+    model.model_id.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  return (
+    <div className="flex  gap-2 w-full">
+      {/* Custom dropdown */}
+      <div className="relative">
+        <button
+          onClick={() => !isStreaming && setIsOpen(!isOpen)}
+          disabled={isStreaming}
+          className="w-96 flex items-center justify-between p-3 bg-neutral-700 hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 rounded-xl"
+          title={selectedModel || "Selecciona un modelo"}
+        >
+          <span className='truncate'>{selectedModel || "Selecciona un modelo"}</span>
+          <ion-icon name="chevron-down" className="text-neutral-400"></ion-icon>
+        </button>
+
+        {isOpen && (
+          <div className="absolute z-10 w-96 mt-1 bg-neutral-800 rounded-xl shadow-lg ">
+            {/* Search input */}
+            <div className="p-2 border-b border-neutral-700">
+              <div>
+                {/* Toggle switch */}
+                <div className="flex items-center gap-2">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={showAllModels}
+                      onChange={() => setShowAllModels(!showAllModels)}
+                      disabled={isStreaming}
+                    />
+                    <div className="w-11 h-6 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={!showAllModels ? "Search recomended models..." : "Search all models..."}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full p-2 bg-neutral-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+
+              </div>
+              {/* Warning message */}
+              {showAllModels && (
+                <p className="text-xs text-yellow-500/70 mt-1">
+                  ⚠️ Some models may not work correctly on your device
+                </p>
+              )}
+            </div>
+
+            <ul className="max-h-72 overflow-auto overflow-x-hidden">
+              {filteredModels.map(({ model_id, vram_required_MB }) => {
+                const isCompatible = availableModels.some(m => m.model_id === model_id)
+
+                return (
+                  <li
+                    key={model_id}
+                    onClick={() => {
+                      onModelSelect(model_id)
+                      setIsOpen(false)
+                      setSearchQuery('')
+                    }}
+                    className={`p-2 cursor-pointer hover:bg-neutral-700 flex items-center justify-between
+                      ${selectedModel === model_id ? 'bg-neutral-600' : ''}`}
+                  >
+                    <div className='flex flex-col'>
+                      <div className="flex items-center gap-1">
+                        {
+                          !isCompatible && showAllModels && (
+                            <div className="flex items-center gap-1" title="Este modelo puede no funcionar correctamente">
+                              <ion-icon name="warning" class="text-yellow-500"></ion-icon>
+                            </div>
+                          )
+                        }
+                        <span className='truncate'>{model_id}</span>
+                      </div>
+                      <div className='-mt-1'>
+                        <small className="text-neutral-400 text-[0.75rem] uppercase ">
+                          {vram_required_MB && `gpu ${(vram_required_MB / 1024).toFixed(2)} gb`}
+                        </small>
+                      </div>
+                    </div>
+                  </li>
+                )
+              })}
+              {filteredModels.length === 0 && (
+                <li className="p-3 text-neutral-400 text-sm text-center">
+                  No models found...
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

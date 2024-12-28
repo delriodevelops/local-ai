@@ -72,8 +72,11 @@ const ChatInput = () => {
       const stream = await engine.chat.completions.create({
         messages: isChain ? [systemMessage, userMessage] : currentMessages,
         stream: true,
-        temperature: 0.1,
-        max_tokens: 256, // Increased for fuller responses
+        temperature: 0.3,
+        max_tokens: 20, // Increased for fuller responses
+        top_p: .98,
+        repetition_penalty: 1.0,
+        // logit_bias: { 69: 100, 14013: 100, 346: 100, }, //  Bias for more human-like responses
       })
 
       let fullResponse = ''
