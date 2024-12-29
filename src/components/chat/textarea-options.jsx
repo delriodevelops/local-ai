@@ -2,46 +2,61 @@
 import React, { useState, useRef, useEffect } from 'react'
 import CustomSlider from '../slider'
 import Tooltip from '../milascenia/tooltip'
-import useChatStore from '@/store/chat';
-
+import useChatStore from '@/store/chat'
 
 const TextAreaOptions = () => {
   const { setTop_p, top_p, setRepetitionPenalty, repetition_penalty, temperature, setTemperature, max_tokens, setMaxTokens } = useChatStore(s => s)
+
+  // Helper function to normalize values for the slider
+  const normalizeValue = (value, min, max) => {
+    return (value - min) / (max - min)
+  }
+
+  // Helper function to denormalize values from the slider
+  const denormalizeValue = (normalized, min, max) => {
+    return normalized * (max - min) + min
+  }
 
   const sliderMenus = [
     {
       name: "max_tokens",
       label: "Max Tokens",
       icon: "newspaper-outline",
-      onChange: setMaxTokens,
+      onChange: (normalizedValue) => {
+        // Convert normalized value back to actual tokens
+        const minTokens = 64
+        const maxTokens = 2048
+        const actualTokens = Math.round(denormalizeValue(normalizedValue, minTokens, maxTokens))
+        setMaxTokens(actualTokens)
+      },
       levels: [
         {
           text: "Brief",
           info: "Short, concise responses",
-          value: 64
+          value: normalizeValue(64, 64, 2048)
         },
         {
           text: "Standard",
           info: "Regular length responses",
-          value: 256
+          value: normalizeValue(256, 64, 2048)
         },
         {
           text: "Detailed",
           info: "Comprehensive responses",
-          value: 512
+          value: normalizeValue(512, 64, 2048)
         },
         {
           text: "Extended",
           info: "Long-form content",
-          value: 1024
+          value: normalizeValue(1024, 64, 2048)
         },
         {
           text: "Maximum",
           info: "Very detailed long-form content",
-          value: 2048
+          value: normalizeValue(2048, 64, 2048)
         }
       ].reverse(),
-      defaultLevel: max_tokens
+      defaultLevel: normalizeValue(max_tokens || 256, 64, 2048)
     },
     {
       name: "temperature",
@@ -74,13 +89,13 @@ const TextAreaOptions = () => {
         value: 0.9
       }
       ].reverse(),
-      defaaultLevel: temperature || 0.5
+      defaultLevel: temperature || 0.5
     },
     {
       name: "top_p",
       label: "Top P",
       icon: "git-branch-outline",
-      onChange: (value) => setTop_p(value),
+      onChange: setTop_p,
       levels: [
         {
           text: "Focused",
@@ -104,7 +119,7 @@ const TextAreaOptions = () => {
       name: "repetition_penalty",
       label: "Repetition Penalty",
       icon: "repeat",
-      onChange: (value) => setRepetitionPenalty(value),
+      onChange: setRepetitionPenalty,
       levels: [
         {
           text: "Natural",
@@ -124,12 +139,11 @@ const TextAreaOptions = () => {
       ].reverse(),
       defaultLevel: repetition_penalty || 1.1
     }
-  ];
+  ]
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activeSlider, setActiveSlider] = useState(null)
   const menuRef = useRef(null)
-
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -148,12 +162,12 @@ const TextAreaOptions = () => {
   }
 
   return (
-    <div className="absolute overflow-visible h-full w-full">
+    <div className="absolute overflow-visible h-full w-fit">
       <div
         ref={menuRef}
         onMouseEnter={() => setIsMenuOpen(true)}
         onMouseLeave={() => { if (!activeSlider) setIsMenuOpen(false) }}
-        className={`absolute z-[9999] bottom-0 left-4 flex gap-2 flex-col items-center justify-center p-2 duration-300 ease-in-out w-14 ${activeSlider && 'hidden'} ${!isMenuOpen ? "h-14" : "h-fit  bg-neutral-800"} rounded-full `}
+        className={`absolute z-[9999] bottom-0 left-4 flex gap-2 flex-col items-center justify-center py-1 duration-300 ease-in-out w-14 ${activeSlider && 'hidden'} ${!isMenuOpen ? "h-14" : "h-fit  bg-neutral-800"} rounded-full `}
       >
         {
           isMenuOpen && !activeSlider && sliderMenus.map((slider, index) => (
@@ -170,8 +184,8 @@ const TextAreaOptions = () => {
           !activeSlider && (
             <button
               onClick={() => setActiveSlider(null)}
-              className="text-3xl hover:scale-125 rounded-full text-neutral-500 hover:text-neutral-100 p-2 flex items-center justify-center cursor-pointer duration-300 ease-in-out">
-              <ion-icon name="close-outline"></ion-icon>
+              className="text-3xl hover:scale-125 rounded-full text-neutral-200 hover:text-neutral-100 p-2 flex items-center justify-center cursor-pointer duration-300 ease-in-out">
+              <ion-icon name="options"></ion-icon>
             </button>
           )
         }
@@ -185,7 +199,6 @@ const TextAreaOptions = () => {
           levels={activeSlider.levels}
           onChange={activeSlider.onChange}
           defaultLevel={activeSlider.defaultLevel}
-
         />
       )}
     </div>

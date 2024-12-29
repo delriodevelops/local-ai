@@ -8,7 +8,7 @@ const ChatInput = () => {
   const {
     engine, setMessages, messages, actualConversation, setActualConversation,
     setHistory, history, isStreaming, setIsStreaming, setActiveChainIndex,
-    chain, activeChainIndex
+    chain, temperature, max_tokens, top_p, repetition_penalty
   } = useChatStore(s => s)
 
   const [isRecording, setIsRecording] = useState(false)
@@ -64,7 +64,6 @@ const ChatInput = () => {
       icon: chain?.at(assistantIndex)?.icon?.icon,
       color: chain?.at(assistantIndex)?.color?.color
     }
-
     try {
       const currentMessages = isChain
         ? [...accumulatedMessages]
@@ -73,11 +72,10 @@ const ChatInput = () => {
       const stream = await engine.chat.completions.create({
         messages: isChain ? [systemMessage, userMessage] : currentMessages,
         stream: true,
-        temperature: 0.3,
-        max_tokens: 20, // Increased for fuller responses
-        top_p: .98,
-        repetition_penalty: 1.0,
-        // logit_bias: { 69: 100, 14013: 100, 346: 100, }, //  Bias for more human-like responses
+        temperature,
+        max_tokens,
+        top_p,
+        repetition_penalty
       })
 
       let fullResponse = ''
