@@ -19,11 +19,6 @@ const useChatStore = create((set, get) => ({
           initProgressCallback: (e) => {
             get().setProgress(e)
           }
-        }, // engineConfig
-        {
-          context_window_size: -1,
-          sliding_window_size: 15000,
-          attention_sink_size: 4,
         }
       )
       return newEngine
