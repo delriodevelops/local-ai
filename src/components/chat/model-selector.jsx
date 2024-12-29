@@ -165,7 +165,7 @@ const CustomModelSelector = ({
                   return (
                     <li
                       key={model_id}
-                      className={`p-2 hover:bg-neutral-700 flex items-center justify-between
+                      className={`p-2 hover:bg-neutral-700 flex items-center justify-between group
                       ${selectedModel === model_id ? 'bg-neutral-600' : ''}`}
                     >
                       <div
@@ -196,7 +196,7 @@ const CustomModelSelector = ({
                       </div>
                       <button
                         onClick={() => toggleFavorite(model_id)}
-                        className={`ml-2 p-1 text-xl `}
+                        className={`ml-2 p-1 text-xl ${!isFavorite ? 'invisible group-hover:visible' : ''}`}
                       >
                         <ion-icon name={isFavorite ? "heart" : "heart-outline"}></ion-icon>
                       </button>
