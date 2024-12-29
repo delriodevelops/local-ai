@@ -20,7 +20,7 @@ const useChatStore = create((set, get) => ({
         }, // engineConfig
         {
           context_window_size: -1,
-          sliding_window_size: 16000,
+          sliding_window_size: 15000,
           attention_sink_size: 4,
         }
       )
@@ -94,6 +94,15 @@ const useChatStore = create((set, get) => ({
   })),
   activeChainIndex: 0,
   setActiveChainIndex: (index) => set({ activeChainIndex: index }),
+
+  setTop_p: (top_p) => set({ top_p }),
+  top_p: 0.7,
+  setTemperature: (temperature) => set({ temperature }),
+  temperature: 0.5,
+  setMaxTokens: (max_tokens) => set({ max_tokens }),
+  max_tokens: 512,
+  setRepetitionPenalty: (repetition_penalty) => set({ repetition_penalty }),
+  repetition_penalty: 1.1,
 
 
 

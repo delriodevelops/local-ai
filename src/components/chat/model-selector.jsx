@@ -47,7 +47,6 @@ const ModelSelector = () => {
     };
 
     const allModels = webllm.prebuiltAppConfig.model_list;
-    console.log('allModels', allModels);
     const filteredModels = filterModels(userSpecs, allModels);
 
     setAvailableModels(filteredModels);
@@ -61,7 +60,7 @@ const ModelSelector = () => {
   }, [selectedModel]);
 
   return (
-    <div className='flex gap-2 items-center pt-2'>
+    <div className='flex flex-col gap-2 items-center pt-2'>
       <CustomModelSelector
         availableModels={availableModels}
         allModels={webllm.prebuiltAppConfig.model_list}
@@ -70,7 +69,7 @@ const ModelSelector = () => {
         isStreaming={isStreaming}
       />
       {!!progress && (
-        <small className='text-sm text-neutral-400'>
+        <small className='text-[0.75em] text-neutral-400'>
           {progress.progress !== 1 && progress.text}
         </small>
       )}
@@ -99,7 +98,7 @@ const CustomModelSelector = ({
   )
 
   return (
-    <div className="flex  gap-2 w-full">
+    <div className="flex gap-2 w-full">
       {/* Custom dropdown */}
       <div className="relative">
         <button

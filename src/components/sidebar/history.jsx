@@ -1,5 +1,6 @@
 import useChatStore from '@/store/chat'
 import React from 'react'
+import NewChatButton from './new-chat-button'
 
 const History = () => {
   const { history, setActualConversation, setMessages, setHistory, actualConversation } = useChatStore(s => s)
@@ -23,7 +24,9 @@ const History = () => {
   return (
     <article
       className="w-full h-full overflow-y-auto overflow-x-hidden"
-      >
+    >
+      <NewChatButton />
+
       {
         !!history?.length
           ? history.sort((a, b) => b.lastMessage - a.lastMessage).map(el => (

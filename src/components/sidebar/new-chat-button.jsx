@@ -18,7 +18,7 @@ const NewChatButton = () => {
   return (
     <button
       onClick={handleCreateNewChat}
-      className="flex items-center gap-2 p-4 hover:bg-neutral-600 bg-neutral-700 rounded-xl cursor-pointer duration-300 ease-in-out w-full"
+      className="flex items-center gap-2 p-4 hover:bg-neutral-600 bg-neutral-700 rounded-xl cursor-pointer duration-300 ease-in-out w-full mb-2"
     >
       <span
         className="flex items-center bg-neutral-500 p-2 rounded-full justify-center"

@@ -2,6 +2,7 @@
 import useChatStore from '@/store/chat'
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import AudioRecorder from './audio-recorder'
+import TextAreaOptions from './textarea-options'
 
 const ChatInput = () => {
   const {
@@ -157,8 +158,9 @@ const ChatInput = () => {
         e.preventDefault()
         if (!isSending) await sendMessage()
       }}
-      className="w-full 2xl:w-3/5 overflow-hidden mb-2 bg-neutral-600 rounded-3xl flex justify-end gap-2 items-center p-2"
+      className="w-full 2xl:w-3/5  mb-2 bg-neutral-600 rounded-3xl flex justify-end gap-2 items-center p-2 relative overflow-visible"
     >
+      <TextAreaOptions />
       <textarea
         name="ipt-textarea"
         id="ipt-textarea"
