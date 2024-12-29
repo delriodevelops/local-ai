@@ -8,6 +8,8 @@ const useChatStore = create((set, get) => ({
 
   engine: null,
   setEngine: async (selectedModel) => {
+    set({ engine: null })
+    set({ progress: null })
     async function handleSelectModel() {
       const worker = new Worker(new URL('/public/workers/chat.js', import.meta.url));
       const newEngine = await webllm.CreateWebWorkerMLCEngine(
