@@ -2,6 +2,7 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import * as webllm from "@mlc-ai/web-llm";
 import useChatStore from '@/store/chat';
+import { getLocalStorage } from '@/utils/custom-storage';
 
 function getGPUInfo() {
   const canvas = document.createElement('canvas');
@@ -77,10 +78,10 @@ const CustomModelSelector = ({
   const [showFavorites, setShowFavorites] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [favorites, setFavorites] = useState(() => {
-    const saved = localStorage.getItem('modelFavorites')
+    const saved = getLocalStorage('modelFavorites')
     return saved ? JSON.parse(saved) : []
   })
-
+  
   // Save favorites to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('modelFavorites', JSON.stringify(favorites))
