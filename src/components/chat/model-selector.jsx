@@ -1,8 +1,8 @@
 'use client'
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState, useRef } from 'react'
 import * as webllm from "@mlc-ai/web-llm";
 import useChatStore from '@/store/chat';
-import { getLocalStorage } from '@/utils/custom-storage';
+import { getLocalStorage, setLocalStorage } from '@/utils/custom-storage';
 
 function getGPUInfo() {
   const canvas = document.createElement('canvas');
@@ -31,6 +31,14 @@ const ModelSelector = () => {
   const [availableModels, setAvailableModels] = useState([])
   const [hfModels, setHfModels] = useState([])
   const [isLoadingHf, setIsLoadingHf] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [modalMessage, setModalMessage] = useState('')
+  const [modalAction, setModalAction] = useState('') // 'add' or 'change'
+  const [apiKeys, setApiKeys] = useState({
+    openai: getLocalStorage('openaiApiKey') || '',
+    gemini: getLocalStorage('geminiApiKey') || '',
+    claude: getLocalStorage('claudeApiKey') || '',
+  })
 
   useLayoutEffect(() => {
     const userSpecs = {
@@ -50,6 +58,15 @@ const ModelSelector = () => {
     if (selectedModel) setEngine(selectedModel);
   }, [selectedModel]);
 
+  const handleApiKeySubmit = (key) => {
+    setApiKeys(prev => {
+      const newKeys = { ...prev, [modalMessage.toLowerCase()]: key };
+      setLocalStorage(`${modalMessage.toLowerCase()}ApiKey`, key);
+      return newKeys;
+    });
+    setShowModal(false);
+  };
+
   return (
     <div className='flex flex-col gap-2 items-center pt-2'>
       <CustomModelSelector
@@ -62,11 +79,24 @@ const ModelSelector = () => {
         selectedModel={selectedModel}
         onModelSelect={setSelectedModel}
         isStreaming={isStreaming}
+        setShowModal={setShowModal}
+        setModalMessage={setModalMessage}
+        setModalAction={setModalAction}
+        apiKeys={apiKeys}
       />
       {!!progress && (
         <small className='text-[0.75em] text-neutral-400'>
           {progress.progress !== 1 && progress.text}
         </small>
+      )}
+      {showModal && (
+        <Modal 
+          message={modalMessage} 
+          action={modalAction}
+          onClose={() => setShowModal(false)} 
+          onSubmit={handleApiKeySubmit}
+          currentApiKey={apiKeys[modalMessage.toLowerCase()]}
+        />
       )}
     </div>
   )
@@ -81,21 +111,46 @@ const CustomModelSelector = ({
   setIsLoadingHf,
   selectedModel,
   onModelSelect,
-  isStreaming
+  isStreaming,
+  setShowModal,
+  setModalMessage,
+  setModalAction,
+  apiKeys
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [showAllModels, setShowAllModels] = useState(false)
   const [showFavorites, setShowFavorites] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [modelSource, setModelSource] = useState('local') // 'local' or 'huggingface'
+  const [modelSource, setModelSource] = useState('local')
+  const [isSourceDropdownOpen, setIsSourceDropdownOpen] = useState(false)
   const [favorites, setFavorites] = useState(() => {
     const saved = getLocalStorage('modelFavorites')
     return saved ? JSON.parse(saved) : []
   })
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
-    localStorage.setItem('modelFavorites', JSON.stringify(favorites))
+    setLocalStorage('modelFavorites', JSON.stringify(favorites))
   }, [favorites])
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsSourceDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleChangeApiKey = () => {
+    setModalMessage(modelSource.toUpperCase());
+    setModalAction('change');
+    setShowModal(true);
+  };
 
   const searchHuggingFaceModels = async (query) => {
     if (!query) {
@@ -108,7 +163,6 @@ const CustomModelSelector = ({
       const response = await fetch(`https://huggingface.co/api/models?search=${query}&filter=text-generation`)
       const data = await response.json()
 
-      // Convertir los resultados de HF al formato esperado
       const formattedModels = data.map(model => ({
         model_id: model.modelId,
         source: 'huggingface',
@@ -145,9 +199,31 @@ const CustomModelSelector = ({
     })
   }
 
-  const models = modelSource === 'local'
-    ? (showAllModels ? allModels : availableModels)
-    : hfModels
+  const getModelsBySource = () => {
+    switch (modelSource) {
+      case 'local':
+        return showAllModels ? allModels : availableModels
+      case 'huggingface':
+        return hfModels
+      case 'openai':
+        return [
+          { model_id: 'gpt-3.5-turbo', source: 'openai', icon: 'openai' },
+          { model_id: 'gpt-4', source: 'openai', icon: 'openai' },
+        ]
+      case 'gemini':
+        return [
+          { model_id: 'gemini-1', source: 'gemini', icon: 'gemini' },
+        ]
+      case 'claude':
+        return [
+          { model_id: 'claude-instant', source: 'claude', icon: 'claude' },
+        ]
+      default:
+        return []
+    }
+  }
+
+  const models = getModelsBySource()
 
   const filteredModels = models.filter(model => {
     const matchesSearch = model.model_id.toLowerCase().includes(searchQuery.toLowerCase())
@@ -157,38 +233,72 @@ const CustomModelSelector = ({
     return matchesSearch
   })
 
+  const sourceOptions = [
+    { value: 'local', label: 'Local Models', icon: 'desktop-outline' },
+    { value: 'huggingface', label: 'HuggingFace Models', icon: 'cloud-outline' },
+    { value: 'openai', label: 'OpenAI Models', icon: 'logo-openai' },
+    { value: 'gemini', label: 'Gemini Models', icon: 'logo-google' },
+    { value: 'claude', label: 'Claude Models', icon: 'logo-electron' },
+  ]
+
   return (
     <div className="flex gap-2 w-full">
-      <div className="relative">
+      <div className="relative w-96">
         <button
           onClick={() => !isStreaming && setIsOpen(!isOpen)}
           disabled={isStreaming}
-          className="w-96 flex items-center justify-between p-3 bg-neutral-700 hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 rounded-xl"
+          className="w-full flex items-center justify-between p-3 bg-neutral-700 hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 rounded-xl"
           title={selectedModel || "Selecciona un modelo"}
         >
           <span className='truncate'>{selectedModel || "Selecciona un modelo"}</span>
-          <ion-icon name="chevron-down" className="text-neutral-400"></ion-icon>
+          <ion-icon name="chevron-down" class="text-neutral-400"></ion-icon>
         </button>
 
         {isOpen && (
-          <div className="absolute z-10 w-96 mt-1 bg-neutral-800 rounded-xl shadow-lg">
+          <div className="absolute z-10 w-full mt-1 bg-neutral-800 rounded-xl shadow-lg">
             <div className="p-2 border-b border-neutral-700">
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">
-                  <select
-                    value={modelSource}
-                    onChange={(e) => {
-                      setModelSource(e.target.value)
-                      setSearchQuery('')
-                      setHfModels([])
-                    }}
-                    className="bg-neutral-700 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  >
-                    <option value="local">Local Models</option>
-                    <option value="huggingface">HuggingFace Models</option>
-                  </select>
+                  <div className="relative" ref={dropdownRef}>
+                    <button
+                      onClick={() => setIsSourceDropdownOpen(!isSourceDropdownOpen)}
+                      className="bg-neutral-700 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 flex items-center justify-between w-48"
+                    >
+                      <span className="flex items-center gap-2">
+                        <ion-icon name={sourceOptions.find(option => option.value === modelSource).icon}></ion-icon>
+                        {sourceOptions.find(option => option.value === modelSource).label}
+                      </span>
+                      <ion-icon name="chevron-down-outline"></ion-icon>
+                    </button>
+                    {isSourceDropdownOpen && (
+                      <div className="absolute z-20 w-full mt-1 bg-neutral-800 rounded-lg shadow-lg">
+                        {sourceOptions.map((option) => (
+                          <button
+                            key={option.value}
+                            onClick={() => {
+                              setModelSource(option.value)
+                              setIsSourceDropdownOpen(false)
+                              setSearchQuery('')
+                              if (['huggingface', 'local'].includes(option.value)) {
+                                setHfModels([])
+                              }
+                              if (['openai', 'gemini', 'claude'].includes(option.value) && !apiKeys[option.value]) {
+                                setModalMessage(option.value.toUpperCase())
+                                setModalAction('add')
+                                setShowModal(true)
+                              }
+                            }}
+                            className="w-full p-2 text-left hover:bg-neutral-700 flex items-center gap-2"
+                          >
+                            <ion-icon name={option.icon}></ion-icon>
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
-                  {modelSource === 'local' && (
+                  {(modelSource === 'local' || modelSource === 'huggingface') && (
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
@@ -207,13 +317,27 @@ const CustomModelSelector = ({
                   >
                     <ion-icon name={showFavorites ? "heart" : "heart-outline"}></ion-icon>
                   </button>
+
+                  {['openai', 'gemini', 'claude'].includes(modelSource) && apiKeys[modelSource] && (
+                    <button
+                      onClick={handleChangeApiKey}
+                      className="bg-neutral-700 hover:bg-neutral-600 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      title="Cambiar API Key"
+                    >
+                      <ion-icon name="key-outline"></ion-icon>
+                    </button>
+                  )}
                 </div>
 
                 <input
                   type="text"
-                  placeholder={modelSource === 'local'
-                    ? (!showAllModels ? "Search recommended models..." : "Search all models...")
-                    : "Search HuggingFace models..."}
+                  placeholder={
+                    modelSource === 'local'
+                      ? (!showAllModels ? "Buscar modelos recomendados..." : "Buscar todos los modelos...")
+                      : modelSource === 'huggingface'
+                        ? "Buscar modelos de HuggingFace..."
+                        : `Buscar modelos de ${modelSource.charAt(0).toUpperCase() + modelSource.slice(1)}...`
+                  }
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full p-2 bg-neutral-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
@@ -223,7 +347,7 @@ const CustomModelSelector = ({
 
               {showAllModels && modelSource === 'local' && (
                 <p className="text-xs text-yellow-500/70 mt-1">
-                  ⚠️ Some models may not work correctly on your device
+                  ⚠️ Algunos modelos pueden no funcionar correctamente en tu dispositivo
                 </p>
               )}
             </div>
@@ -231,10 +355,10 @@ const CustomModelSelector = ({
             <ul className="max-h-72 overflow-auto overflow-x-hidden">
               {isLoadingHf ? (
                 <li className="p-3 text-neutral-400 text-sm text-center">
-                  Loading HuggingFace models...
+                  Cargando modelos de HuggingFace...
                 </li>
               ) : filteredModels.map((model) => {
-                const { model_id, vram_required_MB, isHf, downloads, likes } = model
+                const { model_id, vram_required_MB, isHf, downloads, likes, icon } = model
                 const isCompatible = modelSource === 'huggingface' || availableModels.some(m => m.model_id === model_id)
                 const isFavorite = favorites.includes(model_id)
 
@@ -254,6 +378,9 @@ const CustomModelSelector = ({
                     >
                       <div className='flex flex-col'>
                         <div className="flex items-center gap-1">
+                          {icon && (
+                            <img src={`/icons/${icon}.svg`} alt={icon} className="w-4 h-4" />
+                          )}
                           {!isCompatible && (
                             <div className="flex items-center gap-1" title="Este modelo puede no funcionar correctamente">
                               <ion-icon name="warning" class="text-yellow-500"></ion-icon>
@@ -265,11 +392,11 @@ const CustomModelSelector = ({
                           {isHf ? (
                             <div className="text-neutral-400 text-[0.75rem] flex items-center gap-2">
                               <div className='flex items-center gap-1'><ion-icon name="cloud-download" /> <span>{downloads?.toLocaleString()}</span></div>
-                              <div><ion-icon name="thumbs-up"/> {likes?.toLocaleString()}</div>
+                              <div><ion-icon name="thumbs-up" /> {likes?.toLocaleString()}</div>
                             </div>
                           ) : (
                             <small className="text-neutral-400 text-[0.75rem] uppercase">
-                              {vram_required_MB && `gpu ${(vram_required_MB / 1024).toFixed(2)} gb`}
+                              {vram_required_MB && `GPU ${(vram_required_MB / 1024).toFixed(2)} GB`}
                             </small>
                           )}
                         </div>
@@ -286,12 +413,61 @@ const CustomModelSelector = ({
               })}
               {!isLoadingHf && filteredModels.length === 0 && (
                 <li className="p-3 text-neutral-400 text-sm text-center">
-                  No models found...
+                  No se encontraron modelos...
                 </li>
               )}
             </ul>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+const Modal = ({ message, action, onClose, onSubmit, currentApiKey }) => {
+  const [apiKey, setApiKey] = useState(currentApiKey || '');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(apiKey);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-neutral-800 p-6 rounded-xl shadow-lg max-w-md w-full">
+        <h2 className="text-xl font-bold mb-4">
+          {action === 'add' ? 'Ingresa tu API Key' : 'Cambia tu API Key'}
+        </h2>
+        <form onSubmit={handleSubmit}>
+          <p className="mb-4">
+            {action === 'add' 
+              ? `Por favor, ingresa tu API Key para ${message}:`
+              : `Ingresa la nueva API Key para ${message}:`
+            }
+          </p>
+          <input
+            type="password"
+            value={apiKey}
+            onChange={(e) => setApiKey(e.target.value)}
+            className="w-full p-2 mb-4 bg-neutral-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+            placeholder="Ingresa tu API key"
+          />
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 bg-neutral-700 text-white rounded hover:bg-neutral-600 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              {action === 'add' ? 'Guardar' : 'Actualizar'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )
