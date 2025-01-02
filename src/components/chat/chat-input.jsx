@@ -9,7 +9,7 @@ const ChatInput = () => {
     engine, setMessages, messages, actualConversation, setActualConversation,
     setHistory, history, isStreaming, setIsStreaming, setActiveChainIndex,
     chain, temperature, max_tokens, top_p, repetition_penalty, modelSource,
-    apiKeys
+    apiKeys, engine: model
   } = useChatStore(s => s)
 
   const [isRecording, setIsRecording] = useState(false)
@@ -18,6 +18,7 @@ const ChatInput = () => {
 
   // API Helper Functions
   async function sendOpenAIMessage(content, systemMessage) {
+    console.log(engine, messages)
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -25,9 +26,10 @@ const ChatInput = () => {
         'Authorization': `Bearer ${apiKeys.openai}`
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model,
         messages: [
           systemMessage,
+          ...messages,
           { role: 'user', content }
         ],
         temperature,
@@ -45,7 +47,7 @@ const ChatInput = () => {
   }
 
   async function sendGeminiMessage(content, systemMessage) {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:streamGenerateContent', {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${model}:streamGenerateContent`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -54,6 +56,7 @@ const ChatInput = () => {
       body: JSON.stringify({
         contents: [
           { role: 'system', content: systemMessage.content },
+          ...messages,
           { role: 'user', content }
         ],
         generationConfig: {
@@ -80,9 +83,10 @@ const ChatInput = () => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-3-opus-20240229',
+        model,
         messages: [
           { role: 'system', content: systemMessage.content },
+          ...messages,
           { role: 'user', content }
         ],
         max_tokens,
