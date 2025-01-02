@@ -26,7 +26,7 @@ function filterModels(userSpecs, models) {
 
 const ModelSelector = () => {
   const { isStreaming } = useChatStore(s => s)
-  const { setEngine, progress } = useChatStore(s => s)
+  const { setEngine, progress, setModelSource, modelSource, apiKeys, setApiKeys } = useChatStore(s => s)
   const [selectedModel, setSelectedModel] = useState(undefined)
   const [availableModels, setAvailableModels] = useState([])
   const [hfModels, setHfModels] = useState([])
@@ -34,11 +34,6 @@ const ModelSelector = () => {
   const [showModal, setShowModal] = useState(false)
   const [modalMessage, setModalMessage] = useState('')
   const [modalAction, setModalAction] = useState('') // 'add' or 'change'
-  const [apiKeys, setApiKeys] = useState({
-    openai: getLocalStorage('openaiApiKey') || '',
-    gemini: getLocalStorage('geminiApiKey') || '',
-    claude: getLocalStorage('claudeApiKey') || '',
-  })
 
   useLayoutEffect(() => {
     const userSpecs = {
@@ -55,7 +50,7 @@ const ModelSelector = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedModel) setEngine(selectedModel);
+    if (selectedModel) setEngine(selectedModel, !['local', "huggingface"].includes(modelSource));
   }, [selectedModel]);
 
   const handleApiKeySubmit = (key) => {
@@ -90,10 +85,10 @@ const ModelSelector = () => {
         </small>
       )}
       {showModal && (
-        <Modal 
-          message={modalMessage} 
+        <Modal
+          message={modalMessage}
           action={modalAction}
-          onClose={() => setShowModal(false)} 
+          onClose={() => setShowModal(false)}
           onSubmit={handleApiKeySubmit}
           currentApiKey={apiKeys[modalMessage.toLowerCase()]}
         />
@@ -121,7 +116,7 @@ const CustomModelSelector = ({
   const [showAllModels, setShowAllModels] = useState(false)
   const [showFavorites, setShowFavorites] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [modelSource, setModelSource] = useState('local')
+  const { setModelSource, modelSource } = useChatStore(s => s)
   const [isSourceDropdownOpen, setIsSourceDropdownOpen] = useState(false)
   const [favorites, setFavorites] = useState(() => {
     const saved = getLocalStorage('modelFavorites')
@@ -207,16 +202,22 @@ const CustomModelSelector = ({
         return hfModels
       case 'openai':
         return [
-          { model_id: 'gpt-3.5-turbo', source: 'openai', icon: 'openai' },
-          { model_id: 'gpt-4', source: 'openai', icon: 'openai' },
-        ]
+          "gpt-3.5-turbo",
+          "gpt-4",
+          "gpt-4-turbo",
+          "gpt-4o-mini",
+          "gpt-4o",
+          "o1-preview",
+          "o1-mini",
+
+        ].map(el => ({ model_id: el, source: "openai", icon: "openai" }))
       case 'gemini':
         return [
           { model_id: 'gemini-1', source: 'gemini', icon: 'gemini' },
         ]
-      case 'claude':
+      case 'anthropic':
         return [
-          { model_id: 'claude-instant', source: 'claude', icon: 'claude' },
+          { model_id: 'claude-instant', source: 'anthropic', icon: 'anthropic' },
         ]
       default:
         return []
@@ -234,11 +235,11 @@ const CustomModelSelector = ({
   })
 
   const sourceOptions = [
-    { value: 'local', label: 'Local Models', icon: 'desktop-outline' },
-    { value: 'huggingface', label: 'HuggingFace Models', icon: 'cloud-outline' },
-    { value: 'openai', label: 'OpenAI Models', icon: 'logo-openai' },
-    { value: 'gemini', label: 'Gemini Models', icon: 'logo-google' },
-    { value: 'claude', label: 'Claude Models', icon: 'logo-electron' },
+    { value: 'local', label: 'Local', icon: 'desktop-outline' },
+    { value: 'huggingface', label: 'HuggingFace', icon: 'cloud-outline' },
+    { value: 'openai', label: 'OpenAI', icon: 'aperture' },
+    { value: 'gemini', label: 'Gemini', icon: 'logo-google' },
+    { value: 'anthropic', label: 'anthropic', icon: 'logo-electron' },
   ]
 
   return (
@@ -282,7 +283,7 @@ const CustomModelSelector = ({
                               if (['huggingface', 'local'].includes(option.value)) {
                                 setHfModels([])
                               }
-                              if (['openai', 'gemini', 'claude'].includes(option.value) && !apiKeys[option.value]) {
+                              if (['openai', 'gemini', 'anthropic'].includes(option.value) && !apiKeys[option.value]) {
                                 setModalMessage(option.value.toUpperCase())
                                 setModalAction('add')
                                 setShowModal(true)
@@ -318,15 +319,17 @@ const CustomModelSelector = ({
                     <ion-icon name={showFavorites ? "heart" : "heart-outline"}></ion-icon>
                   </button>
 
-                  {['openai', 'gemini', 'claude'].includes(modelSource) && apiKeys[modelSource] && (
-                    <button
-                      onClick={handleChangeApiKey}
-                      className="bg-neutral-700 hover:bg-neutral-600 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-                      title="Cambiar API Key"
-                    >
-                      <ion-icon name="key-outline"></ion-icon>
-                    </button>
-                  )}
+                  {
+                    ['openai', 'gemini', 'anthropic'].includes(modelSource) && apiKeys[modelSource] && (
+                      <button
+                        onClick={handleChangeApiKey}
+                        className="bg-neutral-700 hover:bg-neutral-600 rounded-lg p-2 text flex items-center focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        title="Cambiar API Key"
+                      >
+                        <ion-icon name="key"></ion-icon>
+                      </button>
+                    )
+                  }
                 </div>
 
                 <input
@@ -381,11 +384,11 @@ const CustomModelSelector = ({
                           {icon && (
                             <img src={`/icons/${icon}.svg`} alt={icon} className="w-4 h-4" />
                           )}
-                          {!isCompatible && (
+                          {/* {!isCompatible && (
                             <div className="flex items-center gap-1" title="Este modelo puede no funcionar correctamente">
                               <ion-icon name="warning" class="text-yellow-500"></ion-icon>
                             </div>
-                          )}
+                          )} */}
                           <span className='truncate'>{model_id}</span>
                         </div>
                         <div>
@@ -440,7 +443,7 @@ const Modal = ({ message, action, onClose, onSubmit, currentApiKey }) => {
         </h2>
         <form onSubmit={handleSubmit}>
           <p className="mb-4">
-            {action === 'add' 
+            {action === 'add'
               ? `Por favor, ingresa tu API Key para ${message}:`
               : `Ingresa la nueva API Key para ${message}:`
             }

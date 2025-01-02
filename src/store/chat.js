@@ -7,7 +7,8 @@ const useChatStore = create((set, get) => ({
   // setModel: (newModel) => set({ model: newModel }),
 
   engine: null,
-  setEngine: async (selectedModel) => {
+  setEngine: async (selectedModel, requiresApiKey) => {
+    console.log(selectedModel, requiresApiKey)
     set({ engine: null })
     set({ progress: null })
     async function handleSelectModel() {
@@ -23,11 +24,16 @@ const useChatStore = create((set, get) => ({
       )
       return newEngine
     }
+    let newEngine;
 
-    const newEngine = await handleSelectModel()
-
+    if (!requiresApiKey) newEngine = await handleSelectModel()
+    else newEngine = selectedModel
+  
     return set({ engine: newEngine })
   },
+
+  modelSource: 'local',
+  setModelSource: (modelSource) => set({ modelSource }),
 
   progress: null,
   setProgress: (newProgress) => set({ progress: newProgress }),
@@ -100,6 +106,13 @@ const useChatStore = create((set, get) => ({
   max_tokens: 512,
   setRepetitionPenalty: (repetition_penalty) => set({ repetition_penalty }),
   repetition_penalty: 1.1,
+
+  apiKeys: {
+    openai: JSON.parse(getLocalStorage('openaiApiKey')) || '',
+    gemini: JSON.parse(getLocalStorage('geminiApiKey')) || '',
+    anthropic: JSON.parse(getLocalStorage('anthropicApiKey')) || '',
+  },
+  setApiKeys: (apiKeys) => set({ apiKeys })
 
 
 
