@@ -8,9 +8,9 @@ const CollapseButton = () => {
   return (
     <button
       onClick={() => { setIsHistoryCollapsed(true) }}
-      className="self-end hover:bg-neutral-900 bg-neutral-950 p-3 flex items-center justify-center rounded-xl cursor-pointer duration-300 ease-in-out mb-2"
+      className="self-end hover:bg-neutral-700 p-3 flex items-center justify-center rounded-xl cursor-pointer duration-300 ease-in-out mb-2"
     >
-      <ion-icon name="chevron-back-outline"></ion-icon>
+      <ion-icon name="close"></ion-icon>
     </button>
   )
 }

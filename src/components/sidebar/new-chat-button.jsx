@@ -3,7 +3,7 @@ import React from 'react'
 
 const NewChatButton = () => {
 
-  const { setActualConversation, setMessages } = useChatStore(s => s)
+  const { setActualConversation, setMessages, setIsHistoryCollapsed } = useChatStore(s => s)
 
   function handleCreateNewChat() {
     setMessages([
@@ -13,21 +13,12 @@ const NewChatButton = () => {
       }
     ])
     setActualConversation(null)
+    if (document.body.clientWidth < 768) setIsHistoryCollapsed(true)
   }
 
   return (
-    <button
-      onClick={handleCreateNewChat}
-      className="flex items-center gap-2 p-4 hover:bg-neutral-600 bg-neutral-700 rounded-xl cursor-pointer duration-300 ease-in-out w-full mb-2"
-    >
-      <span
-        className="flex items-center bg-neutral-500 p-2 rounded-full justify-center"
-      >
-        <ion-icon name="pencil"></ion-icon>
-      </span>
-      <span>
-        Create new chat
-      </span>
+    <button className='hover:bg-neutral-700 p-3 flex items-center justify-center rounded-xl cursor-pointer duration-300 ease-in-out mb-2' onClick={handleCreateNewChat}>
+      <ion-icon name="create-outline" />
     </button>
   )
 }
