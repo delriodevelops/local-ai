@@ -8,7 +8,6 @@ const useChatStore = create((set, get) => ({
 
   engine: null,
   setEngine: async (selectedModel, requiresApiKey) => {
-    console.log(selectedModel, requiresApiKey)
     set({ engine: null })
     set({ progress: null })
     async function handleSelectModel() {
