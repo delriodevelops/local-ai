@@ -25,8 +25,8 @@ function filterModels(userSpecs, models) {
 
 const ModelSelector = () => {
   const { isStreaming } = useChatStore(s => s)
-  const { setEngine, progress, setModelSource, modelSource, apiKeys, setApiKeys } = useChatStore(s => s)
-  const [selectedModel, setSelectedModel] = useState(undefined)
+  const { setEngine, progress, modelSource, apiKeys, setApiKeys } = useChatStore(s => s)
+  const [selectedModel, setSelectedModel] = useState(null)
   const [availableModels, setAvailableModels] = useState([])
   const [hfModels, setHfModels] = useState([])
   const [isLoadingHf, setIsLoadingHf] = useState(false)
@@ -46,7 +46,6 @@ const ModelSelector = () => {
     const filteredModels = filterModels(userSpecs, allModels)
 
     setAvailableModels(filteredModels)
-    if (filteredModels.length > 0) setSelectedModel('snowflake-arctic-embed-s-q0f32-MLC-b4')
   }, [])
 
   useEffect(() => {
@@ -54,11 +53,10 @@ const ModelSelector = () => {
   }, [selectedModel])
 
   const handleApiKeySubmit = (key) => {
-    setApiKeys(prev => {
-      const newKeys = { ...prev, [modalMessage.toLowerCase()]: key }
-      setLocalStorage(`${modalMessage.toLowerCase()}ApiKey`, key)
-      return newKeys
-    })
+    console.log(key, modalMessage)
+    const newKeys = { ...apiKeys, [modalMessage.toLowerCase()]: key }
+    setLocalStorage(`${modalMessage.toLowerCase()}ApiKey`, key)
+    setApiKeys(newKeys)
     setShowModal(false)
   }
 
@@ -68,10 +66,10 @@ const ModelSelector = () => {
         onClick={() => setShowModelModal(true)}
         disabled={isStreaming}
         className="hidden md:flex w-full md:w-96 items-center justify-between p-3 bg-neutral-700 hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 rounded-xl"
-        title={selectedModel || "Selecciona un modelo"}
+        title={selectedModel || "Select a model"}
 
       >
-        <span className="truncate">{selectedModel || "Selecciona un modelo"}</span>
+        <span className="truncate">{selectedModel || "Select a model"}</span>
         <ion-icon name="chevron-down" class="text-neutral-400"></ion-icon>
       </button>
 
@@ -184,10 +182,10 @@ const CustomModelSelector = ({
       setHfModels([])
       return
     }
-
     setIsLoadingHf(true)
+
     try {
-      const response = await fetch(`https://huggingface.co/api/models?search=${query}&filter=text-generation`)
+      const response = await fetch(`https://huggingface.co/api/models?search=${query}&filter=text-generation&sort=downloads`)
       const data = await response.json()
 
       const formattedModels = data.map(model => ({
@@ -208,9 +206,10 @@ const CustomModelSelector = ({
 
   useEffect(() => {
     if (modelSource === 'huggingface') {
+      if (searchQuery.trim().length) setIsLoadingHf(true)
       const delayDebounce = setTimeout(() => {
         searchHuggingFaceModels(searchQuery)
-      }, 500)
+      }, 300)
 
       return () => clearTimeout(delayDebounce)
     }
@@ -360,10 +359,10 @@ const CustomModelSelector = ({
             type="text"
             placeholder={
               modelSource === 'local'
-                ? (!showAllModels ? "Buscar modelos recomendados..." : "Buscar todos los modelos...")
+                ? (!showAllModels ? "Search recommended models..." : "Search all models...")
                 : modelSource === 'huggingface'
-                  ? "Buscar modelos de HuggingFace..."
-                  : `Buscar modelos de ${modelSource.charAt(0).toUpperCase() + modelSource.slice(1)}...`
+                  ? "Search HuggingFace models..."
+                  : `Search ${modelSource.charAt(0).toUpperCase() + modelSource.slice(1)} models...`
             }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -372,10 +371,10 @@ const CustomModelSelector = ({
         </div>
       </div>
 
-      <ul className="flex-1 overflow-auto">
+      <ul className="flex-1 overflow-y-auto overflow-x-hidden">
         {isLoadingHf ? (
-          <li className="p-3 text-neutral-400 text-sm text-center">
-            Cargando modelos de HuggingFace...
+          <li className="p-3 text-neutral-400 text-sm text-center animate-pulse">
+            Loading...
           </li>
         ) : filteredModels.map((model) => {
           const { model_id, vram_required_MB, isHf, downloads, likes, icon } = model
@@ -430,9 +429,9 @@ const CustomModelSelector = ({
             </li>
           )
         })}
-        {!isLoadingHf && filteredModels.length === 0 && (
+        {!isLoadingHf && !!searchQuery.trim().length && filteredModels.length === 0 && (
           <li className="p-3 text-neutral-400 text-sm text-center">
-            No se encontraron modelos...
+            No models found...
           </li>
         )}
       </ul>

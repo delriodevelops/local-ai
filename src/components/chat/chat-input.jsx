@@ -18,25 +18,36 @@ const ChatInput = () => {
 
   // API Helper Functions
   async function sendOpenAIMessage(content, systemMessage) {
+    const body = {
+      model,
+      messages: [
+        systemMessage,
+        ...messages,
+        { role: 'user', content }
+      ],
+      temperature,
+      stream: true
+    }
+
+    if (engine.includes('o1')) {
+      systemMessage.role = 'user';
+      body.max_completion_tokens = max_tokens;
+      body.temperature = 1
+    } else {
+      body.max_tokens = max_tokens;
+      body.top_p = top_p
+    }
+
     console.log(engine, messages)
+
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKeys.openai}`
       },
-      body: JSON.stringify({
-        model,
-        messages: [
-          systemMessage,
-          ...messages,
-          { role: 'user', content }
-        ],
-        temperature,
-        max_tokens,
-        top_p,
-        stream: true
-      })
+      body: JSON.stringify(body)
     })
 
     if (!response.ok) {
@@ -242,6 +253,7 @@ const ChatInput = () => {
           setMessages([...updatedMessages, updatedReply])
         }
       } else {
+        console.log('holaaaaa')
         switch (modelSource) {
           case 'openai':
             stream = await sendOpenAIMessage(content, systemMessage)
