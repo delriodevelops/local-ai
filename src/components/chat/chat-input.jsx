@@ -38,9 +38,6 @@ const ChatInput = () => {
       body.top_p = top_p
     }
 
-    console.log(engine, messages)
-
-
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -253,7 +250,6 @@ const ChatInput = () => {
           setMessages([...updatedMessages, updatedReply])
         }
       } else {
-        console.log('holaaaaa')
         switch (modelSource) {
           case 'openai':
             stream = await sendOpenAIMessage(content, systemMessage)

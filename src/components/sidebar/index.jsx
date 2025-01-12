@@ -13,7 +13,7 @@ const SIDEBAR = () => {
   const { setIsHistoryCollapsed, isHistoryCollapsed } = useChatStore(s => s)
 
   if (!isHistoryCollapsed) return (
-    <section className="bg-neutral-800 p-2 w-full w-dvw absolute md:relative z-50 md:max-w-64 min-h-dvh max-h-dvh overflow-hidden flex flex-col">
+    <section className="bg-neutral-800 p-2 w-full w-dvw absolute md:relative z-50 md:max-w-64 md:min-w-64 min-h-dvh max-h-dvh overflow-hidden flex flex-col">
       <div className='flex items-center justify-between text-xl'>
         <CollapseButton />
         <div className='flex items-center gap-2 self-end'>

@@ -53,7 +53,6 @@ const ModelSelector = () => {
   }, [selectedModel])
 
   const handleApiKeySubmit = (key) => {
-    console.log(key, modalMessage)
     const newKeys = { ...apiKeys, [modalMessage.toLowerCase()]: key }
     setLocalStorage(`${modalMessage.toLowerCase()}ApiKey`, key)
     setApiKeys(newKeys)

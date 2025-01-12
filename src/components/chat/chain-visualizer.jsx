@@ -1,11 +1,20 @@
-import useChatStore from '@/store/chat'
 import React, { useState } from 'react'
+import useChatStore from '@/store/chat'
 
 const ChainVisualizer = () => {
   const { chain, setChain, activeChainIndex, isStreaming } = useChatStore();
-  const [isDragging, setIsDragging] = useState(false);
+  const [isDragging, setIsDraggin] = useState(false);
   const [draggedId, setDraggedId] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const moveItem = (fromIndex, toIndex) => {
+    if (isStreaming) return;
+    const newChain = [...chain];
+    const [movedItem] = newChain.splice(fromIndex, 1);
+    newChain.splice(toIndex, 0, movedItem);
+    setChain(newChain);
+  };
 
   const handleDragStart = (e, index, assistant) => {
     if (isStreaming) return;
@@ -76,52 +85,88 @@ const ChainVisualizer = () => {
   };
 
   return (
-    <div className="flex gap-4 pt-4 pb-8 border-b border-neutral-700 overflow-x-auto items-start px-4">
-      {chain.map((assistant, index) => (
-        <div
-          key={assistant.id}
-          draggable={!isStreaming}
-          onDragStart={(e) => handleDragStart(e, index, assistant)}
-          onDragOver={(e) => handleDragOver(e, index)}
-          onDrop={(e) => handleDrop(e, index)}
-          onDragEnd={handleDragEnd}
-          className={`
-            flex items-center gap-3 p-4 rounded-xl
-            transition-all duration-300 ease-out
-            select-none backdrop-blur-sm
-            transform-gpu will-change-transform
-            ${isStreaming
-              ? 'cursor-not-allowed opacity-80'
-              : isDragging
-                ? 'cursor-grabbing'
-                : 'cursor-grab hover:cursor-grab active:cursor-grabbing'
-            }
-            ${draggedId === assistant.id ? 'opacity-50 scale-95' : 'opacity-100'}
-            ${isDragging && dragOverIndex === index
-              ? 'translate-x-4 bg-neutral-600/50 scale-105 border-2 border-neutral-500/50'
-              : ''
-            }
-            ${isDragging && dragOverIndex !== null && index > dragOverIndex
-              ? '-translate-x-4 rotate-1'
-              : ''
-            }
-            ${isDragging && dragOverIndex !== null && index < dragOverIndex
-              ? 'translate-x-4 -rotate-1'
-              : ''
-            }
-            ${isStreaming && activeChainIndex === index
-              ? 'bg-lime-600/90 shadow-xl shadow-lime-500/30 text-white font-semibold'
-              : 'bg-neutral-800/90 shadow-md hover:shadow-neutral-900/20 hover:bg-neutral-700/80 hover:scale-105'
-            }
-          `}
-        >
-          <span className="text-xl">
-            <ion-icon name={assistant?.icon?.icon}></ion-icon>
-          </span>
-          <span className="font-medium">{assistant.name}</span>
+    <>
+      {/* Desktop Version - Horizontal Scroll */}
+      <div className="hidden md:block w-full">
+        <div className="overflow-x-auto">
+          <div className="flex gap-4 pb-2">
+            {chain.map((assistant, index) => (
+              <div
+                key={assistant.id}
+                draggable={!isStreaming}
+                onDragStart={(e) => handleDragStart(e, index, assistant)}
+                className="flex-shrink-0 cursor-grab active:cursor-grabbing"
+              >
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-neutral-800">
+                  <span className="text-xl">
+                    <ion-icon name={assistant?.icon?.icon}></ion-icon>
+                  </span>
+                  <span className="font-medium whitespace-nowrap">{assistant.name}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
-    </div>
+      </div>
+
+      {/* Mobile Version - Modal */}
+      <div className="md:hidden">
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 p-3 rounded-lg bg-neutral-800 hover:bg-neutral-700"
+        >
+          <ion-icon name="git-branch-outline"></ion-icon>
+          <span>Manage Chain ({chain.length})</span>
+        </button>
+
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+            <div className="bg-neutral-900 rounded-xl w-full max-w-md max-h-[80vh] overflow-y-auto">
+              <div className="p-4 border-b border-neutral-800 flex justify-between items-center">
+                <h3 className="text-lg font-medium">Chain Order</h3>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-2 rounded-lg hover:bg-neutral-800"
+                >
+                  <ion-icon name="close-outline"></ion-icon>
+                </button>
+              </div>
+              <div className="p-4 space-y-2">
+                {chain.map((assistant, index) => (
+                  <div
+                    key={assistant.id}
+                    className="flex items-center justify-between p-4 bg-neutral-800 rounded-xl"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">
+                        <ion-icon name={assistant?.icon?.icon}></ion-icon>
+                      </span>
+                      <span className="font-medium">{assistant.name}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => index > 0 && moveItem(index, index - 1)}
+                        disabled={index === 0 || isStreaming}
+                        className="p-2 rounded-lg hover:bg-neutral-700 disabled:opacity-50"
+                      >
+                        <ion-icon name="chevron-up-outline"></ion-icon>
+                      </button>
+                      <button
+                        onClick={() => index < chain.length - 1 && moveItem(index, index + 1)}
+                        disabled={index === chain.length - 1 || isStreaming}
+                        className="p-2 rounded-lg hover:bg-neutral-700 disabled:opacity-50"
+                      >
+                        <ion-icon name="chevron-down-outline"></ion-icon>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 
