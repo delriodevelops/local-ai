@@ -169,7 +169,7 @@ export default function CustomSlider({
         </div>
 
         <div
-          className={`slider-element absolute left-16 mr-3 bg-neutral-900 text-white p-2 rounded-lg flex flex-col items-center gap-2 min-w-48 max-w-64 ${
+          className={`slider-element absolute right-16 mr-3 bg-neutral-900 text-white p-2 rounded-lg flex flex-col items-center gap-2 min-w-48 max-w-64 ${
             showTooltip ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
           style={{

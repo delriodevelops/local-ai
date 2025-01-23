@@ -341,7 +341,7 @@ const ChatInput = () => {
         e.preventDefault()
         if (!isSending) await sendMessage()
       }}
-      className="w-full 2xl:w-3/5 mb-2 bg-neutral-600 rounded-3xl flex justify-end gap-2 items-center p-2 relative overflow-visible"
+      className="w-full xl:w-3/5 mb-2 bg-neutral-600 rounded-3xl flex justify-end gap-2 items-center p-2 relative overflow-visible"
     >
       <TextAreaOptions />
       <textarea
