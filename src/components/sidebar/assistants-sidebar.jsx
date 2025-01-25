@@ -135,7 +135,7 @@ const AssistantsSidebar = () => {
               return (
                 <div
                   key={el.id}
-                  className={`${!!index ? 'bg-lime-700' : 'hover:bg-neutral-700'} 
+                  className={`${!!index ? 'bg-lime-700' : 'hover:bg-neutral-700 md:hover:bg-neutral-700'} 
                   group relative flex items-center p-2 rounded-xl gap-2 duration-300 cursor-pointer`}
                 >
                   <button
@@ -152,19 +152,23 @@ const AssistantsSidebar = () => {
                     <span className='truncate'>{el.name}</span>
                   </button>
 
-                  <div className="hidden group-hover:flex gap-1">
+                  <div className="flex md:hidden md:group-hover:flex gap-1 touch-none">
                     <button
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         setEditingAssistant(el)
                         setIsModalOpen(true)
                       }}
-                      className="p-2 hover:bg-neutral-600 rounded-full flex items-center aspect-square"
+                      className="p-2 hover:bg-neutral-600 md:hover:bg-neutral-600 rounded-full flex items-center aspect-square"
                     >
                       <ion-icon name="create-outline"></ion-icon>
                     </button>
                     <button
-                      onClick={() => handleDelete(el.id)}
-                      className="p-2 hover:bg-neutral-600 rounded-full flex items-center aspect-square text-red-500"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(el.id)
+                      }}
+                      className="p-2 hover:bg-neutral-600 md:hover:bg-neutral-600 rounded-full flex items-center aspect-square text-red-500"
                     >
                       <ion-icon name="trash-outline"></ion-icon>
                     </button>
