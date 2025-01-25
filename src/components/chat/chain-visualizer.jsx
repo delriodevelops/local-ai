@@ -1,51 +1,56 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import useChatStore from '@/store/chat';
 import { motion, Reorder, AnimatePresence } from 'framer-motion';
 
 const ChainVisualizer = () => {
-  const { chain, setChain, isStreaming } = useChatStore();
+  const { chain, setChain, isStreaming, isHistoryCollapsed } = useChatStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [clientWidth, setClientWidth] = useState(0);
+  useLayoutEffect(() => {
+    const sidebar = document.getElementById('sidebar') ;
+    const modelSelector = document.getElementById('model-selector');
+    const newClientWidth = (sidebar?.clientWidth + 56 || 164) + (modelSelector?.clientWidth || 0);
+    setClientWidth(newClientWidth);
+  }, [isHistoryCollapsed])
 
   return (
     <>
       {/* Desktop Version */}
-      <div className="hidden md:flex w-full">
-        <div className="overflow-x-auto">
-          <Reorder.Group
-            axis="x"
-            values={chain}
-            onReorder={setChain}
-            className="flex gap-4 overflow-x-auto pb-4"
-          >
-            {chain.map((assistant) => (
-              <Reorder.Item
-                key={assistant.id}
-                value={assistant}
-                className="flex-shrink-0 relative"
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      <div className="hidden lg:flex overflow-x-auto h-fit" style={{ width: `calc(100dvw - ${clientWidth}px)` }}>
+        <Reorder.Group
+          axis="x"
+          values={chain}
+          onReorder={setChain}
+          className="flex gap-4 overflow-x-auto"
+        >
+          {chain.map((assistant) => (
+            <Reorder.Item
+              key={assistant.id}
+              value={assistant}
+              className="flex-shrink-0"
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            >
+              <motion.div
+                className="flex items-center gap-3 p-4 rounded-xl bg-neutral-800 hover:bg-neutral-700 cursor-grab transition-all"
+                whileDrag={{
+                  scale: 1.05,
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.2)'
+                }}
               >
-                <motion.div
-                  className="flex items-center gap-3 p-4 rounded-xl bg-neutral-800 hover:bg-neutral-700 cursor-grab transition-all"
-                  whileDrag={{
-                    scale: 1.05,
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.2)'
-                  }}
-                >
-                  <span className="text-xl text-neutral-300">
-                    <ion-icon name={assistant?.icon?.icon}></ion-icon>
-                  </span>
-                  <span className="font-medium whitespace-nowrap text-neutral-100">
-                    {assistant.name}
-                  </span>
-                </motion.div>
-              </Reorder.Item>
-            ))}
-          </Reorder.Group>
-        </div>
+                <span className="text-xl text-neutral-300">
+                  <ion-icon name={assistant?.icon?.icon}></ion-icon>
+                </span>
+                <span className="font-medium whitespace-nowrap text-neutral-100">
+                  {assistant.name}
+                </span>
+              </motion.div>
+            </Reorder.Item>
+          ))}
+        </Reorder.Group>
       </div>
 
       {/* Mobile Version */}
-      <div className="md:hidden">
+      <div className="lg:hidden">
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsModalOpen(true)}
@@ -68,7 +73,7 @@ const ChainVisualizer = () => {
                 initial={{ scale: 0.95, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.95, y: 20 }}
-                className="bg-neutral-900 rounded-xl w-full max-w-md max-h-[80vh] overflow-hidden"
+                className="bg-neutral-900 rounded-xl w-full max-w-md max-h-[80vh] flex flex-col" // Added flex flex-col
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-4 border-b border-neutral-800 flex justify-between items-center">
@@ -81,12 +86,12 @@ const ChainVisualizer = () => {
                   </button>
                 </div>
 
-                <div className="overflow-y-auto p-4">
+                <div className="flex-1 overflow-y-auto py-4 px-12">
                   <Reorder.Group
                     axis="y"
                     values={chain}
                     onReorder={setChain}
-                    className="space-y-3"
+                    className="space-y-3 "
                   >
                     {chain.map((assistant, index) => (
                       <Reorder.Item

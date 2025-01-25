@@ -7,10 +7,10 @@ import ChainVisualizer from './chain-visualizer'
 
 const CHAT = () => {
   return (
-    <section className="flex flex-col bg-neutral-700 w-full px-2 md:px-4 items-center h-dvh">
-      <nav className="w-full flex md:gap-16 gap-4 items-center justify-end py-4 flex-nowrap">
-        <ModelSelector />
-        <ChainVisualizer />
+    <section className="flex flex-col bg-neutral-700 w-full px-2 lg:px-4 items-center h-dvh">
+      <nav className="w-full flex lg:gap-8 gap-4 items-center py-2 flex-nowrap justify-end lg:justify-start">
+          <ModelSelector />
+          <ChainVisualizer />
       </nav>
       <Messages />
       <ChatInput />

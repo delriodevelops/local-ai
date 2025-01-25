@@ -60,11 +60,11 @@ const ModelSelector = () => {
   }
 
   return (
-    <div className="flex flex-col pt-2">
+    <div className="flex flex-col" id='model-selector'>
       <button
         onClick={() => setShowModelModal(true)}
         disabled={isStreaming}
-        className="hidden md:flex w-full md:w-96 items-center justify-between p-3 bg-neutral-700 hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 rounded-xl"
+        className="hidden lg:flex w-full lg:w-96 items-center justify-between p-3 bg-neutral-700 hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 rounded-xl"
         title={selectedModel || "Select a model"}
 
       >
@@ -75,7 +75,7 @@ const ModelSelector = () => {
       <button
         onClick={() => setShowModelModal(true)}
         disabled={isStreaming}
-        className='z-40 md:hidden bg-neutral-800 p-4 -mt-2 flex rounded-xl items-center aspect-square disabled:cursor-not-allowed disabled:opacity-50'
+        className='z-40 lg:hidden bg-neutral-800 p-4 -mt-2 flex rounded-xl items-center aspect-square disabled:cursor-not-allowed disabled:opacity-50'
       >
         <ion-icon name="server-outline" />
       </button>
@@ -87,9 +87,9 @@ const ModelSelector = () => {
       )}
 
       {showModelModal && (
-        <div className="fixed inset-0 z-50 md:relative md:inset-auto">
-          <div className="fixed inset-0 bg-black/50 md:hidden" onClick={() => setShowModelModal(false)} />
-          <div className="fixed inset-x-0 bottom-0 md:absolute md:inset-auto md:w-96 md:mt-1">
+        <div className="fixed inset-0 z-50 lg:relative lg:inset-auto">
+          <div className="fixed inset-0 bg-black/50 lg:hidden" onClick={() => setShowModelModal(false)} />
+          <div className="fixed inset-x-0 bottom-0 lg:absolute lg:inset-auto lg:w-96 lg:mt-1">
             <CustomModelSelector
               availableModels={availableModels}
               allModels={webllm.prebuiltAppConfig.model_list}
@@ -272,8 +272,8 @@ const CustomModelSelector = ({
   })
 
   return (
-    <div className="bg-neutral-800 rounded-t-xl md:rounded-xl shadow-lg h-[90vh] md:max-h-[32rem] flex flex-col">
-      <div className="flex items-center justify-between p-4 border-b border-neutral-700 md:hidden">
+    <div className="bg-neutral-800 rounded-t-xl lg:rounded-xl shadow-lg h-[90vh] lg:max-h-[32rem] flex flex-col">
+      <div className="flex items-center justify-between p-4 border-b border-neutral-700 lg:hidden">
         <h2 className="text-lg font-semibold">Select Model</h2>
         <button onClick={onClose} className="p-2">
           <ion-icon name="close-outline" class="text-2xl"></ion-icon>

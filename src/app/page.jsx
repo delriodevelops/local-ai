@@ -17,7 +17,7 @@ export default function Home() {
   }, [])
 
   return (
-    <main className="flex min-h-dvh maxh-h-dvh justify-between overflow-hidden">
+    <main className="flex min-h-dvh max-h-dvh justify-between overflow-hidden">
       <SIDEBAR />
       <CHAT />
     </main>

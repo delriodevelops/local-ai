@@ -140,7 +140,7 @@ export default function CustomSlider({
           justify-between relative cursor-grab active:cursor-grabbing w-12 h-72 
           ${isDragging && 'w-14'} duration-100 ease-in-out 
           touch-none 
-          md:w-12 
+          lg:w-12 
           sm:w-16 
           sm:h-64 
         `}
