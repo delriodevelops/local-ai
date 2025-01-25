@@ -162,7 +162,7 @@ const TextAreaOptions = () => {
   }
 
   return (
-    <div className="relative overflow-visible h-full w-fit">
+    <div className="relative overflow-visible h-full w-12">
       <div
         ref={menuRef}
         onMouseEnter={() => setIsMenuOpen(true)}
