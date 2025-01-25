@@ -272,7 +272,7 @@ const CustomModelSelector = ({
   })
 
   return (
-    <div className="w-full bg-neutral-800 rounded-t-xl md:rounded-xl shadow-lg max-h-[90vh] md:max-h-[32rem] flex flex-col">
+    <div className="bg-neutral-800 rounded-t-xl md:rounded-xl shadow-lg h-[90vh] md:max-h-[32rem] flex flex-col">
       <div className="flex items-center justify-between p-4 border-b border-neutral-700 md:hidden">
         <h2 className="text-lg font-semibold">Select Model</h2>
         <button onClick={onClose} className="p-2">
