@@ -162,12 +162,12 @@ const TextAreaOptions = () => {
   }
 
   return (
-    <div className="absolute overflow-visible h-full w-fit">
+    <div className="relative overflow-visible h-full w-fit">
       <div
         ref={menuRef}
         onMouseEnter={() => setIsMenuOpen(true)}
         onMouseLeave={() => { if (!activeSlider) setIsMenuOpen(false) }}
-        className={`absolute z-[9999] bottom-0 left-4 flex gap-2 flex-col items-center justify-center py-1 duration-300 ease-in-out w-14 ${activeSlider && 'hidden'} ${!isMenuOpen ? "h-14" : "h-fit  bg-neutral-800"} rounded-full `}
+        className={`absolute z-10 -bottom-2 left-0 flex gap-2 flex-col items-center justify-center py-1 duration-300 ease-in-out w-14 ${activeSlider && 'hidden'} ${!isMenuOpen ? "h-14" : "h-fit  bg-neutral-800"} rounded-full `}
       >
         {
           isMenuOpen && !activeSlider && sliderMenus.map((slider, index) => (

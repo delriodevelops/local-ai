@@ -127,7 +127,7 @@ export default function CustomSlider({
     : currentLevel
 
   return (
-    <div className="slider-element absolute z-20 bottom-1 left-4 flex items-center select-none">
+    <div className="slider-element absolute z-20 bottom-0 left-0 flex items-center select-none">
       <div
         ref={sliderRef}
         className={`slider-element bg-neutral-800 rounded-full py-3 flex flex-col items-center justify-between relative cursor-grab active:cursor-grabbing w-12 h-72 ${isDragging && 'w-14'} duration-100 ease-in-out`}
