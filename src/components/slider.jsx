@@ -68,6 +68,8 @@ export default function CustomSlider({
   }
 
   const handleDragStart = (e) => {
+    // Prevent page scrolling on mobile
+    e.preventDefault()
     setIsDragging(true)
     dragStartY.current = 'touches' in e ? e.touches[0].clientY : e.clientY
     startLevel.current = currentLevel
@@ -80,7 +82,11 @@ export default function CustomSlider({
 
   const handleMouseMove = (e) => handleDrag(e.clientY)
   const handleMouseUp = () => handleDragEnd()
-  const handleTouchMove = (e) => handleDrag(e.touches[0].clientY)
+  const handleTouchMove = (e) => {
+    // Prevent scroll during drag
+    e.preventDefault()
+    handleDrag(e.touches[0].clientY)
+  }
   const handleTouchEnd = () => handleDragEnd()
 
   useEffect(() => {
@@ -127,14 +133,24 @@ export default function CustomSlider({
     : currentLevel
 
   return (
-    <div className="slider-element absolute z-20 bottom-0 left-0 flex items-center select-none">
+    <div className="slider-element absolute z-20 bottom-0 left-0 flex items-center select-none touch-none">
       <div
         ref={sliderRef}
-        className={`slider-element bg-neutral-800 rounded-full py-3 flex flex-col items-center justify-between relative cursor-grab active:cursor-grabbing w-12 h-72 ${isDragging && 'w-14'} duration-100 ease-in-out`}
+        className={`slider-element bg-neutral-800 rounded-full py-3 flex flex-col items-center 
+          justify-between relative cursor-grab active:cursor-grabbing w-12 h-72 
+          ${isDragging && 'w-14'} duration-100 ease-in-out 
+          touch-none 
+          md:w-12 
+          sm:w-16 
+          sm:h-64 
+        `}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => !isDragging && setShowTooltip(false)}
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
+        // Add these handlers
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleDragEnd}
         role="slider"
         aria-valuemin={levels[0].value}
         aria-valuemax={levels.at(-1).value}
