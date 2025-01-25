@@ -17,7 +17,7 @@ const NewChatButton = () => {
   }
 
   return (
-    <button className='hover:bg-neutral-700 p-3 flex items-center justify-center rounded-xl cursor-pointer duration-300 ease-in-out mb-2' onClick={handleCreateNewChat}>
+    <button className='hover:bg-neutral-700 p-4 flex items-center justify-center rounded-xl cursor-pointer duration-300 ease-in-out mb-2' onClick={handleCreateNewChat}>
       <ion-icon name="create-outline" />
     </button>
   )

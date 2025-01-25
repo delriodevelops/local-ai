@@ -9,13 +9,13 @@ const ChainVisualizer = () => {
   return (
     <>
       {/* Desktop Version */}
-      <div className="hidden md:block w-full">
-        <div className="overflow-x-auto pb-4">
+      <div className="hidden md:flex w-full">
+        <div className="overflow-x-auto">
           <Reorder.Group
             axis="x"
             values={chain}
             onReorder={setChain}
-            className="flex gap-4"
+            className="flex gap-4 overflow-x-auto pb-4"
           >
             {chain.map((assistant) => (
               <Reorder.Item
@@ -49,12 +49,10 @@ const ChainVisualizer = () => {
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsModalOpen(true)}
-          className="w-full flex items-center gap-3 p-4 rounded-xl bg-neutral-800 hover:bg-neutral-700 transition-colors"
+          className="w-full flex items-center gap-3 p-4 rounded-xl bg-neutral-800 hover:bg-neutral-700 transition-colors relative"
         >
-          <ion-icon name="git-branch-outline" className="text-xl text-neutral-300" />
-          <span className="font-medium text-neutral-100">
-            Manage Chain ({chain.length})
-          </span>
+          <ion-icon name="link" className="text-xl text-neutral-300" />
+          {!!chain.length && <small className="text-neutral-100 absolute -bottom-1 -right-1 bg-neutral-700 rounded-full w-5 aspect-square">{chain.length}</small>}
         </motion.button>
 
         <AnimatePresence>
@@ -98,8 +96,8 @@ const ChainVisualizer = () => {
                         whileTap={{ scale: 0.98 }}
                       >
                         <div className="flex items-center gap-3">
-                          <ion-icon 
-                            name="menu-outline" 
+                          <ion-icon
+                            name="menu-outline"
                             className="text-xl text-neutral-500"
                           />
                           <span className="font-medium text-neutral-100">
@@ -112,8 +110,8 @@ const ChainVisualizer = () => {
                               e.stopPropagation();
                               if (index > 0) {
                                 const newChain = [...chain];
-                                [newChain[index], newChain[index - 1]] = 
-                                [newChain[index - 1], newChain[index]];
+                                [newChain[index], newChain[index - 1]] =
+                                  [newChain[index - 1], newChain[index]];
                                 setChain(newChain);
                               }
                             }}
@@ -127,8 +125,8 @@ const ChainVisualizer = () => {
                               e.stopPropagation();
                               if (index < chain.length - 1) {
                                 const newChain = [...chain];
-                                [newChain[index], newChain[index + 1]] = 
-                                [newChain[index + 1], newChain[index]];
+                                [newChain[index], newChain[index + 1]] =
+                                  [newChain[index + 1], newChain[index]];
                                 setChain(newChain);
                               }
                             }}

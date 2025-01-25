@@ -33,7 +33,7 @@ const SIDEBAR = () => {
     <div className='flex items-center justify-start absolute top-2 left-2 z-50 md:relative h-fit w-fit'>
       <button
         onClick={() => { setIsHistoryCollapsed(false) }}
-        className='hover:bg-neutral-900 bg-neutral-800 m-2 w-fit h-fit p-3 flex items-center justify-center rounded-xl cursor-pointer duration-300 ease-in-out '>
+        className='hover:bg-neutral-900 bg-neutral-800 m-2 w-fit h-fit p-4 flex items-center justify-center rounded-xl cursor-pointer duration-300 ease-in-out '>
         <ion-icon name="chatbubble"></ion-icon>
       </button>
       <NewChatButton />
