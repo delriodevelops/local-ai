@@ -50,7 +50,7 @@ const useChatStore = create((set, get) => ({
   setActualConversation: (actualConversation) => set({ actualConversation }),
 
 
-  isHistoryCollapsed: false,
+  isHistoryCollapsed: true,
   setIsHistoryCollapsed: (isHistoryCollapsed) => set({ isHistoryCollapsed }),
 
   assistants: JSON.parse(getLocalStorage('assistants')) || [],
