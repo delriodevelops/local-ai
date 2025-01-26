@@ -312,6 +312,19 @@ const ChatInput = () => {
     }
   }
 
+  async function handleSubmit(e) {
+    e.preventDefault()
+    if (!chatInput.trim().length) {
+      window.alert('Please enter a message')
+      return
+    }
+    if (!engine) {
+      window.alert('Please select an engine')
+      return
+    }
+    if (!isSending) await sendMessage()
+  }
+
   // Scroll effect
   useEffect(() => {
     const scrollOnMessage = () => {
@@ -337,10 +350,7 @@ const ChatInput = () => {
 
   return (
     <form
-      onSubmit={async (e) => {
-        e.preventDefault()
-        if (!isSending) await sendMessage()
-      }}
+      onSubmit={handleSubmit}
       className="w-full xl:w-3/5 mb-2 bg-neutral-600 rounded-3xl flex justify-end gap-2 items-center p-2 relative overflow-visible"
     >
       <TextAreaOptions />
@@ -359,9 +369,6 @@ const ChatInput = () => {
       />
       <button
         type='submit'
-        onClick={async () => {
-          if (!isSending) await sendMessage()
-        }}
         disabled={!engine || isStreaming || isRecording || !chatInput.trim().length}
         className="text-4xl flex items-center justify-center cursor-pointer disabled:text-neutral-500 disabled:cursor-not-allowed"
       >
