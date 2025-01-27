@@ -75,7 +75,7 @@ const ModelSelector = () => {
       <button
         onClick={() => setShowModelModal(true)}
         disabled={isStreaming}
-        className='z-40 lg:hidden bg-neutral-800 p-4 -mt-2 flex rounded-xl items-center aspect-square disabled:cursor-not-allowed disabled:opacity-50'
+        className='z-40 lg:hidden bg-neutral-800 p-4 lg:-mt-2 flex rounded-xl items-center aspect-square disabled:cursor-not-allowed disabled:opacity-50'
       >
         <ion-icon name="server-outline" />
       </button>

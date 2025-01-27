@@ -290,6 +290,14 @@ const ChatInput = () => {
 
   // Main send message function
   async function sendMessage(content = chatInput) {
+    if (!chatInput.trim().length) {
+      window.alert('Please enter a message')
+      return
+    }
+    if (!engine) {
+      window.alert('Please select an engine')
+      return
+    }
     await processChainStep(content, 0, messages)
   }
 
@@ -303,7 +311,7 @@ const ChatInput = () => {
   }
 
   async function handleKeyDown(e) {
-    if (e.key === "Enter" && !e.shiftKey && chatInput.trim() && !isSending) {
+    if (e.key === "Enter" && !e.shiftKey && chatInput.trim().length && !isSending) {
       e.preventDefault()
       await sendMessage()
     } else if (e.key === "Enter" && e.shiftKey) {
@@ -314,14 +322,6 @@ const ChatInput = () => {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!chatInput.trim().length) {
-      window.alert('Please enter a message')
-      return
-    }
-    if (!engine) {
-      window.alert('Please select an engine')
-      return
-    }
     if (!isSending) await sendMessage()
   }
 

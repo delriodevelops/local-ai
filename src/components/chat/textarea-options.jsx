@@ -24,8 +24,8 @@ const TextAreaOptions = () => {
       icon: "newspaper-outline",
       onChange: (normalizedValue) => {
         // Convert normalized value back to actual tokens
-        const minTokens = 64
-        const maxTokens = 2048
+        const minTokens = 128
+        const maxTokens = 16300
         const actualTokens = Math.round(denormalizeValue(normalizedValue, minTokens, maxTokens))
         setMaxTokens(actualTokens)
       },
@@ -33,30 +33,30 @@ const TextAreaOptions = () => {
         {
           text: "Brief",
           info: "Short, concise responses",
-          value: normalizeValue(64, 64, 2048)
+          value: normalizeValue(128, 128, 16300)
         },
         {
           text: "Standard",
           info: "Regular length responses",
-          value: normalizeValue(256, 64, 2048)
+          value: normalizeValue(512, 128, 16300)
         },
         {
           text: "Detailed",
           info: "Comprehensive responses",
-          value: normalizeValue(512, 64, 2048)
+          value: normalizeValue(2048, 128, 16300)
         },
         {
           text: "Extended",
           info: "Long-form content",
-          value: normalizeValue(1024, 64, 2048)
+          value: normalizeValue(8192, 128, 16300)
         },
         {
           text: "Maximum",
           info: "Very detailed long-form content",
-          value: normalizeValue(2048, 64, 2048)
+          value: normalizeValue(16300, 128, 16300)
         }
       ].reverse(),
-      defaultLevel: normalizeValue(max_tokens || 256, 64, 2048)
+      defaultLevel: normalizeValue(max_tokens || 2048, 128, 16300)
     },
     {
       name: "temperature",
@@ -173,6 +173,7 @@ const TextAreaOptions = () => {
           isMenuOpen && !activeSlider && sliderMenus.map((slider, index) => (
             <Tooltip key={index} content={slider.name}>
               <button
+                type='button'
                 onClick={() => handleButtonClick(slider)}
                 className="text-3xl hover:scale-125 rounded-full text-neutral-500 hover:text-neutral-100 p-2 flex items-center justify-center cursor-pointer duration-300 ease-in-out">
                 <ion-icon name={`${slider.icon}`}></ion-icon>
@@ -183,7 +184,8 @@ const TextAreaOptions = () => {
         {
           !activeSlider && (
             <button
-              onClick={() => setActiveSlider(null)}
+                type='button'
+                onClick={() => setActiveSlider(null)}
               className="text-3xl hover:scale-125 rounded-full text-neutral-200 hover:text-neutral-100 p-2 flex items-center justify-center cursor-pointer duration-300 ease-in-out">
               <ion-icon name="options"></ion-icon>
             </button>

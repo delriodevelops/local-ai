@@ -74,7 +74,7 @@ const useChatStore = create((set, get) => ({
   temperature: 0.5,
 
   setMaxTokens: (max_tokens) => set({ max_tokens }),
-  max_tokens: 512,
+  max_tokens: 2048,
 
   setRepetitionPenalty: (repetition_penalty) => set({ repetition_penalty }),
   repetition_penalty: 1.1,
