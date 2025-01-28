@@ -8,12 +8,12 @@ const TextAreaOptions = () => {
   const { setTop_p, top_p, setRepetitionPenalty, repetition_penalty, temperature, setTemperature, max_tokens, setMaxTokens } = useChatStore(s => s)
 
   // Helper function to normalize values for the slider
-  const normalizeValue = (value, min, max) => {
+  const normalizeValue = (value, max, min = 128) => {
     return (value - min) / (max - min)
   }
 
   // Helper function to denormalize values from the slider
-  const denormalizeValue = (normalized, min, max) => {
+  const denormalizeValue = (normalized, max, min = 128) => {
     return normalized * (max - min) + min
   }
 
@@ -24,39 +24,38 @@ const TextAreaOptions = () => {
       icon: "newspaper-outline",
       onChange: (normalizedValue) => {
         // Convert normalized value back to actual tokens
-        const minTokens = 128
-        const maxTokens = 16300
-        const actualTokens = Math.round(denormalizeValue(normalizedValue, minTokens, maxTokens))
+        const maxTokens = 12500
+        const actualTokens = Math.round(denormalizeValue(normalizedValue, maxTokens))
         setMaxTokens(actualTokens)
       },
       levels: [
         {
           text: "Brief",
           info: "Short, concise responses",
-          value: normalizeValue(128, 128, 16300)
+          value: normalizeValue(128, 12500)
         },
         {
           text: "Standard",
           info: "Regular length responses",
-          value: normalizeValue(512, 128, 16300)
+          value: normalizeValue(512, 12500)
         },
         {
           text: "Detailed",
           info: "Comprehensive responses",
-          value: normalizeValue(2048, 128, 16300)
+          value: normalizeValue(2048, 12500)
         },
         {
           text: "Extended",
           info: "Long-form content",
-          value: normalizeValue(8192, 128, 16300)
+          value: normalizeValue(8192, 12500)
         },
         {
           text: "Maximum",
           info: "Very detailed long-form content",
-          value: normalizeValue(16300, 128, 16300)
+          value: normalizeValue(12500, 12500)
         }
       ].reverse(),
-      defaultLevel: normalizeValue(max_tokens || 2048, 128, 16300)
+      defaultLevel: normalizeValue(max_tokens || 2048, 12500)
     },
     {
       name: "temperature",
@@ -184,8 +183,8 @@ const TextAreaOptions = () => {
         {
           !activeSlider && (
             <button
-                type='button'
-                onClick={() => setActiveSlider(null)}
+              type='button'
+              onClick={() => setActiveSlider(null)}
               className="text-3xl hover:scale-125 rounded-full text-neutral-200 hover:text-neutral-100 p-2 flex items-center justify-center cursor-pointer duration-300 ease-in-out">
               <ion-icon name="options"></ion-icon>
             </button>

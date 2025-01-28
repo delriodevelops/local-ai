@@ -184,7 +184,7 @@ const CustomModelSelector = ({
     setIsLoadingHf(true)
 
     try {
-      const response = await fetch(`https://huggingface.co/api/models?search=${query}&filter=text-generation&sort=downloads`)
+      const response = await fetch(`https://huggingface.co/api/models?search=${query}&filter=text-generation&sort=downloads&limit=20`)
       const data = await response.json()
 
       const formattedModels = data.map(model => ({
