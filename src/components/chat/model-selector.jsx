@@ -395,9 +395,9 @@ const CustomModelSelector = ({
               >
                 <div className="flex flex-col">
                   <div className="flex items-center gap-1">
-                    {icon && (
+                    {/* {icon && (
                       <img src={`/icons/${icon}.svg`} alt={icon} className="w-4 h-4" />
-                    )}
+                    )} */}
                     <span className="truncate">{model_id}</span>
                   </div>
                   <div>
