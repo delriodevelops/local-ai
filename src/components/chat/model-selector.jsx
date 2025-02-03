@@ -3,6 +3,16 @@ import React, { useEffect, useLayoutEffect, useState, useRef } from 'react'
 import * as webllm from "@mlc-ai/web-llm"
 import useChatStore from '@/store/chat'
 import { getLocalStorage, setLocalStorage } from '@/utils/custom-storage'
+import { DeepSeek, HuggingFace, OpenAI, Antropic } from '../icons'
+
+const sourceOptions = [
+  { value: 'local', label: 'Local', icon: <ion-icon name='desktop-outline' /> },
+  { value: 'huggingface', label: 'HuggingFace', icon: <HuggingFace /> },
+  { value: 'openai', label: 'OpenAI', icon: <OpenAI /> },
+  // { value: 'deepseek', label: 'DeepSeek', icon: <DeepSeek /> },
+  // { value: 'gemini', label: 'Gemini', icon: 'logo-google' },
+  // { value: 'anthropic', label: 'Anthropic', icon: <Antropic /> },
+]
 
 function getGPUInfo() {
   const canvas = document.createElement('canvas')
@@ -66,9 +76,11 @@ const ModelSelector = () => {
         disabled={isStreaming}
         className="hidden lg:flex w-full lg:w-96 items-center justify-between p-3 bg-neutral-700 hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 rounded-xl"
         title={selectedModel || "Select a model"}
-
       >
-        <span className="truncate">{selectedModel || "Select a model"}</span>
+        <div className='flex gap-2 items-center'>
+          {sourceOptions.find(option => option.value === modelSource).icon}
+          <span className="truncate">{selectedModel || "Select a model"}</span>
+        </div>
         <ion-icon name="chevron-down" class="text-neutral-400"></ion-icon>
       </button>
 
@@ -232,18 +244,35 @@ const CustomModelSelector = ({
         return hfModels
       case 'openai':
         return [
-          "gpt-3.5-turbo",
-          "gpt-4",
-          "gpt-4-turbo",
-          "gpt-4o-mini",
-          "gpt-4o",
-          "o1-preview",
-          "o1-mini",
-        ].map(el => ({ model_id: el, source: "openai", icon: "openai" }))
-      case 'gemini':
-        return [
-          { model_id: 'gemini-1', source: 'gemini', icon: 'gemini' },
-        ]
+          {
+            model_id: "gpt-3.5-turbo",
+            max_tokens: 4096,
+          },
+          {
+            model_id: "gpt-4o",
+            max_tokens: 16384,
+          },
+          {
+            model_id: "o1",
+            max_tokens: 100000,
+          },
+          {
+            model_id: "o1-mini",
+            max_tokens: 65536,
+          },
+          {
+            model_id: "o3-mini",
+            max_tokens: 100000,
+          }
+
+        ].map(el => ({ source: "openai", icon: "openai", ...el }))
+      // case 'gemini':
+      //   return [
+      //     {
+      //       model_id: 'gemini-1.5-pro',
+      //       max_tokens: 8192,
+      //     },
+      //   ]
       case 'anthropic':
         return [
           { model_id: 'claude-instant', source: 'anthropic', icon: 'anthropic' },
@@ -252,14 +281,6 @@ const CustomModelSelector = ({
         return []
     }
   }
-
-  const sourceOptions = [
-    { value: 'local', label: 'Local', icon: 'desktop-outline' },
-    { value: 'huggingface', label: 'HuggingFace', icon: 'cloud-outline' },
-    { value: 'openai', label: 'OpenAI', icon: 'aperture' },
-    { value: 'gemini', label: 'Gemini', icon: 'logo-google' },
-    { value: 'anthropic', label: 'anthropic', icon: 'logo-electron' },
-  ]
 
   const models = getModelsBySource()
 
@@ -289,7 +310,7 @@ const CustomModelSelector = ({
                 className="bg-neutral-700 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 flex items-center justify-between w-48"
               >
                 <span className="flex items-center gap-2">
-                  <ion-icon name={sourceOptions.find(option => option.value === modelSource).icon}></ion-icon>
+                  {sourceOptions.find(option => option.value === modelSource).icon}
                   {sourceOptions.find(option => option.value === modelSource).label}
                 </span>
                 <ion-icon name="chevron-down-outline"></ion-icon>
@@ -315,7 +336,7 @@ const CustomModelSelector = ({
                       }}
                       className="w-full p-2 text-left hover:bg-neutral-700 flex items-center gap-2"
                     >
-                      <ion-icon name={option.icon}></ion-icon>
+                      {option.icon}
                       {option.label}
                     </button>
                   ))}
