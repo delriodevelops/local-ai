@@ -5,16 +5,19 @@ import Tooltip from '../milascenia/tooltip'
 import useChatStore from '@/store/chat'
 
 const TextAreaOptions = () => {
-  const { setTop_p, top_p, setRepetitionPenalty, repetition_penalty, temperature, setTemperature, max_tokens, setMaxTokens } = useChatStore(s => s)
+  const { setTop_p, top_p, setRepetitionPenalty, repetition_penalty, temperature, setTemperature, max_tokens, setMaxTokens, selectedModel } = useChatStore(s => s)
 
-  // Helper function to normalize values for the slider
-  const normalizeValue = (value, max, min = 128) => {
-    return (value - min) / (max - min)
+  const maxTokens = selectedModel?.max_tokens || 4096; // Valor máximo de tokens del modelo
+  const minTokens = 128;    // Valor mínimo de tokens del modelo (por defecto 1)
+
+  // Función para normalizar un valor dentro del rango [minTokens, maxTokens] a [0, 1]
+  function normalizeValue(value, maxValue) {
+    return (value - minTokens) / (maxValue - minTokens);
   }
 
-  // Helper function to denormalize values from the slider
-  const denormalizeValue = (normalized, max, min = 128) => {
-    return normalized * (max - min) + min
+  // Función para denormalizar un valor dentro del rango [0, 1] al rango [minTokens, maxTokens]
+  function denormalizeValue(normalizedValue, maxValue) {
+    return Math.round(normalizedValue * (maxValue - minTokens) + minTokens);
   }
 
   const sliderMenus = [
@@ -24,38 +27,37 @@ const TextAreaOptions = () => {
       icon: "newspaper-outline",
       onChange: (normalizedValue) => {
         // Convert normalized value back to actual tokens
-        const maxTokens = 12500
-        const actualTokens = Math.round(denormalizeValue(normalizedValue, maxTokens))
-        setMaxTokens(actualTokens)
+        const actualTokens = denormalizeValue(normalizedValue, maxTokens);
+        setMaxTokens(actualTokens); // Actualiza el estado con el valor real de tokens
       },
       levels: [
         {
           text: "Brief",
           info: "Short, concise responses",
-          value: normalizeValue(128, 12500)
+          value: normalizeValue(minTokens + (maxTokens - minTokens) * 0.1, maxTokens) // ~10% del rango
         },
         {
           text: "Standard",
           info: "Regular length responses",
-          value: normalizeValue(512, 12500)
+          value: normalizeValue(minTokens + (maxTokens - minTokens) * 0.3, maxTokens) // ~30% del rango
         },
         {
           text: "Detailed",
           info: "Comprehensive responses",
-          value: normalizeValue(2048, 12500)
+          value: normalizeValue(minTokens + (maxTokens - minTokens) * 0.6, maxTokens) // ~60% del rango
         },
         {
           text: "Extended",
           info: "Long-form content",
-          value: normalizeValue(8192, 12500)
+          value: normalizeValue(minTokens + (maxTokens - minTokens) * 0.8, maxTokens) // ~80% del rango
         },
         {
           text: "Maximum",
           info: "Very detailed long-form content",
-          value: normalizeValue(12500, 12500)
+          value: normalizeValue(maxTokens, maxTokens) // Máximo valor posible
         }
       ].reverse(),
-      defaultLevel: normalizeValue(max_tokens || 2048, 12500)
+      defaultLevel: normalizeValue(minTokens + (maxTokens - minTokens) * 0.6, maxTokens)
     },
     {
       name: "temperature",

@@ -35,8 +35,7 @@ function filterModels(userSpecs, models) {
 
 const ModelSelector = () => {
   const { isStreaming } = useChatStore(s => s)
-  const { setEngine, progress, modelSource, apiKeys, setApiKeys } = useChatStore(s => s)
-  const [selectedModel, setSelectedModel] = useState(null)
+  const { setEngine, progress, modelSource, apiKeys, setApiKeys, selectedModel, setSelectedModel } = useChatStore(s => s)
   const [availableModels, setAvailableModels] = useState([])
   const [hfModels, setHfModels] = useState([])
   const [isLoadingHf, setIsLoadingHf] = useState(false)
@@ -75,11 +74,11 @@ const ModelSelector = () => {
         onClick={() => setShowModelModal(true)}
         disabled={isStreaming}
         className="hidden lg:flex w-full lg:w-96 items-center justify-between p-3 bg-neutral-700 hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 rounded-xl"
-        title={selectedModel || "Select a model"}
+        title={selectedModel?.model_id || selectedModel || "Select a model"}
       >
         <div className='flex gap-2 items-center'>
           {sourceOptions.find(option => option.value === modelSource).icon}
-          <span className="truncate">{selectedModel || "Select a model"}</span>
+          <span className="truncate">{selectedModel?.model_id || selectedModel || "Select a model"}</span>
         </div>
         <ion-icon name="chevron-down" class="text-neutral-400"></ion-icon>
       </button>
@@ -410,7 +409,7 @@ const CustomModelSelector = ({
               <div
                 className="flex-1 cursor-pointer"
                 onClick={() => {
-                  onModelSelect(model_id)
+                  onModelSelect(model)
                   setSearchQuery('')
                 }}
               >

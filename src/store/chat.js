@@ -25,7 +25,7 @@ const useChatStore = create((set, get) => ({
     if (!requiresApiKey) newEngine = await handleSelectModel()
     else newEngine = selectedModel
 
-    return set({ engine: newEngine })
+    return set({ engine: newEngine, selectedModel: newEngine })
   },
 
   modelSource: 'local',
@@ -84,7 +84,11 @@ const useChatStore = create((set, get) => ({
     gemini: JSON.parse(getLocalStorage('geminiApiKey')) || '',
     anthropic: JSON.parse(getLocalStorage('anthropicApiKey')) || '',
   },
-  setApiKeys: (apiKeys) => set({ apiKeys })
+  setApiKeys: (apiKeys) => set({ apiKeys }),
+
+
+  selectedModel: null,
+  setSelectedModel: (selectedModel) => set({ selectedModel }),
 }))
 
 export default useChatStore
