@@ -65,8 +65,8 @@ const ChainVisualizer = () => {
                 <span className="font-medium whitespace-nowrap text-neutral-100">
                   {assistant.name}
                 </span>
-                <button 
-                className='text-white group-hover:text-red-500 hover:bg-neutral-600 hidden group-hover:flex items-center p-2 rounded-full duration-300 ease-in-out'
+                <button
+                  className='text-white group-hover:text-red-500 hover:bg-neutral-600 hidden group-hover:flex items-center p-2 rounded-full duration-300 ease-in-out'
                   onClick={() => { deleteFromChain(index) }}
                 >
                   <ion-icon name="trash-outline" />

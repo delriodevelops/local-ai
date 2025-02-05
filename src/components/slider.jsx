@@ -9,7 +9,8 @@ export default function CustomSlider({
   onChange,
   getValue,
   continuous = false,
-  icon = "book-outline"
+  icon = "book-outline",
+  label
 }) {
   const ADJUSTED_RANGE = 1 - 2 * PADDING
 
@@ -23,7 +24,7 @@ export default function CustomSlider({
     const normalizedLevel = (defaultLevel - levels[0].value) / (levels.at(-1).value - levels[0].value)
     return PADDING + normalizedLevel * ADJUSTED_RANGE
   })
-  
+
   const sliderRef = useRef(null)
   const dragStartY = useRef(0)
   const startLevel = useRef(defaultLevel)
@@ -51,14 +52,14 @@ export default function CustomSlider({
       setSliderPosition(newPosition)
 
       const normalizedPosition = (newPosition - PADDING) / ADJUSTED_RANGE
-      
+
       if (continuous) {
         onChange(normalizedPosition)
         setCurrentLevel(normalizedPosition)
       } else {
         const levelIndex = Math.round(normalizedPosition * (levels.length - 1))
         const newLevel = levels[Math.max(0, Math.min(levels.length - 1, levelIndex))].value
-        
+
         if (newLevel !== currentLevel) {
           setCurrentLevel(newLevel)
           onChange(newLevel)
@@ -108,10 +109,10 @@ export default function CustomSlider({
 
   const currentLevelInfo = continuous
     ? levels.reduce((prev, curr) => {
-        const prevDiff = Math.abs(getValue(prev.value) - getValue(currentLevel))
-        const currDiff = Math.abs(getValue(curr.value) - getValue(currentLevel))
-        return currDiff < prevDiff ? curr : prev
-      })
+      const prevDiff = Math.abs(getValue(prev.value) - getValue(currentLevel))
+      const currDiff = Math.abs(getValue(curr.value) - getValue(currentLevel))
+      return currDiff < prevDiff ? curr : prev
+    })
     : levels.find(level => level.value === currentLevel)
 
   const markers = useMemo(() => {
@@ -128,7 +129,7 @@ export default function CustomSlider({
     })
   }, [sliderPosition])
 
-  const displayValue = continuous 
+  const displayValue = continuous
     ? Math.round(currentLevel * 100) / 100
     : currentLevel
 
@@ -185,9 +186,8 @@ export default function CustomSlider({
         </div>
 
         <div
-          className={`slider-element absolute left-16 mr-3 bg-neutral-900 text-white p-2 rounded-lg flex flex-col items-center gap-2 min-w-48 max-w-64 ${
-            showTooltip ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
+          className={`slider-element absolute left-16 mr-3 bg-neutral-900 text-white p-2 rounded-lg flex flex-col items-center gap-2 min-w-48 max-w-64 ${showTooltip ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            }`}
           style={{
             top: `${sliderPosition * 100}%`,
             transform: 'translateY(-50%)',

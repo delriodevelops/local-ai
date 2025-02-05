@@ -57,7 +57,7 @@ const TextAreaOptions = () => {
           value: normalizeValue(maxTokens, maxTokens) // Máximo valor posible
         }
       ].reverse(),
-      defaultLevel: normalizeValue(minTokens + (maxTokens - minTokens) * 0.6, maxTokens)
+      defaultLevel: normalizeValue(max_tokens, maxTokens)
     },
     {
       name: "temperature",
@@ -172,7 +172,7 @@ const TextAreaOptions = () => {
       >
         {
           isMenuOpen && !activeSlider && sliderMenus.map((slider, index) => (
-            <Tooltip key={index} content={slider.name}>
+            <Tooltip key={index} content={slider.label}>
               <button
                 type='button'
                 onClick={() => handleButtonClick(slider)}
