@@ -6,12 +6,19 @@ const ChainVisualizer = () => {
   const { chain, setChain, isStreaming, isHistoryCollapsed, activeChainIndex } = useChatStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [clientWidth, setClientWidth] = useState(0);
+
   useLayoutEffect(() => {
     const sidebar = document.getElementById('sidebar');
     const modelSelector = document.getElementById('model-selector');
     const newClientWidth = (sidebar?.clientWidth + 56 || 164) + (modelSelector?.clientWidth || 0);
     setClientWidth(newClientWidth);
   }, [isHistoryCollapsed])
+
+  const deleteFromChain = (i) => {
+    const newChain = [...chain];
+    newChain.splice(i, 1);
+    setChain(newChain);
+  };
 
   return (
     <>
@@ -36,6 +43,7 @@ const ChainVisualizer = () => {
                 transition-all duration-300 ease-out
                 select-none backdrop-blur-sm
                 transform-gpu will-change-transform
+                group
                 ${isStreaming
                     ? 'cursor-not-allowed opacity-80'
                     : 'cursor-grab hover:cursor-grabbing'
@@ -57,6 +65,12 @@ const ChainVisualizer = () => {
                 <span className="font-medium whitespace-nowrap text-neutral-100">
                   {assistant.name}
                 </span>
+                <button 
+                className='text-white group-hover:text-red-500 hover:bg-neutral-600 hidden group-hover:flex items-center p-2 rounded-full duration-300 ease-in-out'
+                  onClick={() => { deleteFromChain(index) }}
+                >
+                  <ion-icon name="trash-outline" />
+                </button>
               </motion.div>
             </Reorder.Item>
           ))}
