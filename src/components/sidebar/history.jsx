@@ -5,15 +5,15 @@ const History = () => {
   const { history, setActualConversation, setMessages, setHistory, actualConversation } = useChatStore(s => s)
 
   function handleSelectConversation(el) {
-    setActualConversation(el.createdAt)
+    setActualConversation(el.conversationId)
     setMessages(el.messages)
   }
 
-  function deleteConversation(e, { createdAt }) {
+  function deleteConversation(e, { conversationId }) {
     e.stopPropagation()
-    const newHistory = history.toSpliced(history.findIndex(el => el.createdAt === createdAt), 1)
+    const newHistory = history.toSpliced(history.findIndex(el => el.conversationId === conversationId), 1)
     setHistory(newHistory)
-    if (createdAt === actualConversation) {
+    if (conversationId === actualConversation) {
       setMessages([])
       setActualConversation(null)
     }
@@ -28,7 +28,7 @@ const History = () => {
         !!history?.length
           ? history.sort((a, b) => b.lastMessage - a.lastMessage).map(el => (
             <p
-              key={el?.createdAt}
+              key={el?.conversationId}
               onClick={() => { handleSelectConversation(el) }}
               className="relative group/delete p-4 hover:bg-neutral-700 rounded-xl duration-300 ease-in-out cursor-pointer truncate">
               <span>

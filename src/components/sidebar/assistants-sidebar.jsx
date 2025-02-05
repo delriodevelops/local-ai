@@ -92,8 +92,9 @@ const AssistantsSidebar = () => {
   }
 
   const handleSubmit = (formData) => {
+    
     const newAssistant = {
-      id: formData.id || Date.now().toString(),
+      id: formData.id || crypto.randomUUID(),
       ...formData
     }
 

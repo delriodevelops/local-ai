@@ -74,11 +74,11 @@ const ModelSelector = () => {
         onClick={() => setShowModelModal(true)}
         disabled={isStreaming}
         className="hidden lg:flex w-full lg:w-96 items-center justify-between p-3 bg-neutral-700 hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 rounded-xl"
-        title={selectedModel?.model_id || selectedModel || "Select a model"}
+        title={selectedModel?.model_id || "Select a model"}
       >
         <div className='flex gap-2 items-center'>
           {sourceOptions.find(option => option.value === modelSource).icon}
-          <span className="truncate">{selectedModel?.model_id || selectedModel || "Select a model"}</span>
+          <span className="truncate">{selectedModel?.model_id || "Select a model"}</span>
         </div>
         <ion-icon name="chevron-down" class="text-neutral-400"></ion-icon>
       </button>
@@ -93,7 +93,7 @@ const ModelSelector = () => {
 
       {!!progress && (
         <small className="text-[0.75em] text-neutral-400">
-          {progress.progress !== 1 && progress.text}
+          {progress?.progress !== 1 && progress?.text}
         </small>
       )}
 
@@ -404,7 +404,7 @@ const CustomModelSelector = ({
             <li
               key={model_id}
               className={`p-2 hover:bg-neutral-700 flex items-center justify-between group
-              ${selectedModel === model_id ? 'bg-neutral-600' : ''}`}
+              ${selectedModel?.model_id === model_id ? 'bg-neutral-600' : ''}`}
             >
               <div
                 className="flex-1 cursor-pointer"

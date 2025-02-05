@@ -11,7 +11,7 @@ const useChatStore = create((set, get) => ({
       const worker = new Worker(new URL('/public/workers/chat.js', import.meta.url));
       const newEngine = await webllm.CreateWebWorkerMLCEngine(
         worker,
-        selectedModel,
+        selectedModel.model_id,
         {
           initProgressCallback: (e) => {
             get().setProgress(e)
@@ -21,11 +21,10 @@ const useChatStore = create((set, get) => ({
       return newEngine
     }
     let newEngine;
-
     if (!requiresApiKey) newEngine = await handleSelectModel()
     else newEngine = selectedModel
 
-    return set({ engine: newEngine, selectedModel: newEngine })
+    return set({ engine: newEngine, selectedModel })
   },
 
   modelSource: 'local',

@@ -6,10 +6,10 @@ import TextAreaOptions from './textarea-options'
 
 const ChatInput = () => {
   const {
-    engine, setMessages, messages, actualConversation, setActualConversation,
+    setMessages, messages, actualConversation, setActualConversation,
     setHistory, history, isStreaming, setIsStreaming, setActiveChainIndex,
     chain, temperature, max_tokens, top_p, repetition_penalty, modelSource,
-    apiKeys, engine: model
+    apiKeys, engine, selectedModel: model
   } = useChatStore(s => s)
 
   const [isRecording, setIsRecording] = useState(false)
@@ -19,7 +19,7 @@ const ChatInput = () => {
   // API Helper Functions
   async function sendOpenAIMessage(content, systemMessage) {
     const body = {
-      model,
+      model: model.model_id,
       messages: [
         systemMessage,
         ...messages,
@@ -29,7 +29,7 @@ const ChatInput = () => {
       stream: true
     }
 
-    if (engine.includes('o1')) {
+    if (model.model_id.includes('o1')) {
       systemMessage.role = 'user';
       body.max_completion_tokens = max_tokens;
       body.temperature = 1
@@ -55,7 +55,7 @@ const ChatInput = () => {
   }
 
   async function sendGeminiMessage(content, systemMessage) {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${model}:streamGenerateContent`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${model.model_id}:streamGenerateContent`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ const ChatInput = () => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model,
+        model: model.model_id,
         messages: [
           { role: 'system', content: systemMessage.content },
           ...messages,
@@ -170,7 +170,8 @@ const ChatInput = () => {
     const newConversation = {
       messages,
       createdAt: actualConversation || currentTime,
-      lastMessage: currentTime
+      lastMessage: currentTime,
+      conversationId: crypto.randomUUID()
     }
 
     const pastConversations = JSON.parse(localStorage.getItem('past-conversations') || '[]')
@@ -179,7 +180,7 @@ const ChatInput = () => {
     if (actualConversation) {
       // Update existing conversation
       updatedConversations = pastConversations.map(conv =>
-        conv.createdAt === actualConversation
+        conv.conversationId === actualConversation
           ? { ...newConversation }
           : conv
       )
@@ -279,7 +280,7 @@ const ChatInput = () => {
       console.error('Error in processChainStep:', error)
       const errorReply = {
         ...reply,
-        content: "Lo siento, hubo un error al procesar tu solicitud. Por favor, intenta nuevamente."
+        content: "I'm sorry, I encountered an error. Please try again later.",
       }
       setMessages([...updatedMessages, errorReply])
     } finally {

@@ -37,9 +37,9 @@ const SearchConversationButton = () => {
     setResults(matches);
   };
 
-  const handleResultClick = ({ createdAt, messages }) => {
+  const handleResultClick = ({ conversationId, messages }) => {
     setIsModalOpen(false);
-    setActualConversation(createdAt);
+    setActualConversation(conversationId);
     setMessages(messages);
   };
 
