@@ -15,9 +15,21 @@ const ChatInput = () => {
   const [isRecording, setIsRecording] = useState(false)
   const [chatInput, setChatInput] = useState('')
   const [isSending, setIsSending] = useState(false)
+  const [abortController, setAbortController] = useState(null)
+
+  function stopStream() {
+    if (abortController) {
+      abortController.abort()
+      setAbortController(null)
+    }
+    setIsStreaming(false)
+  }
 
   // API Helper Functions
   async function sendOpenAIMessage(content, systemMessage) {
+    const controller = new AbortController()
+    setAbortController(controller)
+
     const body = {
       model: model.model_id,
       messages: [
@@ -44,7 +56,8 @@ const ChatInput = () => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKeys.openai}`
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
+      signal: controller.signal
     })
 
     if (!response.ok) {
@@ -55,6 +68,9 @@ const ChatInput = () => {
   }
 
   async function sendGeminiMessage(content, systemMessage) {
+    const controller = new AbortController()
+    setAbortController(controller)
+
     const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/${model.model_id}:streamGenerateContent`, {
       method: 'POST',
       headers: {
@@ -72,7 +88,8 @@ const ChatInput = () => {
           maxOutputTokens: max_tokens,
           topP: top_p
         }
-      })
+      }),
+      signal: controller.signal
     })
 
     if (!response.ok) {
@@ -83,6 +100,9 @@ const ChatInput = () => {
   }
 
   async function sendAnthropicMessage(content, systemMessage) {
+    const controller = new AbortController()
+    setAbortController(controller)
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -101,7 +121,8 @@ const ChatInput = () => {
         temperature,
         top_p,
         stream: true
-      })
+      }),
+      signal: controller.signal
     })
 
     if (!response.ok) {
@@ -118,6 +139,10 @@ const ChatInput = () => {
 
     try {
       while (true) {
+        if (abortController?.signal.aborted) {
+          break
+        }
+
         const { done, value } = await reader.read()
         if (done) break
 
@@ -125,6 +150,9 @@ const ChatInput = () => {
         const lines = chunk.split('\n').filter(line => line.trim())
 
         for (const line of lines) {
+          if (abortController?.signal.aborted) {
+            break
+          }
           if (!line.startsWith('data:')) continue
           const data = line.replace(/^data: /, '')
           if (data === '[DONE]') break
@@ -154,12 +182,16 @@ const ChatInput = () => {
             console.error('Error parsing chunk:', e, 'Raw data:', data)
           }
         }
+        // if (!isStreaming) break
       }
     } catch (error) {
-      console.error('Stream reading error:', error)
-      throw error
+      if (error.name !== 'AbortError') {
+        console.error('Stream reading error:', error)
+        throw error
+      }
     } finally {
       reader.releaseLock()
+      setAbortController(null)
     }
 
     return fullResponse
@@ -286,6 +318,7 @@ const ChatInput = () => {
     } finally {
       setIsSending(false)
       setIsStreaming(false)
+      setAbortController(null)
     }
   }
 
@@ -368,13 +401,27 @@ const ChatInput = () => {
         disabled={isStreaming || !engine}
         onIsRecording={onIsRecording}
       />
-      <button
-        type='submit'
-        disabled={!engine || isStreaming || isRecording || !chatInput.trim().length}
-        className="text-4xl flex items-center justify-center cursor-pointer disabled:text-neutral-500 disabled:cursor-not-allowed"
-      >
-        <ion-icon name="arrow-up-circle"></ion-icon>
-      </button>
+      {
+        isStreaming ?
+          (
+            <button
+              type='button'
+              onClick={stopStream}
+              className="text-4xl flex items-center justify-center cursor-pointer"
+            >
+              <ion-icon name="stop-circle" />
+            </button>
+          )
+          : (
+            <button
+              type='submit'
+              disabled={!engine || isStreaming || isRecording || !chatInput.trim().length}
+              className="text-4xl flex items-center justify-center cursor-pointer disabled:text-neutral-500 disabled:cursor-not-allowed"
+            >
+              <ion-icon name="arrow-up-circle" />
+            </button>
+          )
+      }
     </form>
   )
 }
