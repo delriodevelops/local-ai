@@ -114,65 +114,73 @@ const ChainVisualizer = () => {
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto py-4 px-12">
-                  <Reorder.Group
-                    axis="y"
-                    values={chain}
-                    onReorder={setChain}
-                    className="space-y-3 "
-                  >
-                    {chain.map((assistant, index) => (
-                      <Reorder.Item
-                        key={assistant.id}
-                        value={assistant}
-                        className="flex items-center justify-between p-4 bg-neutral-800 rounded-lg"
-                        whileTap={{ scale: 0.98 }}
+                {
+                  !!chain.length
+                    ? <div className="flex-1 overflow-y-auto py-4 px-12">
+                      <Reorder.Group
+                        axis="y"
+                        values={chain}
+                        onReorder={setChain}
+                        className="space-y-3 "
                       >
-                        <div className="flex items-center gap-3">
-                          <ion-icon
-                            name="menu-outline"
-                            className="text-xl text-neutral-500"
-                          />
-                          <span className="font-medium text-neutral-100">
-                            {assistant.name}
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (index > 0) {
-                                const newChain = [...chain];
-                                [newChain[index], newChain[index - 1]] =
-                                  [newChain[index - 1], newChain[index]];
-                                setChain(newChain);
-                              }
-                            }}
-                            disabled={index === 0 || isStreaming}
-                            className="p-2 text-neutral-400 hover:text-neutral-200 disabled:opacity-30"
+                        {chain.map((assistant, index) => (
+                          <Reorder.Item
+                            key={assistant.id}
+                            value={assistant}
+                            className="flex items-center justify-between p-4 bg-neutral-800 rounded-lg"
+                            whileTap={{ scale: 0.98 }}
                           >
-                            <ion-icon name="chevron-up-outline" className="text-xl" />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (index < chain.length - 1) {
-                                const newChain = [...chain];
-                                [newChain[index], newChain[index + 1]] =
-                                  [newChain[index + 1], newChain[index]];
-                                setChain(newChain);
-                              }
-                            }}
-                            disabled={index === chain.length - 1 || isStreaming}
-                            className="p-2 text-neutral-400 hover:text-neutral-200 disabled:opacity-30"
-                          >
-                            <ion-icon name="chevron-down-outline" className="text-xl" />
-                          </button>
-                        </div>
-                      </Reorder.Item>
-                    ))}
-                  </Reorder.Group>
-                </div>
+                            <div className="flex items-center gap-3">
+                              <ion-icon
+                                name="menu-outline"
+                                className="text-xl text-neutral-500"
+                              />
+                              <span className="font-medium text-neutral-100">
+                                {assistant.name}
+                              </span>
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (index > 0) {
+                                    const newChain = [...chain];
+                                    [newChain[index], newChain[index - 1]] =
+                                      [newChain[index - 1], newChain[index]];
+                                    setChain(newChain);
+                                  }
+                                }}
+                                disabled={index === 0 || isStreaming}
+                                className="p-2 text-neutral-400 hover:text-neutral-200 disabled:opacity-30"
+                              >
+                                <ion-icon name="chevron-up-outline" className="text-xl" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (index < chain.length - 1) {
+                                    const newChain = [...chain];
+                                    [newChain[index], newChain[index + 1]] =
+                                      [newChain[index + 1], newChain[index]];
+                                    setChain(newChain);
+                                  }
+                                }}
+                                disabled={index === chain.length - 1 || isStreaming}
+                                className="p-2 text-neutral-400 hover:text-neutral-200 disabled:opacity-30"
+                              >
+                                <ion-icon name="chevron-down-outline" className="text-xl" />
+                              </button>
+                            </div>
+                          </Reorder.Item>
+                        ))}
+                      </Reorder.Group>
+                    </div>
+                    : (
+                      <div className="text-neutral-400 text-center p-4">
+                        No assistant in the chain
+                      </div>
+                    )
+                }
               </motion.div>
             </motion.div>
           )}

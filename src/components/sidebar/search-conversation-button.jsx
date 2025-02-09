@@ -65,7 +65,7 @@ const SearchConversationButton = () => {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start lg:items-center justify-center duration-300 ease-in-out mt-2" >
+    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur z-50 flex items-start lg:items-center justify-center duration-300 ease-in-out mt-2" >
       <div className="bg-neutral-800 rounded-top-xl w-full h-full lg:h-auto lg:max-w-2xl lg:max-h-[80vh] overflow-hidden flex flex-col mt-0 lg:mt-4 p-2 lg:p-0" style={{ "interpolate-size": "allow-keywords" }}>
         <div className={`relative flex items-center p-2 bg-neutral-700  border-b border-neutral-600 ${results.length ? 'rounded-t-xl' : 'rounded-xl'}`} >
           <input
