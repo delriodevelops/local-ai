@@ -92,7 +92,7 @@ const AssistantsSidebar = () => {
   }
 
   const handleSubmit = (formData) => {
-    
+
     const newAssistant = {
       id: formData.id || crypto.randomUUID(),
       ...formData
@@ -141,7 +141,7 @@ const AssistantsSidebar = () => {
                 >
                   <button
                     disabled={isStreaming}
-                    className="flex-1 flex items-center gap-2"
+                    className="flex-1 flex items-center gap-2 relative"
                     onClick={() => toggleFromChain(el)}
                   >
                     <span className={`text-xl text-center h-8 w-8 p-2 
@@ -151,29 +151,30 @@ const AssistantsSidebar = () => {
                       {index || <ion-icon name={el?.icon?.icon}></ion-icon>}
                     </span>
                     <span className='truncate'>{el.name}</span>
+                    <div className="flex absolute lg:invisible lg:group-hover:visible right-0 gap-1 touch-none">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingAssistant(el)
+                          setIsModalOpen(true)
+                        }}
+                        className="p-2 hover:bg-neutral-600 bg-neutral-700 hover:bg-neutral-600 rounded-full flex items-center aspect-square"
+                      >
+                        <ion-icon name="create-outline"></ion-icon>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(el.id)
+                        }}
+                        className="p-2 hover:bg-neutral-600 bg-neutral-700 lg:hover:bg-neutral-600 rounded-full flex items-center aspect-square text-red-500"
+                      >
+                        <ion-icon name="trash-outline"></ion-icon>
+                      </button>
+                    </div>
                   </button>
 
-                  <div className="flex lg:hidden lg:group-hover:flex gap-1 touch-none">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingAssistant(el)
-                        setIsModalOpen(true)
-                      }}
-                      className="p-2 hover:bg-neutral-600 lg:hover:bg-neutral-600 rounded-full flex items-center aspect-square"
-                    >
-                      <ion-icon name="create-outline"></ion-icon>
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(el.id)
-                      }}
-                      className="p-2 hover:bg-neutral-600 lg:hover:bg-neutral-600 rounded-full flex items-center aspect-square text-red-500"
-                    >
-                      <ion-icon name="trash-outline"></ion-icon>
-                    </button>
-                  </div>
+
                 </div>
               )
             })

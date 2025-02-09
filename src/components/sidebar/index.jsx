@@ -29,7 +29,7 @@ const SIDEBAR = () => {
   )
 
   return (
-    <div className='flex items-center justify-start absolute top-2 left-2 z-50 lg:relative h-fit w-fit'>
+    <div className='flex items-center justify-start absolute top-0 left-0 z-50 lg:relative h-fit w-fit'>
       <button
         onClick={() => { setIsHistoryCollapsed(false) }}
         className='hover:bg-neutral-900 bg-neutral-800 m-2 w-fit h-fit p-4 flex items-center justify-center rounded-xl cursor-pointer duration-300 ease-in-out '>
