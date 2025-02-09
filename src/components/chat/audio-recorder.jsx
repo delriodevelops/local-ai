@@ -58,7 +58,7 @@ const AudioRecorder = ({ onTranscriptSpeech, onIsRecording, disabled = false }) 
         disabled={disabled}
         onClick={handleButtonClick}
         type="button"
-        className={`disabled:text-neutral-500 disabled:cursor-not-allowed text-3xl flex items-center justify-center cursor-pointer ${isRecording ? 'text-red-500' : 'text-white'}`}
+        className={`disabled:text-neutral-500 disabled:cursor-not-allowed text-3xl flex items-center justify-center cursor-pointer ${isRecording ? 'text-red-500' : 'text-white'} self-end`}
       >
         <ion-icon name={!!isRecording ? "mic-circle" : "mic"} />
       </button>

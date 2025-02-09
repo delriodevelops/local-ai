@@ -407,7 +407,7 @@ const ChatInput = () => {
             <button
               type='button'
               onClick={stopStream}
-              className="text-4xl flex items-center justify-center cursor-pointer"
+              className="text-4xl flex items-center justify-center cursor-pointer self-end"
             >
               <ion-icon name="stop-circle" />
             </button>
@@ -416,7 +416,7 @@ const ChatInput = () => {
             <button
               type='submit'
               disabled={!engine || isStreaming || isRecording || !chatInput.trim().length}
-              className="text-4xl flex items-center justify-center cursor-pointer disabled:text-neutral-500 disabled:cursor-not-allowed"
+              className="text-4xl flex items-center justify-center cursor-pointer disabled:text-neutral-500 disabled:cursor-not-allowed self-end"
             >
               <ion-icon name="arrow-up-circle" />
             </button>
