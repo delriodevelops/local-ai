@@ -79,7 +79,14 @@
       "deps": ["CN-01"],
       "at": "2026-10-30T16:43:07Z",
       "by": "claude-code",
-      "desc": "Si es MeshMind: poner el nombre en la app (título, iconos), escribir un README corto con qué es y cómo arrancarlo, y quizá renombrar el repo a `meshmind`.\n\n**Terminado:** la app y el repo se llaman MeshMind y el README lo explica."
+      "desc": "Si es MeshMind: poner el nombre en la app (título, iconos), escribir un README corto con qué es y cómo arrancarlo, y quizá renombrar el repo a `meshmind`.\n\n**Terminado:** la app y el repo se llaman MeshMind y el README lo explica.",
+      "notes": [
+        {
+          "at": "2026-10-30T18:21:51Z",
+          "by": "claude-code",
+          "text": "Hecho (sin renombrar aún el repo):\n- La app se presenta como MeshMind: título, icono propio (tres nodos conectados en lima), nombre del paquete, y una **pantalla de bienvenida** con el chat vacío que explica los tres pasos (elegir modelo, encadenar asistentes, seguir el razonamiento). Antes la pantalla salía en blanco.\n- README nuevo en inglés: qué es, funciones, cómo arrancarlo, qué modelo elegir.\n- Quitados el favicon y los SVG de la plantilla de Next.\nPendiente de decidir: renombrar el repo de GitHub `local-ai` → `meshmind` (GitHub redirige las URLs viejas)."
+        }
+      ]
     },
     {
       "id": "LN-02",
