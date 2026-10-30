@@ -1,0 +1,98 @@
+{
+  "kanvas": 1,
+  "title": "local-ai",
+  "groups": [
+    {
+      "id": "CN",
+      "name": "Confirmar"
+    },
+    {
+      "id": "PR",
+      "name": "Producto"
+    },
+    {
+      "id": "LN",
+      "name": "Lanzamiento"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "CN-01",
+      "title": "Confirmar que local-ai es MeshMind",
+      "state": "review",
+      "group": "CN",
+      "at": "2026-10-30T16:43:07Z",
+      "by": "claude-code",
+      "desc": "El portfolio enlaza **meshmind.vercel.app** («Visual chain-of-thought builder for AI reasoning»), pero no hay ningún repo llamado MeshMind y este código no menciona ese nombre. Encaja en parte: es un chat de IA que encadena asistentes.\n\n- Mira en Vercel de qué repo sale el proyecto `meshmind` (Project → Settings → Git).\n- Si es otro código y no lo tienes, decidir si MeshMind se construye a partir de este.\n\n**Terminado:** sabemos qué código es MeshMind.",
+      "notes": [
+        {
+          "at": "2026-10-30T16:48:28Z",
+          "by": "claude-code",
+          "text": "Confirmado en el chat: local-ai es MeshMind. Esta tarea se puede dar por hecha."
+        },
+        {
+          "at": "2026-10-30T18:04:21Z",
+          "by": "claude-code",
+          "text": "Confirmado en el chat: local-ai es MeshMind."
+        }
+      ]
+    },
+    {
+      "id": "PR-01",
+      "title": "Arrancarlo y probarlo en el navegador",
+      "state": "todo",
+      "group": "PR",
+      "deps": ["CN-01"],
+      "at": "2026-10-30T16:43:07Z",
+      "by": "claude-code",
+      "desc": "Lleva sin tocarse desde febrero de 2025. Comprobar con `npm run dev` que se descarga un modelo, se chatea, se crean asistentes y funciona una cadena de dos o tres. Actualizar WebLLM (0.2.78) y Next.js (14.2) si hace falta para que funcione con los modelos actuales.\n\nCoste 0: los modelos corren en tu propio navegador (necesita WebGPU: Chrome o Edge).\n\n**Terminado:** una cadena de asistentes responde de principio a fin y los fallos encontrados quedan apuntados como tareas.",
+      "notes": [
+        {
+          "at": "2026-10-30T18:11:06Z",
+          "by": "claude-code",
+          "text": "Probado en el navegador (Chrome con WebGPU y la NVIDIA del PC), con SmolLM2-360M (~210 MB):\n- ✅ Compila, descarga el modelo, chatea, el botón de detener funciona, y una cadena Product Research → Developer pasa la respuesta del primero al segundo.\n- Arreglado: la lista de modelos ofrecía modelos de embeddings (no chatean); las pestañas de la cadena se salían por la derecha (el ancho se calculaba con JS); la longitud por defecto (2048) hacía que los modelos pequeños entraran en bucle, ahora 512; la página no tenía título (ahora «MeshMind»).\n- En el móvil se ve bien.\n- Nota: con modelos tan pequeños las respuestas son flojas; para enseñarlo conviene un modelo de 1–3 B (Llama 3.2, Qwen).\nNo puedo darla por terminada en el tablero porque depende de CN-01, que espera tu revisión."
+        }
+      ]
+    },
+    {
+      "id": "PR-02",
+      "title": "Ver la cadena de razonamiento como un esquema",
+      "state": "todo",
+      "group": "PR",
+      "deps": ["PR-01"],
+      "at": "2026-10-30T16:43:07Z",
+      "by": "claude-code",
+      "desc": "El portfolio promete un constructor **visual**. Hoy la cadena es una lista en la barra lateral. Mostrarla como un esquema de pasos conectados (asistente → asistente), donde se vea qué responde cada paso y se puedan reordenar arrastrando.\n\n**Terminado:** construyes y ves una cadena como esquema y sigues cada paso."
+    },
+    {
+      "id": "LN-01",
+      "title": "Nombre y README de MeshMind",
+      "state": "todo",
+      "group": "LN",
+      "deps": ["CN-01"],
+      "at": "2026-10-30T16:43:07Z",
+      "by": "claude-code",
+      "desc": "Si es MeshMind: poner el nombre en la app (título, iconos), escribir un README corto con qué es y cómo arrancarlo, y quizá renombrar el repo a `meshmind`.\n\n**Terminado:** la app y el repo se llaman MeshMind y el README lo explica."
+    },
+    {
+      "id": "LN-02",
+      "title": "Volver a publicar la web",
+      "state": "todo",
+      "group": "LN",
+      "deps": ["PR-02", "LN-01"],
+      "at": "2026-10-30T16:43:07Z",
+      "by": "claude-code",
+      "desc": "meshmind.vercel.app da **402** (Vercel bloqueado, igual que el resto) y local-ai-five.vercel.app da 404. Como todo corre en el navegador, también se puede publicar gratis como web estática (GitHub Pages o Cloudflare Pages).\n\n**Terminado:** la web carga y una cadena funciona en producción."
+    },
+    {
+      "id": "LN-03",
+      "title": "Actualizar MeshMind en el portfolio",
+      "state": "todo",
+      "group": "LN",
+      "deps": ["LN-02"],
+      "at": "2026-10-30T16:43:07Z",
+      "by": "claude-code",
+      "desc": "Capturas nuevas y enlace correcto en la ficha del portfolio.\n\n**Terminado:** la ficha enseña la versión publicada."
+    }
+  ]
+}

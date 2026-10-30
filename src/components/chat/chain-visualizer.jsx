@@ -1,18 +1,10 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useState } from 'react';
 import useChatStore from '@/store/chat';
 import { motion, Reorder, AnimatePresence } from 'framer-motion';
 
 const ChainVisualizer = () => {
-  const { chain, setChain, isStreaming, isHistoryCollapsed, activeChainIndex } = useChatStore();
+  const { chain, setChain, isStreaming, activeChainIndex } = useChatStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [clientWidth, setClientWidth] = useState(0);
-
-  useLayoutEffect(() => {
-    const sidebar = document.getElementById('sidebar');
-    const modelSelector = document.getElementById('model-selector');
-    const newClientWidth = (sidebar?.clientWidth + 56 || 164) + (modelSelector?.clientWidth || 0);
-    setClientWidth(newClientWidth);
-  }, [isHistoryCollapsed])
 
   const deleteFromChain = (i) => {
     const newChain = [...chain];
@@ -23,7 +15,8 @@ const ChainVisualizer = () => {
   return (
     <>
       {/* Desktop Version */}
-      <div className="hidden lg:flex overflow-x-auto h-fit" style={{ width: `calc(100dvw - ${clientWidth}px)` }}>
+      {/* flex-1 + min-w-0: ocupa el hueco que deja el selector de modelo y hace scroll dentro, sin salirse */}
+      <div className="hidden lg:flex flex-1 min-w-0 overflow-x-auto h-fit">
         <Reorder.Group
           axis="x"
           values={chain}

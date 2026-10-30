@@ -4,6 +4,10 @@ import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
+export const metadata = {
+  title: "MeshMind",
+  description: "Chain AI assistants that run entirely in your browser.",
+};
 
 export default function RootLayout({ children }) {
 

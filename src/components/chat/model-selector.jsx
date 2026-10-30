@@ -29,7 +29,9 @@ function filterModels(userSpecs, models) {
     const hasEnoughRAM = userSpecs.ram >= (model.ram_required || 8)
     const hasGPU = model.vram_required_MB ? userSpecs.gpu !== 'No WebGL support' : true
     const requiredFeatures = !!model.required_features
-    return hasEnoughCPU && hasEnoughRAM && hasGPU && !requiredFeatures
+    // model_type 1 = embeddings: no generan texto, así que no sirven para chatear
+    const isEmbedding = model.model_type === 1
+    return hasEnoughCPU && hasEnoughRAM && hasGPU && !requiredFeatures && !isEmbedding
   }).sort((a, b) => a.vram_required_MB - b.vram_required_MB)
 }
 
