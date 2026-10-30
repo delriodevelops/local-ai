@@ -260,7 +260,11 @@ const ChatInput = () => {
       role: 'assistant',
       content: '',
       icon: chain?.at(chainIndex)?.icon?.icon,
-      color: chain?.at(chainIndex)?.color?.color
+      color: chain?.at(chainIndex)?.color?.color,
+      // Para que el esquema de la cadena sepa qué paso y qué asistente generó cada respuesta
+      assistantId: chain?.at(chainIndex)?.id,
+      assistantName: chain?.at(chainIndex)?.name,
+      step: chain.length ? chainIndex : undefined
     }
 
     try {

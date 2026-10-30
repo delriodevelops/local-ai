@@ -62,7 +62,14 @@
       "deps": ["PR-01"],
       "at": "2026-10-30T16:43:07Z",
       "by": "claude-code",
-      "desc": "El portfolio promete un constructor **visual**. Hoy la cadena es una lista en la barra lateral. Mostrarla como un esquema de pasos conectados (asistente → asistente), donde se vea qué responde cada paso y se puedan reordenar arrastrando.\n\n**Terminado:** construyes y ves una cadena como esquema y sigues cada paso."
+      "desc": "El portfolio promete un constructor **visual**. Hoy la cadena es una lista en la barra lateral. Mostrarla como un esquema de pasos conectados (asistente → asistente), donde se vea qué responde cada paso y se puedan reordenar arrastrando.\n\n**Terminado:** construyes y ves una cadena como esquema y sigues cada paso.",
+      "notes": [
+        {
+          "at": "2026-10-30T18:16:50Z",
+          "by": "claude-code",
+          "text": "Hecho y probado en el navegador (PC y móvil), con una cadena de dos asistentes:\n- Botón **«Chain»** arriba (con el número de pasos y, mientras trabaja, el asistente que va en curso). Abre el esquema: **Tú → paso 1 → paso 2 → … → Result**, unido con flechas. Se abre solo al lanzar una cadena de 2 o más pasos.\n- Cada paso muestra su estado (**Working… / Waiting / Done / Not run yet**) y el principio de lo que respondió. Al pulsarlo, salta a esa respuesta en el chat; **Result** salta a la respuesta final.\n- **Reordenar arrastrando** las tarjetas (también en el móvil). Tras reordenar, los pasos vuelven a «Not run yet» porque sus respuestas eran de otro orden. La × quita un paso.\n- En el móvil, el mismo esquema en vertical dentro de la ventana «Chain».\n- Por dentro: cada respuesta guarda ahora el asistente y el número de paso que la generó.\nNo puedo moverla de estado en el tablero: depende de PR-01, que depende de CN-01 (en tu revisión)."
+        }
+      ]
     },
     {
       "id": "LN-01",
