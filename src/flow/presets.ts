@@ -170,7 +170,7 @@ export const TEMPLATES: { id: string; name: string; description: string; build: 
             tools: [{ serverId: 'mslearn', name: 'microsoft_docs_search' }, { serverId: 'deepwiki', name: 'ask_wiki_question' }],
           },
         },
-        { id: 'out', type: 'output', position: { x: 740, y: 120 }, data: { label: 'Answer' } },
+        { id: 'out', type: 'output', position: { x: 800, y: 120 }, data: { label: 'Answer' } },
       ],
       edges: [edge('in', 'ag'), edge('ag', 'out')],
       servers: ['mslearn', 'deepwiki'],
