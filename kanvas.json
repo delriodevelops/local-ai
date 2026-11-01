@@ -13,6 +13,10 @@
     {
       "id": "LN",
       "name": "Lanzamiento"
+    },
+    {
+      "id": "DS",
+      "name": "Diseño"
     }
   ],
   "tasks": [
@@ -96,17 +100,34 @@
       "deps": ["PR-02", "LN-01"],
       "at": "2026-10-30T16:43:07Z",
       "by": "claude-code",
-      "desc": "meshmind.vercel.app da **402** (Vercel bloqueado, igual que el resto) y local-ai-five.vercel.app da 404. Como todo corre en el navegador, también se puede publicar gratis como web estática (GitHub Pages o Cloudflare Pages).\n\n**Terminado:** la web carga y una cadena funciona en producción."
+      "desc": "meshmind.vercel.app da **402** (Vercel bloqueado, igual que el resto) y local-ai-five.vercel.app da 404. Como todo corre en el navegador, también se puede publicar gratis como web estática (GitHub Pages o Cloudflare Pages).\n\n**Terminado:** la web carga y una cadena funciona en producción.",
+      "notes": [
+        {
+          "at": "2026-11-01T15:36:22Z",
+          "by": "claude-code",
+          "text": "Publicado en GitHub Pages: https://delriodevelops.github.io/meshmind/ (Vercel daba 402). Se vuelve a publicar solo con cada push a main (commit e4fc2a3). Comprobado en la web pública: elegir SmolLM2-135M, descargarlo y responder a un mensaje funciona. El repo se llama ahora delriodevelops/meshmind."
+        }
+      ]
     },
     {
       "id": "LN-03",
       "title": "Actualizar MeshMind en el portfolio",
       "state": "todo",
       "group": "LN",
-      "deps": ["LN-02"],
+      "deps": ["LN-02", "DS-01"],
       "at": "2026-10-30T16:43:07Z",
       "by": "claude-code",
       "desc": "Capturas nuevas y enlace correcto en la ficha del portfolio.\n\n**Terminado:** la ficha enseña la versión publicada."
+    },
+    {
+      "id": "DS-01",
+      "title": "Rediseño visual de MeshMind",
+      "state": "proposed",
+      "group": "DS",
+      "deps": ["LN-02"],
+      "at": "2026-11-01T15:36:22Z",
+      "by": "claude-code",
+      "desc": "La interfaz es funcional pero se ve como una plantilla gris de 2023. Rediseñarla para que luzca en el portfolio: paleta y tipografía propias, cabecera y barra lateral más limpias, burbujas de mensaje, selector de modelo y diagrama de la cadena con más jerarquía, y que se vea bien en móvil. Sin tocar cómo funciona por dentro.\nPara revisar: abrir https://delriodevelops.github.io/meshmind/ en escritorio y móvil y comparar con capturas del antes."
     }
   ]
 }
