@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { db } from '@/db'
+import { EMBED } from '@/embed'
 import { useApp } from '@/flow/store'
 import { runFlow } from '@/flow/run'
 import { usesLLM, validateFlow } from '@/flow/graph'
@@ -64,7 +65,8 @@ export const useSession = create<SessionState>((set, get) => ({
     set({ running: false })
     controller = null
 
-    // Guarda la conversación entera en IndexedDB
+    // Guarda la conversación entera en IndexedDB; la demo de la landing no deja nada en el historial
+    if (EMBED) return
     const now = Date.now()
     const id = get().conversationId ?? crypto.randomUUID()
     const existing = await db.conversations.get(id)

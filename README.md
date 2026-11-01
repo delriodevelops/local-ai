@@ -35,7 +35,7 @@ Everything downloads the first time it's needed and stays cached in the browser.
 | Assistants | Any [WebLLM](https://github.com/mlc-ai/web-llm) chat model you pick (Qwen 2.5 1.5B recommended) | WebGPU | 0.4–5 GB |
 | See / create image | [Janus-Pro 1B](https://huggingface.co/onnx-community/Janus-Pro-1B-ONNX) via Transformers.js | WebGPU | ~2.4 GB |
 | Transcribe | [Whisper base](https://huggingface.co/onnx-community/whisper-base) via Transformers.js | WebGPU | ~0.3 GB |
-| Speak | [Kokoro 82M](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX) via kokoro-js | WASM | ~0.1 GB |
+| Speak | [Kokoro 82M](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX) via kokoro-js | WebGPU (WASM fallback) | 0.1–0.3 GB |
 
 ## Run it
 

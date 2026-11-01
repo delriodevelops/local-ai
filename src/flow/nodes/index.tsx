@@ -1,9 +1,10 @@
-import { memo, type ReactNode } from 'react'
+import { memo, useContext, type ReactNode } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { AudioLines, Check, Clapperboard, Eye, GitBranch, ImagePlus, LogIn, LogOut, Merge, Mic, Split, Sparkles, X, LoaderCircle } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useApp } from '../store'
 import { outputType, PORT_COLOR, portText } from '../graph'
+import { Vertical } from '../orientation'
 import { COLORS } from '../presets'
 import { useSession } from '@/chat/session'
 import { VOICES } from '@/media/media'
@@ -22,18 +23,32 @@ function useOutType(id: string) {
   return useApp(s => outputType(id, s.nodes, s.edges))
 }
 
-function Port({ type, kind, id, top, label }: { type: 'source' | 'target'; kind: PortType | 'any'; id: string; top?: string; label?: string }) {
+// Entradas a la izquierda y salidas a la derecha; en vertical, arriba y abajo.
+// top y left colocan los puertos de un nodo que tiene varios: top en horizontal, left en vertical
+function Port({ type, kind, id, top, left, label }: {
+  type: 'source' | 'target'; kind: PortType | 'any'; id: string; top?: string; left?: string; label?: string
+}) {
+  const vertical = useContext(Vertical)
   const color = kind === 'any' ? '#8a8a83' : PORT_COLOR[kind]
+  const side = vertical ? (type === 'target' ? Position.Top : Position.Bottom) : (type === 'target' ? Position.Left : Position.Right)
   return (
     <Handle
       type={type}
       id={id}
-      position={type === 'target' ? Position.Left : Position.Right}
-      style={{ top, background: 'var(--color-neutral-950)', borderColor: color }}
+      position={side}
+      style={{ ...(vertical ? { left } : { top }), background: 'var(--color-neutral-950)', borderColor: color }}
       className="!w-3 !h-3 !border-2"
     >
       {label && (
-        <span className={cn('pointer-events-none absolute top-1/2 -translate-y-1/2 font-mono text-[9px] uppercase tracking-widest', type === 'source' ? 'left-4' : 'right-4')} style={{ color: portText(color) }}>
+        <span
+          className={cn(
+            'pointer-events-none absolute font-mono text-[9px] uppercase tracking-widest',
+            // En vertical la etiqueta va dentro del nodo, junto al borde, para no quedar encima de la conexión
+            vertical ? cn('left-1/2 -translate-x-1/2', type === 'source' ? 'bottom-4' : 'top-4')
+              : cn('top-1/2 -translate-y-1/2', type === 'source' ? 'left-4' : 'right-4'),
+          )}
+          style={{ color: portText(color) }}
+        >
           {label}
         </span>
       )}
@@ -48,10 +63,12 @@ const STATE_RING: Record<string, string> = {
   error: 'border-red-600',
 }
 
-function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64', local = true }: {
-  id: string; kind: string; icon: ReactNode; color?: string; selected?: boolean; step?: StepResult; children: ReactNode; width?: string; local?: boolean
+// labels: el nodo tiene puertos con nombre, que en vertical necesitan sitio en el borde de abajo
+function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64', local = true, labels = false }: {
+  id: string; kind: string; icon: ReactNode; color?: string; selected?: boolean; step?: StepResult; children: ReactNode; width?: string; local?: boolean; labels?: boolean
 }) {
   const { deleteElements } = useReactFlow()
+  const vertical = useContext(Vertical)
   return (
     <div className={cn(
       'group border-[1.5px] bg-neutral-900 text-neutral-100 duration-300 ease-snap',
@@ -70,16 +87,17 @@ function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64'
         {step?.progress && step.state === 'running' && (
           <span className="font-mono text-[10px] text-neutral-400">{step.progress.index + 1}/{step.progress.total}</span>
         )}
+        {/* En pantallas táctiles no hay hover ni tecla de borrar: ahí la X está siempre */}
         <button
           type="button"
           onClick={() => deleteElements({ nodes: [{ id }] })}
-          className="nodrag opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-red-600 duration-200"
+          className={cn('nodrag text-neutral-500 hover:text-red-600 duration-200', selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100')}
           title="Remove node"
         >
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
-      <div className="p-3 flex flex-col gap-2">
+      <div className={cn('p-3 flex flex-col gap-2', vertical && labels && 'pb-7')}>
         {children}
         {step?.state === 'running' && step.status && <p className="font-mono text-[10px] text-signal-ink truncate">{step.status}</p>}
         {step?.state === 'waiting' && step.status && <p className="font-mono text-[10px] text-neutral-500 truncate">{step.status}</p>}
@@ -131,12 +149,12 @@ const TypeTag = ({ type }: { type: PortType }) => (
 )
 
 export const InputNodeView = memo(({ id, data, selected }: NodeProps<InputNode>) => (
-  <Shell id={id} kind="Message" icon={<LogIn className="w-3 h-3" />} selected={selected} width="w-56">
+  <Shell id={id} kind="Message" icon={<LogIn className="w-3 h-3" />} selected={selected} width="w-56" labels>
     <Title id={id} value={data.label} />
     <p className="text-xs text-neutral-400 pr-10">What you type, the photo you attach and your voice note start here.</p>
-    <Port type="source" id="out" kind="text" top="38%" label="text" />
-    <Port type="source" id="image" kind="image" top="58%" label="image" />
-    <Port type="source" id="audio" kind="audio" top="78%" label="audio" />
+    <Port type="source" id="out" kind="text" top="38%" left="22%" label="text" />
+    <Port type="source" id="image" kind="image" top="58%" left="50%" label="image" />
+    <Port type="source" id="audio" kind="audio" top="78%" left="78%" label="audio" />
   </Shell>
 ))
 
@@ -212,15 +230,15 @@ export const SplitNodeView = memo(({ id, data, selected }: NodeProps<SplitNode>)
 export const ConditionNodeView = memo(({ id, data, selected }: NodeProps<ConditionNode>) => {
   const step = useStep(id)
   return (
-    <Shell id={id} kind="Condition" icon={<GitBranch className="w-3 h-3" />} selected={selected} step={step} width="w-60">
+    <Shell id={id} kind="Condition" icon={<GitBranch className="w-3 h-3" />} selected={selected} step={step} width="w-60" labels>
       <Title id={id} value={data.label} />
       <Field id={id} label="If the text contains" value={data.match} field="match" mono />
       {step?.branch && (
         <p className="font-mono text-[10px] uppercase tracking-widest text-signal-ink">Went → {step.branch}</p>
       )}
       <Port type="target" id="in" kind="text" />
-      <Port type="source" id="yes" kind="text" top="40%" label="yes" />
-      <Port type="source" id="no" kind="text" top="75%" label="no" />
+      <Port type="source" id="yes" kind="text" top="40%" left="30%" label="yes" />
+      <Port type="source" id="no" kind="text" top="75%" left="70%" label="no" />
     </Shell>
   )
 })

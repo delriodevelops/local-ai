@@ -1,6 +1,7 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware'
 import { addEdge, applyEdgeChanges, applyNodeChanges, type Connection, type EdgeChange, type NodeChange } from '@xyflow/react'
+import { EMBED } from '@/embed'
 import { TEMPLATES } from './presets'
 import type { FlowEdge, FlowNode } from './types'
 
@@ -31,6 +32,14 @@ type AppState = {
 
 const initial = TEMPLATES[1].build()
 
+// Incrustada en la landing, la demo arranca con los ajustes del visitante (tema, modelo) pero no escribe nada:
+// es la misma web, y si guardase, la plantilla de la demo sustituiría su flujo
+const readOnly: StateStorage = {
+  getItem: key => localStorage.getItem(key),
+  setItem: () => {},
+  removeItem: () => {},
+}
+
 // Flujo y ajustes se guardan en el navegador; el historial va aparte, en IndexedDB
 export const useApp = create<AppState>()(
   persist(
@@ -60,6 +69,7 @@ export const useApp = create<AppState>()(
     {
       name: 'meshmind',
       version: 1,
+      storage: createJSONStorage(() => (EMBED ? readOnly : localStorage)),
       partialize: ({ nodes, edges, temperature, maxTokens, modelId, falKey, view, theme }) =>
         ({ nodes: nodes.map(({ selected: _, ...n }) => n) as FlowNode[], edges, temperature, maxTokens, modelId, falKey, view, theme }),
     },

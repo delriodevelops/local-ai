@@ -116,20 +116,21 @@ function TurnView({ turn }: { turn: Turn }) {
 export default function Thread() {
   const turns = useSession(s => s.turns)
   const error = useSession(s => s.error)
-  const end = useRef<HTMLDivElement>(null)
+  const box = useRef<HTMLDivElement>(null)
   const lastSteps = turns.at(-1)?.steps
 
+  // Baja el propio hilo hasta el final; scrollIntoView movería también la landing cuando la app va incrustada
   useEffect(() => {
-    if (turns.length) end.current?.scrollIntoView({ block: 'end' })
+    const el = box.current
+    if (el && turns.length) el.scrollTop = el.scrollHeight
   }, [turns.length, lastSteps])
 
   return (
-    <div className="@container flex-1 min-h-0 overflow-y-auto">
+    <div ref={box} className="@container flex-1 min-h-0 overflow-y-auto">
       <div className="mx-auto w-full max-w-3xl px-4 py-8 flex flex-col gap-10">
         {!turns.length && <Welcome />}
         {turns.map(turn => <TurnView key={turn.id} turn={turn} />)}
         {error && <p className="rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-700">{error}</p>}
-        <div ref={end} />
       </div>
     </div>
   )

@@ -1,18 +1,28 @@
-import { useEffect, useMemo, useRef, type ReactNode } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import {
   Background, BackgroundVariant, Controls, MiniMap, Panel, ReactFlow, ReactFlowProvider, useReactFlow,
-  type Connection, type Edge,
+  type Connection, type Edge, type NodeChange,
 } from '@xyflow/react'
 import * as Popover from '@radix-ui/react-popover'
 import { AudioLines, Clapperboard, Eye, GitBranch, ImagePlus, LayoutTemplate, LogIn, LogOut, Merge, Mic, Plus, Sparkles, Split } from 'lucide-react'
 import '@xyflow/react/dist/style.css'
 import { useApp } from './store'
 import { useScheme } from '@/ui/theme'
+import { useMedia } from '@/lib/useMedia'
 import { checkConnection, edgeType, PORT_COLOR } from './graph'
 import { nodeTypes } from './nodes'
+import { fromVertical, toVertical, Vertical, VERTICAL_QUERY } from './orientation'
 import { ASSISTANTS, TEMPLATES, newId } from './presets'
 import { useSession } from '@/chat/session'
 import type { FlowNode } from './types'
+
+// Una copia traspuesta por cada nodo guardado: los que no cambian conservan la suya y React Flow no los repinta
+const verticalCopies = new WeakMap<FlowNode, FlowNode>()
+function verticalNode(node: FlowNode) {
+  let copy = verticalCopies.get(node)
+  if (!copy) verticalCopies.set(node, (copy = { ...node, position: toVertical(node.position) }))
+  return copy
+}
 
 // Fondo y minimapa se pintan como atributos SVG: necesitan el color ya resuelto, no una variable CSS
 const CANVAS_COLORS = {
@@ -69,6 +79,13 @@ function Flow() {
   const templateKey = useApp(s => s.templateKey)
   const scheme = useScheme()
   const colors = CANVAS_COLORS[scheme]
+  const vertical = useContext(Vertical)
+
+  // En vertical se pintan las posiciones traspuestas, y lo que se arrastra se guarda deshaciendo la trasposición
+  const shownNodes = useMemo(() => (vertical ? nodes.map(verticalNode) : nodes), [nodes, vertical])
+  const onShownNodesChange = useCallback((changes: NodeChange<FlowNode>[]) => onNodesChange(vertical
+    ? changes.map(change => (change.type === 'position' && change.position ? { ...change, position: fromVertical(change.position) } : change))
+    : changes), [vertical, onNodesChange])
 
   useEffect(() => {
     if (templateKey) requestAnimationFrame(() => fitView({ padding: 0.2, duration: 400 }))
@@ -94,16 +111,18 @@ function Flow() {
       x: (rect?.left ?? 0) + (rect?.width ?? 600) / 2 - 120,
       y: (rect?.top ?? 0) + (rect?.height ?? 400) / 2 - 60,
     })
-    addNode({ ...node, id: newId(node.type as string), position } as FlowNode)
+    addNode({ ...node, id: newId(node.type as string), position: vertical ? fromVertical(position) : position } as FlowNode)
   }
 
   return (
     <div ref={wrapper} className="h-full w-full">
+      {/* Al girar la pantalla se monta de nuevo: los nodos cambian de sitio y sus conexiones de lado, y se reencuadra */}
       <ReactFlow
-        nodes={nodes}
+        key={vertical ? 'down' : 'across'}
+        nodes={shownNodes}
         edges={styledEdges}
         nodeTypes={nodeTypes}
-        onNodesChange={onNodesChange}
+        onNodesChange={onShownNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={(c: Connection) => connect(c)}
         isValidConnection={c => checkConnection(c, nodes, edges).ok}
@@ -167,9 +186,12 @@ function Flow() {
 }
 
 export default function Canvas() {
+  const vertical = useMedia(VERTICAL_QUERY)
   return (
     <ReactFlowProvider>
-      <Flow />
+      <Vertical.Provider value={vertical}>
+        <Flow />
+      </Vertical.Provider>
     </ReactFlowProvider>
   )
 }

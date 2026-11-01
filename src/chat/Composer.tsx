@@ -1,6 +1,7 @@
 import { useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { ArrowUp, ImagePlus, Mic, Square, X } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { useMedia } from '@/lib/useMedia'
 import { useEngine } from '@/engine/engine'
 import { useApp } from '@/flow/store'
 import { usesLLM } from '@/flow/graph'
@@ -47,6 +48,7 @@ export default function Composer() {
   const takesImage = nodes.some(n => n.type === 'describe')
   const takesAudio = nodes.some(n => n.type === 'transcribe')
   const recorder = useRecorder(audio => setAttachments(a => ({ ...a, audio })))
+  const narrow = useMedia('(max-width: 639px)')
 
   const canSend = (!needsModel || ready) && !running && (!!text.trim() || !!attachments.image || !!attachments.audio)
 
@@ -56,7 +58,10 @@ export default function Composer() {
     send(text.trim(), attachments)
     setText('')
     setAttachments({})
-    if (area.current) area.current.style.height = 'auto'
+    if (area.current) {
+      area.current.style.height = 'auto'
+      area.current.style.overflowY = 'hidden'
+    }
   }
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -69,9 +74,11 @@ export default function Composer() {
     try { await recorder.start() } catch { setMicError('The microphone is blocked. Allow it in the browser to record.') }
   }
 
+  // En el móvil, entre los botones solo cabe una línea corta
   const placeholder = needsModel && !ready
     ? 'Pick a model to start'
-    : takesAudio && !assistants ? 'Record a voice note or type'
+    : takesAudio && !assistants ? (narrow ? 'Voice note or text' : 'Record a voice note or type')
+    : narrow ? 'Message the flow'
     : `Message the flow · ${assistants} assistant${assistants === 1 ? '' : 's'}`
 
   return (
@@ -129,10 +136,12 @@ export default function Composer() {
               setText(e.target.value)
               e.target.style.height = 'auto'
               e.target.style.height = `${Math.min(e.target.scrollHeight, 224)}px`
+              // La barra de scroll solo aparece cuando el texto ya no cabe en la altura máxima
+              e.target.style.overflowY = e.target.scrollHeight > 224 ? 'auto' : 'hidden'
             }}
             onKeyDown={onKeyDown}
             placeholder={placeholder}
-            className="flex-1 resize-none bg-transparent px-2 py-2 text-[15px] outline-none placeholder:text-neutral-500 max-h-56"
+            className="flex-1 min-w-0 resize-none overflow-y-hidden bg-transparent px-2 py-2 text-[15px] outline-none placeholder:text-neutral-500 max-h-56"
           />
           {running ? (
             <button type="button" onClick={stop} title="Stop" className="w-10 h-10 shrink-0 rounded-xl bg-ink text-paper flex items-center justify-center hover:bg-signal hover:text-ink duration-200">
