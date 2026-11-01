@@ -7,10 +7,10 @@ export const VERTICAL_QUERY = '(orientation: portrait) and (max-width: 1023px)'
 export const Vertical = createContext(false)
 
 // Las posiciones guardadas son siempre las del lienzo horizontal; en vertical se trasponen.
-// Los nodos son más anchos que altos, así que las ramas paralelas (que pasan a ir una al lado de otra)
-// y los pasos (que pasan a ir uno debajo de otro) necesitan algo más de aire
+// Los nodos son más anchos que altos: las ramas paralelas, que pasan a ir una al lado de otra, necesitan algo
+// más de aire. Entre pasos ya sobra, y estirarlo haría que lo ordenado en vertical se amontonase al girar
 const ACROSS = 1.15
-const DOWN = 1.25
+const DOWN = 1
 
 export const toVertical = ({ x, y }: XYPosition): XYPosition => ({ x: y * ACROSS, y: x * DOWN })
 export const fromVertical = ({ x, y }: XYPosition): XYPosition => ({ x: y / DOWN, y: x / ACROSS })

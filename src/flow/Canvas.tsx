@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import {
-  Background, BackgroundVariant, Controls, MiniMap, Panel, ReactFlow, ReactFlowProvider, useReactFlow,
+  Background, BackgroundVariant, Controls, MiniMap, Panel, ReactFlow, ReactFlowProvider, useReactFlow, useUpdateNodeInternals,
   type Connection, type Edge, type NodeChange,
 } from '@xyflow/react'
 import * as Popover from '@radix-ui/react-popover'
@@ -91,6 +91,17 @@ function Flow() {
     if (templateKey) requestAnimationFrame(() => fitView({ padding: 0.2, duration: 400 }))
   }, [templateKey, fitView])
 
+  // Al girar la pantalla los puertos cambian de lado: React Flow los vuelve a medir y se reencuadra.
+  // Sin volver a montar el lienzo, así no se corta un audio o un vídeo que esté sonando en un nodo
+  const updateNodeInternals = useUpdateNodeInternals()
+  const orientation = useRef(vertical)
+  useEffect(() => {
+    if (orientation.current === vertical) return
+    orientation.current = vertical
+    updateNodeInternals(useApp.getState().nodes.map(n => n.id))
+    requestAnimationFrame(() => fitView({ padding: 0.2 }))
+  }, [vertical, updateNodeInternals, fitView])
+
   // Las conexiones toman el color de lo que transportan y se animan mientras pasa la señal
   const styledEdges = useMemo<Edge[]>(() => edges.map(edge => {
     const type = edgeType(edge, nodes, edges)
@@ -116,9 +127,7 @@ function Flow() {
 
   return (
     <div ref={wrapper} className="h-full w-full">
-      {/* Al girar la pantalla se monta de nuevo: los nodos cambian de sitio y sus conexiones de lado, y se reencuadra */}
       <ReactFlow
-        key={vertical ? 'down' : 'across'}
         nodes={shownNodes}
         edges={styledEdges}
         nodeTypes={nodeTypes}

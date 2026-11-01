@@ -1,4 +1,4 @@
-import { useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { ArrowUp, ImagePlus, Mic, Square, X } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useMedia } from '@/lib/useMedia'
@@ -34,6 +34,13 @@ function useRecorder(onDone: (url: string) => void) {
   return { recording, start, stop }
 }
 
+// Alto según el texto, hasta 224 px; la barra de scroll solo aparece cuando ya no cabe
+function fit(el: HTMLTextAreaElement) {
+  el.style.height = 'auto'
+  el.style.height = `${Math.min(el.scrollHeight, 224)}px`
+  el.style.overflowY = el.scrollHeight > el.clientHeight ? 'auto' : 'hidden'
+}
+
 export default function Composer() {
   const [text, setText] = useState('')
   const [attachments, setAttachments] = useState<Attachments>({})
@@ -51,6 +58,20 @@ export default function Composer() {
   const narrow = useMedia('(max-width: 639px)')
 
   const canSend = (!needsModel || ready) && !running && (!!text.trim() || !!attachments.image || !!attachments.audio)
+
+  // Si cambia el ancho (girar el móvil, abrir la barra lateral) el borrador ocupa otras líneas: se vuelve a ajustar
+  useEffect(() => {
+    const el = area.current
+    if (!el) return
+    let width = el.clientWidth
+    const observer = new ResizeObserver(() => {
+      if (el.clientWidth === width) return
+      width = el.clientWidth
+      fit(el)
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const submit = (e?: FormEvent) => {
     e?.preventDefault()
@@ -134,10 +155,7 @@ export default function Composer() {
             rows={1}
             onChange={e => {
               setText(e.target.value)
-              e.target.style.height = 'auto'
-              e.target.style.height = `${Math.min(e.target.scrollHeight, 224)}px`
-              // La barra de scroll solo aparece cuando el texto ya no cabe en la altura máxima
-              e.target.style.overflowY = e.target.scrollHeight > 224 ? 'auto' : 'hidden'
+              fit(e.target)
             }}
             onKeyDown={onKeyDown}
             placeholder={placeholder}

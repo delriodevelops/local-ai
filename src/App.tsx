@@ -36,13 +36,15 @@ export default function App() {
     if (!EMBED && modelId && hasWebGPU()) isCached(modelId).then(cached => { if (cached) load(modelId) })
   }, [])
 
-  // Desde la landing se llega con ?template=…: se abre esa plantilla y se limpia la URL
+  // Desde la landing se llega con ?template=…: se abre esa plantilla y se limpia la URL.
+  // La demo incrustada la conserva: no guarda nada, así que al recargar el marco vuelve a necesitarla
   useEffect(() => {
     const url = new URL(window.location.href)
     const template = url.searchParams.get('template')
     if (!template || !TEMPLATES.some(t => t.id === template)) return
     useApp.getState().loadTemplate(template)
     set({ view: desktop ? 'split' : 'flow' })
+    if (EMBED) return
     url.searchParams.delete('template')
     window.history.replaceState(null, '', url)
   }, [])
