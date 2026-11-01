@@ -37,7 +37,7 @@ function StepRow({ step, index, last }: { step: StepResult; index: number; last:
       {!last && <span className="absolute left-[11px] top-6 bottom-0 w-px bg-neutral-800" />}
       <span
         className="absolute left-0 top-0.5 w-[23px] h-[23px] rounded-md flex items-center justify-center text-neutral-950 font-mono text-[10px]"
-        style={{ background: step.color ?? '#111111', color: step.color ? '#111111' : '#f2f2ef' }}
+        style={{ background: step.color ?? 'var(--color-ink)', color: step.color ? '#111111' : 'var(--color-paper)' }}
       >
         {Icon ? <Icon className="w-3 h-3" /> : String(index + 1).padStart(2, '0')}
       </span>

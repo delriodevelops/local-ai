@@ -1,6 +1,9 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
+/* El tema oscuro lo decide la clase 'dark' de <html> (src/ui/theme.ts), no solo la preferencia del sistema */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Estilo tipográfico internacional, como la landing: papel, tinta y un solo rojo.
    La escala neutral está invertida respecto a la versión oscura: 950 es el papel del fondo y 50 la tinta,
    así cada clase conserva su papel (fondo, panel, borde, texto) */
@@ -44,6 +47,40 @@
   }
 }
 
+/* Lo pone src/ui/theme.ts mientras cambia de tema */
+.theme-change, .theme-change * { transition: none !important; }
+
+/* Superficie elevada sobre el fondo: bloques de código y controles del lienzo */
+:root { --surface: #ffffff; }
+
+/* Modo oscuro: la escala neutral vuelve al orden oscuro (950 fondo, 50 texto) y tinta y papel se intercambian,
+   así las mismas clases sirven en los dos temas */
+.dark {
+  color-scheme: dark;
+  --color-neutral-50: #f5f5f0;
+  --color-neutral-100: #ecece7;
+  --color-neutral-200: #dededa;
+  --color-neutral-300: #c9c9c1;
+  --color-neutral-400: #b0b0a8;
+  --color-neutral-500: #9a9a92;
+  --color-neutral-600: #4b4b45;
+  --color-neutral-700: #34342f;
+  --color-neutral-800: #222220;
+  --color-neutral-900: #171716;
+  --color-neutral-950: #0f0f0e;
+  --color-ink: #f2f2ef;
+  --color-paper: #111111;
+  /* Sobre el fondo oscuro el texto rojo tiene que ser más claro, no más oscuro: 6.4:1 sobre los paneles */
+  --color-signal-ink: #ff6b52;
+  /* Los avisos usan tonos oscuros de la paleta de Tailwind pensados para papel: en oscuro, sus tonos claros */
+  --color-red-600: #f87171;
+  --color-red-700: #fca5a5;
+  --color-amber-800: #fbbf24;
+  --color-amber-900: #fcd34d;
+  --color-blue-700: #93b4ff;
+  --surface: var(--color-neutral-900);
+}
+
 @layer base {
   html { color-scheme: light; }
   body {
@@ -74,8 +111,15 @@
   color: var(--color-neutral-400);
 }
 
+/* Los botones que se invierten al pasar el ratón (hover:bg-ink hover:text-paper) tienen hijos con gris propio:
+   al invertir, esos grises quedarían sobre tinta sin contraste, así que heredan el color del botón */
+.hover\:text-paper:hover :is([class*='text-neutral-'], .label) { color: inherit; }
+
+/* El velo de los diálogos es tinta al 40 %: en oscuro la tinta es clara y aclararía la página en vez de oscurecerla */
+.dark .bg-ink\/40 { background-color: rgb(0 0 0 / 0.6); }
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-thumb { background: #b5b5ad; }
+::-webkit-scrollbar-thumb { background: var(--color-neutral-600); }
 ::-webkit-scrollbar-track { background: transparent; }
 
 .shiki-block pre,
@@ -84,7 +128,29 @@
   padding: 16px 18px;
   overflow-x: auto;
   font-size: 13px;
-  background-color: #ffffff !important;
+  background-color: var(--surface) !important;
+}
+
+/* Los grises de prose son fijos: se atan a la escala de la app para que sigan el tema */
+.prose {
+  --tw-prose-body: var(--color-neutral-200);
+  --tw-prose-headings: var(--color-neutral-50);
+  --tw-prose-lead: var(--color-neutral-300);
+  --tw-prose-links: var(--color-signal-ink);
+  --tw-prose-bold: var(--color-neutral-50);
+  --tw-prose-counters: var(--color-neutral-500);
+  --tw-prose-bullets: var(--color-neutral-500);
+  --tw-prose-hr: var(--color-neutral-700);
+  --tw-prose-quotes: var(--color-neutral-100);
+  --tw-prose-quote-borders: var(--color-neutral-700);
+  --tw-prose-captions: var(--color-neutral-500);
+  --tw-prose-kbd: var(--color-neutral-50);
+  --tw-prose-kbd-shadows: color-mix(in oklab, var(--color-neutral-50) 10%, transparent);
+  --tw-prose-code: var(--color-neutral-50);
+  --tw-prose-pre-code: var(--color-neutral-200);
+  --tw-prose-pre-bg: var(--surface);
+  --tw-prose-th-borders: var(--color-neutral-600);
+  --tw-prose-td-borders: var(--color-neutral-700);
 }
 
 /* Malla de la bienvenida */
@@ -96,12 +162,12 @@
 /* React Flow con la paleta de la app */
 .react-flow {
   --xy-background-color: var(--color-neutral-950);
-  --xy-controls-button-background-color: #ffffff;
+  --xy-controls-button-background-color: var(--surface);
   --xy-controls-button-background-color-hover: var(--color-neutral-800);
   --xy-controls-button-color: var(--color-ink);
   --xy-controls-button-border-color: var(--color-neutral-700);
-  --xy-minimap-background-color: #ffffff;
-  --xy-edge-stroke: #111111;
+  --xy-minimap-background-color: var(--surface);
+  --xy-edge-stroke: var(--color-ink);
   --xy-connectionline-stroke: #ff3a1f;
 }
 .react-flow__controls { border: 1.5px solid var(--color-ink); overflow: hidden; box-shadow: none; }

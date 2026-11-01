@@ -1,19 +1,22 @@
 import { memo, useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { useScheme } from '@/ui/theme'
 
-// Shiki solo se descarga la primera vez que aparece un bloque de código
+// Shiki solo se descarga la primera vez que aparece un bloque de código.
+// Los colores van en el HTML que genera, así que se vuelve a resaltar al cambiar de tema
 function CodeBlock({ code, lang }: { code: string; lang: string }) {
   const [html, setHtml] = useState<string | null>(null)
+  const theme = useScheme() === 'dark' ? 'vitesse-dark' : 'vitesse-light'
   useEffect(() => {
     let alive = true
     import('shiki/bundle/web')
       .then(({ codeToHtml, bundledLanguages }) =>
-        codeToHtml(code, { lang: lang in bundledLanguages ? lang : 'text', theme: 'vitesse-light' }))
+        codeToHtml(code, { lang: lang in bundledLanguages ? lang : 'text', theme }))
       .then(result => alive && setHtml(result))
       .catch(() => {})
     return () => { alive = false }
-  }, [code, lang])
+  }, [code, lang, theme])
 
   if (!html) return <pre><code>{code}</code></pre>
   return <div className="shiki-block" dangerouslySetInnerHTML={{ __html: html }} />

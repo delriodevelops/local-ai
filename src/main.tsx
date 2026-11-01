@@ -4,6 +4,7 @@ import '@fontsource-variable/archivo/wdth.css'
 import '@fontsource/ibm-plex-mono/400.css'
 import '@fontsource/ibm-plex-mono/500.css'
 import './index.css'
+import './ui/theme'
 import App from './App'
 
 createRoot(document.getElementById('root')!).render(

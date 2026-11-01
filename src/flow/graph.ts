@@ -31,14 +31,18 @@ export const OUTPUTS: Record<NodeKind, Record<string, PortType | 'dynamic'>> = {
   video: { out: 'video' },
 }
 
-// Un color por tipo, distinguibles sobre papel: tinta, azul, rojo, ámbar y violeta
+// Un color por tipo, distinguibles sobre papel y en oscuro: tinta, azul, rojo, ámbar y violeta.
+// Solo se usan en estilos en línea, así que la tinta puede ser la variable CSS y seguir el tema
 export const PORT_COLOR: Record<PortType, string> = {
-  text: '#111111',
+  text: 'var(--color-ink)',
   list: '#2f5bff',
   image: '#ff3a1f',
   audio: '#d98e00',
   video: '#7c4dff',
 }
+
+// Texto en el color de un tipo: mezclado con el color del texto del tema llega a 4.5:1 en claro y en oscuro
+export const portText = (color: string) => `color-mix(in oklab, ${color} 65%, var(--color-neutral-50))`
 
 // Tipo de lo que sale por un conector. Un asistente que recibe una lista responde a cada elemento y devuelve otra lista
 export function outputType(nodeId: string, nodes: FlowNode[], edges: FlowEdge[], handle = 'out', seen = new Set<string>()): PortType {

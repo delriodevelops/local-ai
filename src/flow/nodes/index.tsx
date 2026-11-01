@@ -3,7 +3,7 @@ import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
 import { AudioLines, Check, Clapperboard, Eye, GitBranch, ImagePlus, LogIn, LogOut, Merge, Mic, Split, Sparkles, X, LoaderCircle } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useApp } from '../store'
-import { outputType, PORT_COLOR } from '../graph'
+import { outputType, PORT_COLOR, portText } from '../graph'
 import { COLORS } from '../presets'
 import { useSession } from '@/chat/session'
 import { VOICES } from '@/media/media'
@@ -29,11 +29,11 @@ function Port({ type, kind, id, top, label }: { type: 'source' | 'target'; kind:
       type={type}
       id={id}
       position={type === 'target' ? Position.Left : Position.Right}
-      style={{ top, background: '#f2f2ef', borderColor: color }}
+      style={{ top, background: 'var(--color-neutral-950)', borderColor: color }}
       className="!w-3 !h-3 !border-2"
     >
       {label && (
-        <span className={cn('pointer-events-none absolute top-1/2 -translate-y-1/2 font-mono text-[9px] uppercase tracking-widest', type === 'source' ? 'left-4' : 'right-4')} style={{ color }}>
+        <span className={cn('pointer-events-none absolute top-1/2 -translate-y-1/2 font-mono text-[9px] uppercase tracking-widest', type === 'source' ? 'left-4' : 'right-4')} style={{ color: portText(color) }}>
           {label}
         </span>
       )}
@@ -60,7 +60,7 @@ function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64'
       selected && 'ring-1 ring-signal',
     )}>
       <div className="flex items-center gap-2 px-3 pt-2.5 pb-2 border-b border-neutral-800">
-        <span className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: color ?? '#111111', color: color ? '#111111' : '#f2f2ef' }}>
+        <span className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: color ?? 'var(--color-ink)', color: color ? '#111111' : 'var(--color-paper)' }}>
           {icon}
         </span>
         <span className="label flex-1">{kind}</span>
@@ -95,7 +95,7 @@ function Title({ id, value }: { id: string; value: string }) {
     <input
       value={value}
       onChange={e => updateNode(id, { label: e.target.value })}
-      className="nodrag bg-transparent text-[15px] font-medium outline-none focus:text-white w-full"
+      className="nodrag bg-transparent text-[15px] font-medium border-b border-transparent focus:border-signal outline-none w-full"
       aria-label="Node name"
     />
   )
@@ -127,7 +127,7 @@ function Preview({ step }: { step?: StepResult }) {
 }
 
 const TypeTag = ({ type }: { type: PortType }) => (
-  <span className="font-mono text-[9px] uppercase tracking-widest" style={{ color: PORT_COLOR[type] }}>→ {type}</span>
+  <span className="font-mono text-[9px] uppercase tracking-widest" style={{ color: portText(PORT_COLOR[type]) }}>→ {type}</span>
 )
 
 export const InputNodeView = memo(({ id, data, selected }: NodeProps<InputNode>) => (

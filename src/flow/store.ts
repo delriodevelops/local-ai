@@ -5,6 +5,8 @@ import { TEMPLATES } from './presets'
 import type { FlowEdge, FlowNode } from './types'
 
 export type View = 'chat' | 'flow' | 'split'
+// 'system' sigue la preferencia del sistema operativo
+export type Theme = 'system' | 'light' | 'dark'
 
 type AppState = {
   nodes: FlowNode[]
@@ -15,6 +17,7 @@ type AppState = {
   // Clave de fal.ai para el nodo de vídeo; solo se guarda en este navegador
   falKey: string
   view: View
+  theme: Theme
   // Sube cada vez que se carga una plantilla, para reencuadrar el lienzo
   templateKey: number
   onNodesChange: (changes: NodeChange<FlowNode>[]) => void
@@ -23,7 +26,7 @@ type AppState = {
   addNode: (node: FlowNode) => void
   updateNode: (id: string, data: Partial<FlowNode['data']>) => void
   loadTemplate: (id: string) => void
-  set: (patch: Partial<Pick<AppState, 'temperature' | 'maxTokens' | 'modelId' | 'view' | 'falKey'>>) => void
+  set: (patch: Partial<Pick<AppState, 'temperature' | 'maxTokens' | 'modelId' | 'view' | 'falKey' | 'theme'>>) => void
 }
 
 const initial = TEMPLATES[1].build()
@@ -39,6 +42,7 @@ export const useApp = create<AppState>()(
       modelId: null,
       falKey: '',
       view: 'split',
+      theme: 'system',
       templateKey: 0,
       onNodesChange: changes => set(s => ({ nodes: applyNodeChanges(changes, s.nodes) })),
       onEdgesChange: changes => set(s => ({ edges: applyEdgeChanges(changes, s.edges) })),
@@ -56,8 +60,8 @@ export const useApp = create<AppState>()(
     {
       name: 'meshmind',
       version: 1,
-      partialize: ({ nodes, edges, temperature, maxTokens, modelId, falKey, view }) =>
-        ({ nodes: nodes.map(({ selected: _, ...n }) => n) as FlowNode[], edges, temperature, maxTokens, modelId, falKey, view }),
+      partialize: ({ nodes, edges, temperature, maxTokens, modelId, falKey, view, theme }) =>
+        ({ nodes: nodes.map(({ selected: _, ...n }) => n) as FlowNode[], edges, temperature, maxTokens, modelId, falKey, view, theme }),
     },
   ),
 )

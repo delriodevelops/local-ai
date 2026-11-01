@@ -7,11 +7,18 @@ import * as Popover from '@radix-ui/react-popover'
 import { AudioLines, Clapperboard, Eye, GitBranch, ImagePlus, LayoutTemplate, LogIn, LogOut, Merge, Mic, Plus, Sparkles, Split } from 'lucide-react'
 import '@xyflow/react/dist/style.css'
 import { useApp } from './store'
+import { useScheme } from '@/ui/theme'
 import { checkConnection, edgeType, PORT_COLOR } from './graph'
 import { nodeTypes } from './nodes'
 import { ASSISTANTS, TEMPLATES, newId } from './presets'
 import { useSession } from '@/chat/session'
 import type { FlowNode } from './types'
+
+// Fondo y minimapa se pintan como atributos SVG: necesitan el color ya resuelto, no una variable CSS
+const CANVAS_COLORS = {
+  light: { dots: '#c9c9c2', mask: 'rgba(242,242,239,0.75)', node: '#b5b5ad' },
+  dark: { dots: '#3a3a35', mask: 'rgba(15,15,14,0.75)', node: '#4b4b45' },
+}
 
 function MenuItem({ icon, title, text, onSelect }: { icon: ReactNode; title: string; text?: string; onSelect: () => void }) {
   return (
@@ -60,6 +67,8 @@ function Flow() {
   const { screenToFlowPosition, fitView } = useReactFlow()
   const wrapper = useRef<HTMLDivElement>(null)
   const templateKey = useApp(s => s.templateKey)
+  const scheme = useScheme()
+  const colors = CANVAS_COLORS[scheme]
 
   useEffect(() => {
     if (templateKey) requestAnimationFrame(() => fitView({ padding: 0.2, duration: 400 }))
@@ -98,16 +107,16 @@ function Flow() {
         onEdgesChange={onEdgesChange}
         onConnect={(c: Connection) => connect(c)}
         isValidConnection={c => checkConnection(c, nodes, edges).ok}
-        colorMode="light"
+        colorMode={scheme}
         fitView
         fitViewOptions={{ padding: 0.2 }}
         minZoom={0.2}
         proOptions={{ hideAttribution: true }}
         deleteKeyCode={['Backspace', 'Delete']}
       >
-        <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="#c9c9c2" />
+        <Background variant={BackgroundVariant.Dots} gap={22} size={1} color={colors.dots} />
         <Controls showInteractive={false} className="!shadow-none" />
-        <MiniMap pannable zoomable className="!hidden md:!block" maskColor="rgba(242,242,239,0.75)" nodeColor="#b5b5ad" />
+        <MiniMap pannable zoomable className="!hidden md:!block" maskColor={colors.mask} nodeColor={colors.node} />
         <Panel position="top-left" className="flex gap-2">
           <Menu trigger={<ToolbarButton><Plus className="w-4 h-4" /> Add node</ToolbarButton>}>
             <p className="label px-2.5 pt-1.5 pb-1">Assistants</p>

@@ -11,7 +11,7 @@ function Mesh() {
     <svg viewBox="0 0 360 250" className="w-full h-auto" aria-hidden="true">
       {EDGES.map(([a, b], i) => (
         <g key={i}>
-          <line x1={NODES[a][0]} y1={NODES[a][1]} x2={NODES[b][0]} y2={NODES[b][1]} stroke="#111111" strokeWidth="1.5" />
+          <line x1={NODES[a][0]} y1={NODES[a][1]} x2={NODES[b][0]} y2={NODES[b][1]} style={{ stroke: 'var(--color-ink)' }} strokeWidth="1.5" />
           <line
             x1={NODES[a][0]} y1={NODES[a][1]} x2={NODES[b][0]} y2={NODES[b][1]}
             stroke="#ff3a1f" strokeWidth="4" strokeLinecap="round" className="mesh-trace" style={{ animationDelay: `${i * 0.4}s` }}
@@ -21,7 +21,7 @@ function Mesh() {
       {NODES.map(([x, y], i) => (
         <g key={i}>
           <circle cx={x} cy={y} r="13" fill="#ff3a1f" opacity="0.15" className="mesh-node" style={{ animationDelay: `${i * 0.5}s` }} />
-          <rect x={x - 6} y={y - 6} width="12" height="12" fill="#f2f2ef" stroke="#111111" strokeWidth="2" />
+          <rect x={x - 6} y={y - 6} width="12" height="12" style={{ fill: 'var(--color-neutral-950)', stroke: 'var(--color-ink)' }} strokeWidth="2" />
         </g>
       ))}
     </svg>
