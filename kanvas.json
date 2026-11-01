@@ -153,6 +153,11 @@
           "at": "2026-11-01T16:08:22Z",
           "by": "claude-code",
           "text": "Hecho en la rama \"rebuild\" (commit 80d3f44), todavía sin publicar. MeshMind rehecho de cero: Vite + React 19 + TypeScript en lugar de Next. Lienzo de nodos con React Flow: Mensaje, Asistente, Split, Join, Condición y Respuesta; conexiones tipadas (texto en lima, lista en azul) que impiden bucles y uniones que no encajan. Un asistente que recibe una lista responde a cada elemento. Cuatro plantillas. Vista Chat / Ambos / Lienzo; en el chat, cada respuesta muestra el recorrido paso a paso. Historial en IndexedDB, ajustes con Zustand, componentes Radix, iconos lucide. Carga inicial: ~250 KB comprimido (antes ~1,8 MB); WebLLM se descarga solo al elegir modelo. Probado en el navegador con las plantillas de panel, lista y condición, y en móvil. Se ha quitado la voz (dictado y lectura en alto) de la versión anterior."
+        },
+        {
+          "at": "2026-11-01T17:06:47Z",
+          "by": "claude-code",
+          "text": "Published: rebuild merged into main (fast-forward), live at delriodevelops.github.io/meshmind."
         }
       ]
     },
@@ -163,7 +168,14 @@
       "group": "ML",
       "at": "2026-11-01T16:44:11Z",
       "by": "claude-code",
-      "desc": "Además de texto y lista, las conexiones pueden llevar imagen y audio, cada una con su color. El nodo Mensaje acepta adjuntar una imagen o grabar una nota de voz, y el chat y el nodo Respuesta muestran imágenes y reproducen audio. Hecho cuando se puede mandar una foto por el flujo hasta la Respuesta y verla en el chat."
+      "desc": "Además de texto y lista, las conexiones pueden llevar imagen y audio, cada una con su color. El nodo Mensaje acepta adjuntar una imagen o grabar una nota de voz, y el chat y el nodo Respuesta muestran imágenes y reproducen audio. Hecho cuando se puede mandar una foto por el flujo hasta la Respuesta y verla en el chat.",
+      "notes": [
+        {
+          "at": "2026-11-01T17:06:46Z",
+          "by": "claude-code",
+          "text": "Done and published (1153a4f). Connections can carry image, audio and video, each with its own colour. The Message node has text, image and audio outputs; the chat lets you attach a photo and record a voice note, and shows images and plays audio/video."
+        }
+      ]
     },
     {
       "id": "ML-02",
@@ -173,7 +185,14 @@
       "deps": ["ML-01"],
       "at": "2026-11-01T16:44:11Z",
       "by": "claude-code",
-      "desc": "Recibe una imagen y devuelve texto: describe, lee lo que pone o responde a sus instrucciones sobre ella. Usa un modelo de visión de WebLLM (p. ej. Phi-3.5-vision), en local. Hecho cuando el flujo foto → describir → asistente funciona en el navegador."
+      "desc": "Recibe una imagen y devuelve texto: describe, lee lo que pone o responde a sus instrucciones sobre ella. Usa un modelo de visión de WebLLM (p. ej. Phi-3.5-vision), en local. Hecho cuando el flujo foto → describir → asistente funciona en el navegador.",
+      "notes": [
+        {
+          "at": "2026-11-01T17:06:46Z",
+          "by": "claude-code",
+          "text": "Done. 'See image' node with Janus-Pro 1B (Transformers.js, WebGPU). Tested: it correctly described a generated image (person on rocks looking at the sea)."
+        }
+      ]
     },
     {
       "id": "ML-03",
@@ -183,7 +202,14 @@
       "deps": ["ML-01"],
       "at": "2026-11-01T16:44:11Z",
       "by": "claude-code",
-      "desc": "Recibe texto y devuelve una imagen, generada en el navegador con WebGPU (SD-Turbo o Janus-Pro-1B vía Transformers.js / ONNX Runtime). Antes de elegir, comprobar qué modelo rinde aceptable en una GPU normal. Hecho cuando un flujo texto → asistente que escribe el prompt → imagen da una imagen en menos de ~30 s."
+      "desc": "Recibe texto y devuelve una imagen, generada en el navegador con WebGPU (SD-Turbo o Janus-Pro-1B vía Transformers.js / ONNX Runtime). Antes de elegir, comprobar qué modelo rinde aceptable en una GPU normal. Hecho cuando un flujo texto → asistente que escribe el prompt → imagen da una imagen en menos de ~30 s.",
+      "notes": [
+        {
+          "at": "2026-11-01T17:06:46Z",
+          "by": "claude-code",
+          "text": "Done. 'Create image' node with Janus-Pro 1B (the same model as seeing, so it is a single download of ~2.4 GB). 384x384 image in about 30-60 s once downloaded. Tested on the public site."
+        }
+      ]
     },
     {
       "id": "ML-04",
@@ -193,7 +219,14 @@
       "deps": ["ML-01"],
       "at": "2026-11-01T16:44:11Z",
       "by": "claude-code",
-      "desc": "Recibe audio y devuelve texto con Whisper en el navegador (Transformers.js). Hecho cuando una nota de voz grabada en el chat se transcribe y sigue por el flujo."
+      "desc": "Recibe audio y devuelve texto con Whisper en el navegador (Transformers.js). Hecho cuando una nota de voz grabada en el chat se transcribe y sigue por el flujo.",
+      "notes": [
+        {
+          "at": "2026-11-01T17:06:46Z",
+          "by": "claude-code",
+          "text": "Done. 'Transcribe' node with Whisper base (WebGPU). Tested by transcribing a Kokoro narration: almost word for word."
+        }
+      ]
     },
     {
       "id": "ML-05",
@@ -203,7 +236,14 @@
       "deps": ["ML-01"],
       "at": "2026-11-01T16:44:11Z",
       "by": "claude-code",
-      "desc": "Recibe texto y devuelve audio con una voz natural generada en local (Kokoro.js). Recupera la lectura en voz alta que tenía la versión anterior. Hecho cuando la respuesta de un flujo se puede escuchar en el chat."
+      "desc": "Recibe texto y devuelve audio con una voz natural generada en local (Kokoro.js). Recupera la lectura en voz alta que tenía la versión anterior. Hecho cuando la respuesta de un flujo se puede escuchar en el chat.",
+      "notes": [
+        {
+          "at": "2026-11-01T17:06:46Z",
+          "by": "claude-code",
+          "text": "Done. 'Speak' node with Kokoro 82M (WASM), 5 voices, cleans the Markdown before reading. tts.stream() hung, so it generates by chunks of sentences."
+        }
+      ]
     },
     {
       "id": "ML-06",
@@ -213,7 +253,14 @@
       "deps": ["ML-02", "ML-03", "ML-04", "ML-05"],
       "at": "2026-11-01T16:44:11Z",
       "by": "claude-code",
-      "desc": "Dos o tres plantillas que luzcan en el portfolio, p. ej. 'Foto → idea → imagen nueva' y 'Nota de voz → asistente → respuesta hablada'. Hecho cuando aparecen en el menú de plantillas y funcionan de principio a fin."
+      "desc": "Dos o tres plantillas que luzcan en el portfolio, p. ej. 'Foto → idea → imagen nueva' y 'Nota de voz → asistente → respuesta hablada'. Hecho cuando aparecen en el menú de plantillas y funcionan de principio a fin.",
+      "notes": [
+        {
+          "at": "2026-11-01T17:06:46Z",
+          "by": "claude-code",
+          "text": "Done. Three templates: Illustrate & narrate, Photo remix and Voice assistant. All three tested end to end in the browser, and the first one also on the public site."
+        }
+      ]
     },
     {
       "id": "ML-07",
@@ -223,7 +270,14 @@
       "deps": ["ML-01"],
       "at": "2026-11-01T16:44:11Z",
       "by": "claude-code",
-      "desc": "Los modelos de vídeo no caben en un navegador. Opción: un nodo que llama a un servicio (fal o Replicate) con tu propia clave, marcado claramente como 'sale de tu ordenador'. Decidir antes si merece la pena romper la idea de 'todo en local'."
+      "desc": "Los modelos de vídeo no caben en un navegador. Opción: un nodo que llama a un servicio (fal o Replicate) con tu propia clave, marcado claramente como 'sale de tu ordenador'. Decidir antes si merece la pena romper la idea de 'todo en local'.",
+      "notes": [
+        {
+          "at": "2026-11-01T17:06:47Z",
+          "by": "claude-code",
+          "text": "Done but NOT tested: there is no fal.ai key. 'Create video' node marked 'online'; the key goes in Settings and stays in the browser. It uses fal's queue API (submit → status → response), checked against their documentation. Default model fal-ai/ltx-video."
+        }
+      ]
     }
   ]
 }
