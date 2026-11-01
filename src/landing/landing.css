@@ -1,58 +1,75 @@
 body{margin:0;background:#f2f2ef}
 a{color:#111111}a:hover{color:#ff3a1f}
+:focus-visible{outline:2px solid #ff3a1f;outline-offset:3px}
 @property --n{syntax:'<integer>';inherits:false;initial-value:0}
+:root{--v:0}
 
-/* Entrada: la retícula se dibuja, el círculo cae, el título sube */
+/* ---------- Entrada: la retícula se dibuja, el círculo cae, el título sube ---------- */
 @keyframes draw-down{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 @keyframes rise{from{transform:translateY(108%)}to{transform:translateY(0)}}
-@keyframes fade-up{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
 @keyframes drop{0%{transform:scale(0)}70%{transform:scale(1.06)}100%{transform:scale(1)}}
 @keyframes drift{0%,100%{translate:0 0}50%{translate:-3vw 2vw}}
 @keyframes widths{0%,100%{font-variation-settings:"wdth" 70}50%{font-variation-settings:"wdth" 125}}
 @keyframes cue{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 @keyframes pulse{0%,14%,100%{background:#f2f2ef;color:#111111}4%,9%{background:#ff3a1f;color:#111111}}
-@keyframes count{from{--n:0}}
-@keyframes countdown{from{--n:99}}
 @keyframes ticker{to{transform:translateX(-50%)}}
-
+@keyframes fade{from{opacity:0}}
 .gridline{transform-origin:top;animation:draw-down 1.4s cubic-bezier(.87,0,.13,1) both;animation-delay:calc(var(--i) * 70ms)}
 .rise{animation:rise 1.2s cubic-bezier(.16,1,.3,1) both}
-.fade-up{animation:fade-up 1s cubic-bezier(.16,1,.3,1) both}
 .disc{animation:drop 1.6s cubic-bezier(.87,0,.13,1) both .2s, drift 14s cubic-bezier(.45,0,.55,1) 1.8s infinite}
 .breathe{animation:widths 9s cubic-bezier(.65,0,.35,1) infinite}
 .cue{animation:cue 2.4s cubic-bezier(.65,0,.35,1) infinite}
 .ticker{animation:ticker 40s linear infinite}
 
-/* Animaciones ligadas al scroll: avanzan y retroceden con él */
-@keyframes slide-l{to{translate:-18vw 0}}
-@keyframes slide-r{to{translate:18vw 0}}
-@keyframes swell{to{scale:3.4;opacity:0}}
+/* ---------- Hero fijado: al bajar, MESH y MIND se abren, el disco se traga la pantalla
+   y aparece la frase sobre rojo. Dura lo que dura el contenedor alto ---------- */
+.hero-pin{height:260vh;view-timeline:--hero block}
+.hero-stage{position:sticky;top:0;height:100vh;box-sizing:border-box;overflow:hidden}
+@keyframes hz-mesh{0%{translate:0 0;scale:1;opacity:1}40%{translate:-26vw -6vh;scale:1.5;opacity:1}68%,100%{translate:-70vw -14vh;scale:2.2;opacity:0}}
+@keyframes hz-mind{0%{translate:0 0;scale:1;opacity:1}40%{translate:22vw 8vh;scale:1.5;opacity:1}68%,100%{translate:70vw 16vh;scale:2.2;opacity:0}}
+@keyframes hz-disc{0%{scale:1}25%{scale:1.35}62%,100%{scale:14}}
+@keyframes hz-grid{0%{opacity:1}35%,100%{opacity:0}}
+@keyframes hz-say{0%,58%{opacity:0;translate:0 12vh;font-stretch:62%}80%{opacity:1;translate:0 0;font-stretch:100%}100%{opacity:1;translate:0 -4vh;font-stretch:125%}}
+.hero-stage .line-l{animation:hz-mesh linear both;animation-timeline:--hero;animation-range:contain 0% contain 100%}
+.hero-stage .line-r{animation:hz-mind linear both;animation-timeline:--hero;animation-range:contain 0% contain 100%}
+.hero-stage .disc-wrap{animation:hz-disc linear both;animation-timeline:--hero;animation-range:contain 0% contain 100%}
+.hero-stage .grid,.hero-stage .cue-wrap{animation:hz-grid linear both;animation-timeline:--hero;animation-range:contain 0% contain 100%}
+.hz-say{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:center;padding:0 40px;margin:0;font-weight:800;font-size:clamp(56px,10vw,170px);line-height:.85;letter-spacing:-0.045em;text-transform:uppercase;color:#111111;pointer-events:none;animation:hz-say linear both;animation-timeline:--hero;animation-range:contain 0% contain 100%}
+
+/* ---------- Animaciones ligadas al scroll: avanzan y retroceden con él ---------- */
 @keyframes scrub{from{translate:14% 0}to{translate:-14% 0}}
 @keyframes num{from{font-stretch:125%;translate:0 30%}to{font-stretch:62%;translate:0 0}}
 @keyframes mask{from{clip-path:inset(0 0 100% 0);translate:0 40px}to{clip-path:inset(0 0 0 0);translate:0 0}}
 @keyframes up{from{opacity:0;translate:0 48px}}
+@keyframes ghost{from{translate:0 18%}to{translate:0 -18%}}
+@keyframes cam{from{transform:perspective(1400px) rotateX(32deg) scale(.82);opacity:.15}to{transform:perspective(1400px) rotateX(0) scale(1);opacity:1}}
 @keyframes wire-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 @keyframes pop{from{opacity:0;scale:.82}}
 @keyframes row-in{from{opacity:0;translate:-56px 0}}
+@keyframes band{0%,100%{background-color:transparent}35%,65%{background-color:#ff3a1f}}
+@keyframes verb{0%,100%{font-variation-settings:"wdth" 75;translate:0 0}35%,65%{font-variation-settings:"wdth" 125;translate:14px 0}}
 @keyframes curtain{from{clip-path:inset(10% 8% 10% 8%)}to{clip-path:inset(0 0 0 0)}}
 @keyframes lane-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes count{from{--n:0}}
+@keyframes countdown{from{--n:99}}
 @keyframes stretch-in{from{font-stretch:62%}to{font-stretch:125%}}
 @keyframes disc-par{from{translate:0 -12%}to{translate:0 24%}}
-@keyframes wipe-up{from{clip-path:inset(28% 0 0 0)}to{clip-path:inset(0 0 0 0)}}
-@keyframes rise-in{from{clip-path:inset(100% 0 0 0);translate:0 20%}to{clip-path:inset(0 0 0 0);translate:0 0}}
+@keyframes iris{from{clip-path:circle(0% at 50% 100%)}to{clip-path:circle(150% at 50% 100%)}}
+@keyframes ch-in{from{translate:0 110%;rotate:8deg}}
 @keyframes grow{to{transform:scaleX(1)}}
 
 .progress{position:fixed;left:0;top:0;right:0;height:4px;background:#ff3a1f;transform-origin:left;transform:scaleX(0);z-index:50;animation:grow linear both;animation-timeline:scroll(root)}
-.hero .line-l{animation:slide-l linear both;animation-timeline:view();animation-range:exit 0% exit 100%}
-.hero .line-r{animation:slide-r linear both;animation-timeline:view();animation-range:exit 0% exit 100%}
-.hero .disc-wrap{animation:swell linear both;animation-timeline:view();animation-range:exit 0% exit 90%}
+.reveal{animation:up linear both;animation-timeline:view();animation-range:entry 0% entry 80%}
 .scrub{animation:scrub linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
 .num{display:inline-block;animation:num linear both;animation-timeline:view();animation-range:entry 0% cover 45%}
 .mask{animation:mask linear both;animation-timeline:view();animation-range:entry 10% entry 90%}
-.reveal{animation:up linear both;animation-timeline:view();animation-range:entry 0% entry 80%}
+.ghost{position:absolute;z-index:-1;right:-3vw;top:-6vw;font-weight:800;font-size:38vw;line-height:.8;letter-spacing:-0.06em;color:transparent;-webkit-text-stroke:1.5px rgba(17,17,17,.12);font-stretch:62%;pointer-events:none;user-select:none;animation:ghost linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
+.ghost.on-dark{-webkit-text-stroke-color:rgba(242,242,239,.14)}
+.cam{transform-origin:50% 100%;animation:cam linear both;animation-timeline:view();animation-range:entry 0% cover 40%}
 .wire{stroke-dasharray:1;stroke-dashoffset:0;animation:wire-draw linear both;animation-timeline:view();animation-range:entry 30% cover 50%}
 .node{animation:pulse 3.6s linear infinite,pop linear both;animation-timeline:auto,view();animation-range:normal,entry 10% entry 70%;transition:translate .45s cubic-bezier(.16,1,.3,1)}
-.row{animation:row-in linear both;animation-timeline:view();animation-range:entry 0% entry 75%;transition:background-color .45s cubic-bezier(.16,1,.3,1)}
+.row{animation:row-in linear both,band linear both;animation-timeline:view(),view();animation-range:entry 0% entry 75%,cover 35% cover 65%;transition:background-color .45s cubic-bezier(.16,1,.3,1)}
+.row .verb{display:inline-block;font-variation-settings:"wdth" 75;animation:verb linear both;animation-timeline:view();animation-range:cover 35% cover 65%}
 .curtain{animation:curtain linear both;animation-timeline:view();animation-range:entry 0% entry 90%}
 .lane{transform-origin:left;animation:lane-fill linear both;animation-timeline:view();animation-range:entry 40% cover 55%}
 .count{counter-reset:n var(--n);animation:count 2.2s cubic-bezier(.16,1,.3,1) both;animation-timeline:view();animation-range:entry 20% cover 45%}
@@ -60,13 +77,17 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .countdown{counter-reset:n var(--n);animation:countdown 2.2s cubic-bezier(.16,1,.3,1) both;animation-timeline:view();animation-range:entry 20% cover 45%}
 .countdown::after{content:counter(n)}
 .tpl{animation:up linear both;animation-timeline:view();animation-range:entry 0% entry 70%}
-.cta-word{display:block;animation:stretch-in linear both;animation-timeline:view();animation-range:entry 10% cover 50%}
+.iris{animation:iris linear both;animation-timeline:view();animation-range:entry 0% entry 85%}
+.cta-word{display:block;overflow:hidden;padding-bottom:.06em;animation:stretch-in linear both;animation-timeline:view();animation-range:entry 10% cover 50%}
 .cta-word.alt{animation-direction:reverse}
 .cta-disc{animation:disc-par linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
-.wipe-up{animation:wipe-up linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
-.wm-wrap{overflow:hidden;animation:rise-in linear both;animation-timeline:view();animation-range:entry 0% entry 100%}
+.ch{display:inline-block;animation:ch-in linear both;animation-timeline:view();animation-range:entry calc(5% + var(--k) * 3%) entry calc(55% + var(--k) * 3%)}
+.wm .ch{animation-range:entry calc(var(--k) * 4%) entry calc(60% + var(--k) * 4%)}
 
-/* Hover */
+/* La velocidad del scroll inclina lo que se mueve (--v la pone landing/main.ts) */
+.skew{transform:skewY(calc(var(--v) * 3deg));transition:transform .4s cubic-bezier(.16,1,.3,1)}
+
+/* ---------- Hover ---------- */
 .nav a{background:linear-gradient(#ff3a1f,#ff3a1f) 0 100%/0 2px no-repeat;padding-bottom:3px;transition:background-size .45s cubic-bezier(.16,1,.3,1),color .3s}
 .nav a:hover{background-size:100% 2px}
 .btn{background-image:linear-gradient(#ff3a1f,#ff3a1f);background-size:0% 100%;background-repeat:no-repeat;transition:background-size .5s cubic-bezier(.16,1,.3,1),color .3s,transform .35s cubic-bezier(.16,1,.3,1)}
@@ -74,15 +95,18 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .btn.on-red{background-image:linear-gradient(#f2f2ef,#f2f2ef)}
 .btn .arrow{display:inline-block;transition:transform .35s cubic-bezier(.16,1,.3,1)}
 .btn:hover .arrow{transform:translate(4px,-4px)}
+.motion{font:inherit;font-size:12px;letter-spacing:.12em;text-transform:uppercase;background:none;border:1.5px solid #111111;color:#111111;padding:10px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;transition:background-color .3s,color .3s}
+.motion:hover{background:#111111;color:#f2f2ef}
+.motion .dot{width:8px;height:8px;border-radius:50%;background:#ff3a1f}
+.reduce-motion .motion .dot{background:transparent;box-shadow:inset 0 0 0 1.5px currentColor}
 .meta-cell{transition:border-color .3s,translate .45s cubic-bezier(.16,1,.3,1)}
 .meta-cell:hover{border-top-color:#ff3a1f !important;translate:0 -6px}
 .ticker-band:hover .ticker{animation-play-state:paused}
 .ticker span{transition:color .25s}
 .ticker span:hover{color:#ff3a1f}
 .node:hover{background:#ff3a1f !important;translate:0 -8px}
-.row .verb{display:inline-block;transition:font-variation-settings .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);font-variation-settings:"wdth" 75}
-.row:hover{background:#ff3a1f}
-.row:hover .verb{font-variation-settings:"wdth" 125;transform:translateX(12px)}
+.row:hover{background:#ff3a1f !important}
+.row:hover .verb{font-variation-settings:"wdth" 125 !important}
 .row .meta{transition:translate .5s cubic-bezier(.16,1,.3,1)}
 .row:hover .meta{translate:-8px 0}
 .lane-row:hover .lane{filter:brightness(1.25)}
@@ -94,15 +118,26 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .tpl:hover .t-name{translate:12px 0}
 .tpl .arr{position:absolute;right:4px;top:24px;font-size:30px;opacity:0;translate:-16px 16px;transition:opacity .35s,translate .5s cubic-bezier(.16,1,.3,1)}
 .tpl:hover .arr{opacity:1;translate:0 0}
-:focus-visible{outline:2px solid #ff3a1f;outline-offset:3px}
 
-@media (max-width:760px){.row{grid-template-columns:44px minmax(0,1fr) !important}.row .meta{display:none !important}}
-/* Movimiento reducido: fuera desplazamientos, parallax y movimiento continuo; se quedan fundidos, colores,
-   contadores, líneas que se dibujan y hovers */
-@keyframes fade{from{opacity:0}}
-@media (prefers-reduced-motion:reduce){
-  .breathe,.disc,.ticker,.cue,.cta-disc,.scrub,.cta-word,.hero .line-l,.hero .line-r,.hero .disc-wrap{animation:none}
-  .gridline,.rise,.fade-up,.mask,.reveal,.row,.tpl,.num,.curtain,.wipe-up,.wm-wrap{animation-name:fade}
-  .node{animation-name:pulse,fade}
-  .btn:hover,.node:hover,.meta-cell:hover{transform:none;translate:none}
+@media (max-width:760px){
+  .row{grid-template-columns:44px minmax(0,1fr) !important}
+  .row .meta{display:none !important}
+  .hero-pin{height:220vh}
 }
+
+/* ---------- Movimiento reducido ---------- */
+/* Lo decide landing/main.ts (y el script del <head>): la preferencia del sistema, salvo que el visitante
+   pulse el botón Motion. Sin desplazamientos grandes ni movimiento continuo; quedan fundidos y colores */
+.reduce-motion .hero-pin{height:auto}
+.reduce-motion .hero-stage{position:relative;height:auto;overflow:visible}
+.reduce-motion .hz-say{display:none}
+.reduce-motion .breathe,.reduce-motion .disc,.reduce-motion .ticker,.reduce-motion .cue,.reduce-motion .cta-disc,
+.reduce-motion .scrub,.reduce-motion .cta-word,.reduce-motion .ghost,.reduce-motion .ch,
+.reduce-motion .hero-stage .line-l,.reduce-motion .hero-stage .line-r,.reduce-motion .hero-stage .disc-wrap,.reduce-motion .hero-stage .grid,.reduce-motion .hero-stage .cue-wrap,
+.reduce-motion .row .verb{animation:none}
+.reduce-motion .gridline,.reduce-motion .rise,.reduce-motion .mask,.reduce-motion .reveal,.reduce-motion .tpl,.reduce-motion .num,
+.reduce-motion .curtain,.reduce-motion .iris,.reduce-motion .cam{animation-name:fade}
+.reduce-motion .row{animation-name:fade,none}
+.reduce-motion .node{animation-name:pulse,fade}
+.reduce-motion .skew{transform:none}
+.reduce-motion .btn:hover,.reduce-motion .node:hover,.reduce-motion .meta-cell:hover{transform:none;translate:none}

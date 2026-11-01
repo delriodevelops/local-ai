@@ -11,6 +11,14 @@
   <meta property="og:type" content="website" />
   <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
   <script>
+    // Antes de pintar: movimiento reducido si el sistema lo pide, salvo que el visitante eligiera otra cosa.
+    // Así la página no salta de alto al cargar landing/main.ts
+    (function () {
+      var choice = null
+      try { choice = localStorage.getItem('mm-motion') } catch (e) {}
+      var reduce = choice === 'reduced' || (choice !== 'full' && matchMedia('(prefers-reduced-motion: reduce)').matches)
+      if (reduce) document.documentElement.classList.add('reduce-motion')
+    })()
     // Registra ya el service worker de aislamiento: así la app abre con todos los núcleos sin recargar
     if (window.isSecureContext && 'serviceWorker' in navigator) navigator.serviceWorker.register('%BASE_URL%isolation-sw.js')
   </script>
@@ -20,7 +28,7 @@
 <main style="font-family: 'Archivo Variable', system-ui, sans-serif; color: #111111; background: #f2f2ef; overflow: clip">
   <div class="progress" aria-hidden="true"></div>
 
-  <header style="position: relative; z-index: 3; max-width: 1440px; margin: 0 auto; padding: 24px 40px; display: flex; flex-wrap: wrap; gap: 16px 40px; align-items: baseline; font-size: 13px; line-height: 1.3">
+  <header style="position: relative; z-index: 3; max-width: 1440px; margin: 0 auto; padding: 24px 40px; display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; font-size: 13px; line-height: 1.3">
     <span style="font-weight: 800; font-size: 15px; letter-spacing: -0.01em; flex: 1 1 200px">MeshMind<br><span style="font-weight: 400; color: #555555">Local AI flows</span></span>
     <nav class="nav" style="display: flex; gap: 32px; flex: 1 1 360px; flex-wrap: wrap">
       <a href="#canvas" style="text-decoration: none">01 Canvas</a>
@@ -28,67 +36,77 @@
       <a href="#machine" style="text-decoration: none">03 Machine</a>
       <a href="#start" style="text-decoration: none">04 Start</a>
     </nav>
+    <button class="motion" type="button" aria-pressed="true"><span class="dot" aria-hidden="true"></span>Motion <span class="state">On</span></button>
     <a class="btn" href="./app/" style="display: inline-block; background-color: #111111; color: #f2f2ef; padding: 14px 20px; text-decoration: none; font-weight: 600">Open the app <span class="arrow">↗</span></a>
   </header>
 
-  <section class="hero" style="position: relative; max-width: 1440px; margin: 0 auto; padding: 40px 40px 0">
-    <div aria-hidden="true" style="position: absolute; inset: 0 40px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; pointer-events: none">
-      <span class="gridline" style="--i: 0; border-left: 1px solid rgba(17,17,17,.1)"></span>
-      <span class="gridline" style="--i: 1; border-left: 1px solid rgba(17,17,17,.1)"></span>
-      <span class="gridline" style="--i: 2; border-left: 1px solid rgba(17,17,17,.1)"></span>
-      <span class="gridline" style="--i: 3; border-left: 1px solid rgba(17,17,17,.1)"></span>
-      <span class="gridline" style="--i: 4; border-left: 1px solid rgba(17,17,17,.1)"></span>
-      <span class="gridline" style="--i: 5; border-left: 1px solid rgba(17,17,17,.1)"></span>
-      <span class="gridline" style="--i: 6; border-left: 1px solid rgba(17,17,17,.1)"></span>
-      <span class="gridline" style="--i: 7; border-left: 1px solid rgba(17,17,17,.1)"></span>
-      <span class="gridline" style="--i: 8; border-left: 1px solid rgba(17,17,17,.1)"></span>
-      <span class="gridline" style="--i: 9; border-left: 1px solid rgba(17,17,17,.1)"></span>
-      <span class="gridline" style="--i: 10; border-left: 1px solid rgba(17,17,17,.1)"></span>
-      <span class="gridline" style="--i: 11; border-left: 1px solid rgba(17,17,17,.1); border-right: 1px solid rgba(17,17,17,.1)"></span>
-    </div>
+  <div class="hero-pin">
+    <section class="hero-stage">
+      <div style="position: relative; max-width: 1440px; height: 100%; margin: 0 auto; padding: 40px 40px 160px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center">
+        <div class="grid" aria-hidden="true" style="position: absolute; inset: 0 40px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; pointer-events: none">
+          <span class="gridline" style="--i: 0; border-left: 1px solid rgba(17,17,17,.1)"></span>
+          <span class="gridline" style="--i: 1; border-left: 1px solid rgba(17,17,17,.1)"></span>
+          <span class="gridline" style="--i: 2; border-left: 1px solid rgba(17,17,17,.1)"></span>
+          <span class="gridline" style="--i: 3; border-left: 1px solid rgba(17,17,17,.1)"></span>
+          <span class="gridline" style="--i: 4; border-left: 1px solid rgba(17,17,17,.1)"></span>
+          <span class="gridline" style="--i: 5; border-left: 1px solid rgba(17,17,17,.1)"></span>
+          <span class="gridline" style="--i: 6; border-left: 1px solid rgba(17,17,17,.1)"></span>
+          <span class="gridline" style="--i: 7; border-left: 1px solid rgba(17,17,17,.1)"></span>
+          <span class="gridline" style="--i: 8; border-left: 1px solid rgba(17,17,17,.1)"></span>
+          <span class="gridline" style="--i: 9; border-left: 1px solid rgba(17,17,17,.1)"></span>
+          <span class="gridline" style="--i: 10; border-left: 1px solid rgba(17,17,17,.1)"></span>
+          <span class="gridline" style="--i: 11; border-left: 1px solid rgba(17,17,17,.1); border-right: 1px solid rgba(17,17,17,.1)"></span>
+        </div>
 
-    <div class="disc-wrap" aria-hidden="true" style="position: absolute; z-index: 0; right: 7vw; top: 150px; width: clamp(150px, 25vw, 380px); aspect-ratio: 1">
-      <div class="disc" style="width: 100%; height: 100%; border-radius: 50%; background: #ff3a1f"></div>
-    </div>
+        <div style="position: relative">
+        <div class="disc-wrap" aria-hidden="true" style="position: absolute; z-index: 0; right: 4vw; top: 8%; width: clamp(150px, 25vw, 380px); aspect-ratio: 1">
+          <div class="disc" style="width: 100%; height: 100%; border-radius: 50%; background: #ff3a1f"></div>
+        </div>
 
-    <h1 style="position: relative; z-index: 1; margin: 0; padding-top: 48px; font-weight: 800; font-size: clamp(84px, 19vw, 300px); line-height: .8; letter-spacing: -0.045em; text-transform: uppercase">
-      <span class="line-l" style="display: block; overflow: hidden; padding-bottom: .04em">
-        <span class="rise" style="display: block; animation-delay: .35s"><span class="breathe" style="display: inline-block">Mesh</span></span>
-      </span>
-      <span class="line-r" style="display: block; overflow: hidden; padding-bottom: .04em; margin-left: 18vw">
-        <span class="rise" style="display: block; animation-delay: .5s"><span class="breathe" style="display: inline-block; animation-delay: -4.5s">Mind</span></span>
-      </span>
-    </h1>
+        <h1 style="position: relative; z-index: 1; margin: 0; font-weight: 800; font-size: clamp(84px, 19vw, 300px); line-height: .8; letter-spacing: -0.045em; text-transform: uppercase">
+          <span class="line-l" style="display: block; overflow: hidden; padding-bottom: .04em">
+            <span class="rise" style="display: block; animation-delay: .35s"><span class="breathe" style="display: inline-block">Mesh</span></span>
+          </span>
+          <span class="line-r" style="display: block; overflow: hidden; padding-bottom: .04em; margin-left: 18vw">
+            <span class="rise" style="display: block; animation-delay: .5s"><span class="breathe" style="display: inline-block; animation-delay: -4.5s">Mind</span></span>
+          </span>
+        </h1>
+        </div>
 
-    <div style="position: relative; z-index: 1; margin-top: 64px; display: flex; flex-wrap: wrap; gap: 32px 24px; align-items: end">
-      <p class="fade-up" style="flex: 1 1 380px; margin: 0; font-size: clamp(24px, 2.4vw, 34px); line-height: 1.15; font-weight: 600; letter-spacing: -0.015em; animation-delay: .9s">( 01 ) Wire AI models into flows that think, see, listen and speak.</p>
-      <p class="fade-up" style="flex: 1 1 320px; margin: 0; font-size: 17px; line-height: 1.6; color: #444444; animation-delay: 1.05s">Every model runs on your own graphics card and processor, inside a browser tab. No server, no account, no API key. The models download once and stay with you.</p>
-      <div class="fade-up" style="flex: 0 1 260px; display: flex; gap: 20px; align-items: end; justify-content: flex-end; animation-delay: 1.2s">
-        <span style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em">Scroll</span>
-        <span style="position: relative; width: 1px; height: 72px; background: rgba(17,17,17,.15)"><span class="cue" style="position: absolute; inset: 0; background: #111111"></span></span>
+        <div class="cue-wrap" aria-hidden="true" style="position: absolute; left: 40px; bottom: 130px; z-index: 1; display: flex; gap: 16px; align-items: end">
+          <span style="position: relative; width: 1px; height: 72px; background: rgba(17,17,17,.15)"><span class="cue" style="position: absolute; inset: 0; background: #111111"></span></span>
+          <span style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em">Scroll</span>
+        </div>
       </div>
-    </div>
+      <p class="hz-say">Your machine<br>is the server.</p>
+    </section>
+  </div>
 
-    <div style="position: relative; z-index: 1; margin-top: 72px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px">
-      <div class="fade-up" style="animation-delay: 1.3s">
+  <section style="position: relative; z-index: 1; max-width: 1440px; margin: 0 auto; padding: 120px 40px 0">
+    <div style="display: flex; flex-wrap: wrap; gap: 32px 24px; align-items: end">
+      <p class="reveal" style="flex: 1 1 380px; margin: 0; font-size: clamp(24px, 2.4vw, 34px); line-height: 1.15; font-weight: 600; letter-spacing: -0.015em">( 01 ) Wire AI models into flows that think, see, listen and speak.</p>
+      <p class="reveal" style="flex: 1 1 320px; margin: 0; font-size: 17px; line-height: 1.6; color: #444444">Every model runs on your own graphics card and processor, inside a browser tab. No server, no account, no API key. The models download once and stay with you.</p>
+    </div>
+    <div style="margin-top: 72px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px">
+      <div class="reveal">
         <div class="meta-cell" style="border-top: 2px solid #111111; padding-top: 14px">
           <div style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #555555">Text</div>
           <div style="margin-top: 6px; font-size: 20px; font-weight: 600">Qwen 2.5 · Llama 3.2</div>
         </div>
       </div>
-      <div class="fade-up" style="animation-delay: 1.4s">
+      <div class="reveal">
         <div class="meta-cell" style="border-top: 2px solid #111111; padding-top: 14px">
           <div style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #555555">Image</div>
           <div style="margin-top: 6px; font-size: 20px; font-weight: 600">Janus-Pro 1B</div>
         </div>
       </div>
-      <div class="fade-up" style="animation-delay: 1.5s">
+      <div class="reveal">
         <div class="meta-cell" style="border-top: 2px solid #111111; padding-top: 14px">
           <div style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #555555">Sound</div>
           <div style="margin-top: 6px; font-size: 20px; font-weight: 600">Whisper · Kokoro</div>
         </div>
       </div>
-      <div class="fade-up" style="animation-delay: 1.6s">
+      <div class="reveal">
         <div class="meta-cell" style="border-top: 2px solid #ff3a1f; padding-top: 14px">
           <div style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #555555">Server</div>
           <div style="margin-top: 6px; font-size: 20px; font-weight: 600">None. It runs in your tab.</div>
@@ -98,15 +116,18 @@
   </section>
 
   <div class="ticker-band" aria-hidden="true" style="margin-top: 120px; border-top: 2px solid #111111; border-bottom: 2px solid #111111; padding: 18px 0; overflow: hidden">
-    <div class="scrub">
-      <div class="ticker" style="display: flex; width: max-content; gap: 56px; white-space: nowrap; font-weight: 800; font-size: 56px; letter-spacing: -0.03em; text-transform: uppercase; font-variation-settings: 'wdth' 70">
-        <span>Think</span><span style="color:#ff3a1f">●</span><span>See</span><span style="color:#ff3a1f">●</span><span>Paint</span><span style="color:#ff3a1f">●</span><span>Listen</span><span style="color:#ff3a1f">●</span><span>Speak</span><span style="color:#ff3a1f">●</span><span>Split</span><span style="color:#ff3a1f">●</span><span>Join</span><span style="color:#ff3a1f">●</span><span>Decide</span><span style="color:#ff3a1f">●</span>
-        <span>Think</span><span style="color:#ff3a1f">●</span><span>See</span><span style="color:#ff3a1f">●</span><span>Paint</span><span style="color:#ff3a1f">●</span><span>Listen</span><span style="color:#ff3a1f">●</span><span>Speak</span><span style="color:#ff3a1f">●</span><span>Split</span><span style="color:#ff3a1f">●</span><span>Join</span><span style="color:#ff3a1f">●</span><span>Decide</span><span style="color:#ff3a1f">●</span>
+    <div class="skew">
+      <div class="scrub">
+        <div class="ticker" style="display: flex; width: max-content; gap: 56px; white-space: nowrap; font-weight: 800; font-size: 56px; letter-spacing: -0.03em; text-transform: uppercase; font-variation-settings: 'wdth' 70">
+          <span>Think</span><span style="color:#ff3a1f">●</span><span>See</span><span style="color:#ff3a1f">●</span><span>Paint</span><span style="color:#ff3a1f">●</span><span>Listen</span><span style="color:#ff3a1f">●</span><span>Speak</span><span style="color:#ff3a1f">●</span><span>Split</span><span style="color:#ff3a1f">●</span><span>Join</span><span style="color:#ff3a1f">●</span><span>Decide</span><span style="color:#ff3a1f">●</span>
+          <span>Think</span><span style="color:#ff3a1f">●</span><span>See</span><span style="color:#ff3a1f">●</span><span>Paint</span><span style="color:#ff3a1f">●</span><span>Listen</span><span style="color:#ff3a1f">●</span><span>Speak</span><span style="color:#ff3a1f">●</span><span>Split</span><span style="color:#ff3a1f">●</span><span>Join</span><span style="color:#ff3a1f">●</span><span>Decide</span><span style="color:#ff3a1f">●</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <section id="canvas" style="max-width: 1440px; margin: 0 auto; padding: 160px 40px 120px">
+  <section id="canvas" style="position: relative; isolation: isolate; max-width: 1440px; margin: 0 auto; padding: 160px 40px 120px">
+    <span class="ghost" aria-hidden="true">01</span>
     <div style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end">
       <span style="display: inline-block; overflow: hidden"><span class="num" style="font-weight: 800; font-size: clamp(120px, 15vw, 220px); line-height: .78; letter-spacing: -0.05em; color: #ff3a1f; font-stretch: 62%">01</span></span>
       <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 18px">
@@ -116,7 +137,7 @@
     </div>
 
     <div style="margin-top: 80px; overflow-x: auto">
-      <div style="position: relative; min-width: 900px; aspect-ratio: 2.4">
+      <div class="cam" style="position: relative; min-width: 900px; aspect-ratio: 2.4">
         <svg viewBox="0 0 1200 500" style="position: absolute; inset: 0; width: 100%; height: 100%" aria-hidden="true">
           <g fill="none" stroke="#111111" stroke-width="2">
             <path class="wire" pathLength="1" d="M198 250 C 270 250, 270 90, 342 90"/>
@@ -159,7 +180,8 @@
     </div>
   </section>
 
-  <section id="senses" style="max-width: 1440px; margin: 0 auto; padding: 80px 40px 140px">
+  <section id="senses" style="position: relative; isolation: isolate; max-width: 1440px; margin: 0 auto; padding: 80px 40px 140px">
+    <span class="ghost" aria-hidden="true">02</span>
     <div style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end; margin-bottom: 64px">
       <span style="display: inline-block; overflow: hidden"><span class="num" style="font-weight: 800; font-size: clamp(120px, 15vw, 220px); line-height: .78; letter-spacing: -0.05em; color: #ff3a1f; font-stretch: 62%">02</span></span>
       <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 18px">
@@ -213,7 +235,8 @@
     </div>
   </section>
 
-  <section id="machine" class="curtain" style="background: #111111; color: #f2f2ef">
+  <section id="machine" class="curtain" style="position: relative; isolation: isolate; overflow: hidden; background: #111111; color: #f2f2ef">
+    <span class="ghost on-dark" aria-hidden="true">03</span>
     <div style="max-width: 1440px; margin: 0 auto; padding: 140px 40px; display: flex; flex-wrap: wrap; gap: 72px 64px">
       <div style="flex: 1 1 460px; display: flex; flex-direction: column; gap: 24px">
         <span style="display: inline-block; overflow: hidden"><span class="num" style="font-weight: 800; font-size: clamp(120px, 15vw, 220px); line-height: .78; letter-spacing: -0.05em; color: #ff3a1f; font-stretch: 62%">03</span></span>
@@ -259,7 +282,8 @@
     </div>
   </section>
 
-  <section id="start" style="max-width: 1440px; margin: 0 auto; padding: 160px 40px 140px">
+  <section id="start" style="position: relative; isolation: isolate; max-width: 1440px; margin: 0 auto; padding: 160px 40px 140px">
+    <span class="ghost" aria-hidden="true">04</span>
     <div style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end; margin-bottom: 56px">
       <span style="display: inline-block; overflow: hidden"><span class="num" style="font-weight: 800; font-size: clamp(120px, 15vw, 220px); line-height: .78; letter-spacing: -0.05em; color: #ff3a1f; font-stretch: 62%">04</span></span>
       <h2 class="mask" style="flex: 1 1 420px; margin: 0; font-weight: 800; font-size: clamp(44px, 5.6vw, 84px); line-height: .92; letter-spacing: -0.035em; text-transform: uppercase">Start from a template</h2>
@@ -303,13 +327,13 @@
     </div>
   </section>
 
-  <section class="wipe-up" style="position: relative; background: #ff3a1f; overflow: hidden">
+  <section class="iris" style="position: relative; background: #ff3a1f; overflow: hidden">
     <div aria-hidden="true" class="cta-disc" style="position: absolute; right: -8vw; top: -12vw; width: 46vw; aspect-ratio: 1; border-radius: 50%; background: #f2f2ef"></div>
     <div style="position: relative; max-width: 1440px; margin: 0 auto; padding: 140px 40px; display: flex; flex-direction: column; gap: 48px">
-      <h2 style="margin: 0; font-weight: 800; font-size: clamp(72px, 12vw, 200px); line-height: .8; letter-spacing: -0.05em; text-transform: uppercase">
-        <span class="cta-word" style="font-stretch: 125%">Draw</span>
-        <span class="cta-word alt" style="font-stretch: 62%; margin-left: 12vw">your first</span>
-        <span class="cta-word" style="font-stretch: 100%">mesh.</span>
+      <h2 aria-label="Draw your first mesh." style="margin: 0; font-weight: 800; font-size: clamp(72px, 12vw, 200px); line-height: .8; letter-spacing: -0.05em; text-transform: uppercase">
+        <span class="cta-word" aria-hidden="true" style="font-stretch: 125%"><span class="ch" style="--k: 0">D</span><span class="ch" style="--k: 1">r</span><span class="ch" style="--k: 2">a</span><span class="ch" style="--k: 3">w</span></span>
+        <span class="cta-word alt" aria-hidden="true" style="font-stretch: 62%; margin-left: 12vw"><span class="ch" style="--k: 2">y</span><span class="ch" style="--k: 3">o</span><span class="ch" style="--k: 4">u</span><span class="ch" style="--k: 5">r</span><span class="ch" style="--k: 6; width: .3em">&#160;</span><span class="ch" style="--k: 6">f</span><span class="ch" style="--k: 7">i</span><span class="ch" style="--k: 8">r</span><span class="ch" style="--k: 9">s</span><span class="ch" style="--k: 10">t</span></span>
+        <span class="cta-word" aria-hidden="true" style="font-stretch: 100%"><span class="ch" style="--k: 4">m</span><span class="ch" style="--k: 5">e</span><span class="ch" style="--k: 6">s</span><span class="ch" style="--k: 7">h</span><span class="ch" style="--k: 8">.</span></span>
       </h2>
       <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center">
         <a class="btn on-red" href="./app/" style="display: inline-block; background-color: #111111; color: #f2f2ef; padding: 22px 32px; font-size: 18px; font-weight: 600; text-decoration: none">Open MeshMind <span class="arrow">↗</span></a>
@@ -319,8 +343,8 @@
   </section>
 
   <footer style="max-width: 1440px; margin: 0 auto; padding: 48px 40px 32px">
-    <div class="wm-wrap">
-      <div class="breathe" style="font-weight: 800; font-size: 16.5vw; line-height: .8; letter-spacing: -0.05em; text-transform: uppercase; white-space: nowrap">MeshMind</div>
+    <div aria-label="MeshMind" style="overflow: hidden">
+      <div class="breathe wm skew" aria-hidden="true" style="font-weight: 800; font-size: 16.5vw; line-height: .8; letter-spacing: -0.05em; text-transform: uppercase; white-space: nowrap; padding-bottom: .04em"><span class="ch" style="--k: 0">M</span><span class="ch" style="--k: 1">e</span><span class="ch" style="--k: 2">s</span><span class="ch" style="--k: 3">h</span><span class="ch" style="--k: 4">M</span><span class="ch" style="--k: 5">i</span><span class="ch" style="--k: 6">n</span><span class="ch" style="--k: 7">d</span></div>
     </div>
     <div style="margin-top: 32px; padding-top: 16px; border-top: 2px solid #111111; display: flex; flex-wrap: wrap; gap: 12px 40px; justify-content: space-between; font-size: 13px">
       <span>WebLLM · Transformers.js · Kokoro · React Flow</span>
