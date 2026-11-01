@@ -31,12 +31,13 @@ export const OUTPUTS: Record<NodeKind, Record<string, PortType | 'dynamic'>> = {
   video: { out: 'video' },
 }
 
+// Un color por tipo, distinguibles sobre papel: tinta, azul, rojo, ámbar y violeta
 export const PORT_COLOR: Record<PortType, string> = {
-  text: '#c8f560',
-  list: '#60a5fa',
-  image: '#f472b6',
-  audio: '#fb923c',
-  video: '#a78bfa',
+  text: '#111111',
+  list: '#2f5bff',
+  image: '#ff3a1f',
+  audio: '#d98e00',
+  video: '#7c4dff',
 }
 
 // Tipo de lo que sale por un conector. Un asistente que recibe una lista responde a cada elemento y devuelve otra lista

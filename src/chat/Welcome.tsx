@@ -1,26 +1,27 @@
+import { ArrowUpRight } from 'lucide-react'
 import { useApp } from '@/flow/store'
 import { TEMPLATES } from '@/flow/presets'
 
 const NODES = [[40, 150], [120, 60], [150, 190], [230, 110], [300, 200], [320, 50]]
 const EDGES = [[0, 1], [0, 2], [1, 3], [2, 3], [3, 4], [3, 5], [1, 5], [2, 4]]
 
-// La señal recorre la malla de un nodo a otro
+// La señal recorre la malla de un nodo a otro: cables de tinta, pulsos rojos
 function Mesh() {
   return (
     <svg viewBox="0 0 360 250" className="w-full h-auto" aria-hidden="true">
       {EDGES.map(([a, b], i) => (
         <g key={i}>
-          <line x1={NODES[a][0]} y1={NODES[a][1]} x2={NODES[b][0]} y2={NODES[b][1]} stroke="#26281f" />
+          <line x1={NODES[a][0]} y1={NODES[a][1]} x2={NODES[b][0]} y2={NODES[b][1]} stroke="#111111" strokeWidth="1.5" />
           <line
             x1={NODES[a][0]} y1={NODES[a][1]} x2={NODES[b][0]} y2={NODES[b][1]}
-            stroke="#c8f560" strokeWidth="1.5" strokeLinecap="round" className="mesh-trace" style={{ animationDelay: `${i * 0.4}s` }}
+            stroke="#ff3a1f" strokeWidth="4" strokeLinecap="round" className="mesh-trace" style={{ animationDelay: `${i * 0.4}s` }}
           />
         </g>
       ))}
       {NODES.map(([x, y], i) => (
         <g key={i}>
-          <circle cx={x} cy={y} r="14" fill="#c8f560" opacity="0.08" className="mesh-node" style={{ animationDelay: `${i * 0.5}s` }} />
-          <circle cx={x} cy={y} r="5" fill="#0b0c09" stroke="#c8f560" strokeWidth="1.5" />
+          <circle cx={x} cy={y} r="13" fill="#ff3a1f" opacity="0.15" className="mesh-node" style={{ animationDelay: `${i * 0.5}s` }} />
+          <rect x={x - 6} y={y - 6} width="12" height="12" fill="#f2f2ef" stroke="#111111" strokeWidth="2" />
         </g>
       ))}
     </svg>
@@ -33,34 +34,35 @@ export default function Welcome() {
 
   return (
     <div className="py-6">
-      <div className="grid gap-6 @xl:grid-cols-[1.2fr_0.8fr] items-center">
+      <div className="grid gap-6 @xl:grid-cols-[1.25fr_0.75fr] items-end">
         <div className="flex flex-col gap-5 animate-rise">
           <span className="label">MeshMind · local inference</span>
-          <h1 className="font-display text-5xl @md:text-6xl @2xl:text-7xl leading-[0.9] tracking-tight text-neutral-50">
-            Think in <em className="text-signal">meshes.</em>
+          <h1 className="display text-6xl @md:text-7xl @2xl:text-8xl leading-[0.82] text-neutral-50">
+            Think in <span className="text-signal">meshes.</span>
           </h1>
-          <p className="text-neutral-400 max-w-md text-[15px] leading-relaxed">
-            Wire AI assistants into a flow: run them in parallel, split work into items, route by conditions. It all runs in your browser. No server, no API key.
+          <p className="text-neutral-300 max-w-md text-[15px] leading-relaxed">
+            Wire AI models into a flow: run them in parallel, split work into items, route by conditions, see, paint, listen and speak. It all runs in your browser. No server, no API key.
           </p>
         </div>
         <div className="hidden @xl:block animate-rise" style={{ animationDelay: '120ms' }}>
           <Mesh />
         </div>
       </div>
-      <p className="label mt-10 mb-3">Start from a template</p>
-      <ul className="grid @lg:grid-cols-2 border-t border-neutral-800">
+      <p className="label mt-12 mb-3">Start from a template</p>
+      <ul className="grid @lg:grid-cols-2 @lg:gap-x-8 border-t-2 border-ink">
         {TEMPLATES.map((t, i) => (
-          <li key={t.id} className="border-b border-neutral-800 @lg:odd:border-r @lg:odd:pr-5 @lg:even:pl-5 animate-rise" style={{ animationDelay: `${200 + i * 70}ms` }}>
+          <li key={t.id} className="border-b border-ink animate-rise" style={{ animationDelay: `${200 + i * 70}ms` }}>
             <button
               type="button"
               onClick={() => { loadTemplate(t.id); setApp({ view: window.innerWidth < 1024 ? 'flow' : 'split' }) }}
-              className="group w-full text-left py-4 flex gap-4"
+              className="group relative w-full text-left py-4 pr-8 flex gap-4 duration-300 ease-snap hover:text-signal-ink"
             >
-              <span className="font-mono text-xs text-lime-300 pt-0.5">{String(i + 1).padStart(2, '0')}</span>
+              <span className="text-xs pt-1 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
               <span className="flex flex-col gap-1">
-                <span className="text-neutral-50 group-hover:text-signal duration-200">{t.name}</span>
+                <span className="text-lg font-bold tracking-tight duration-300 ease-snap group-hover:translate-x-2">{t.name}</span>
                 <span className="text-sm text-neutral-400">{t.description}</span>
               </span>
+              <ArrowUpRight className="absolute right-0 top-4 w-5 h-5 opacity-0 -translate-x-2 translate-y-2 duration-300 ease-snap group-hover:opacity-100 group-hover:translate-x-0 group-hover:translate-y-0" />
             </button>
           </li>
         ))}

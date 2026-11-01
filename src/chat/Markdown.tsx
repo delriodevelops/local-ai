@@ -9,7 +9,7 @@ function CodeBlock({ code, lang }: { code: string; lang: string }) {
     let alive = true
     import('shiki/bundle/web')
       .then(({ codeToHtml, bundledLanguages }) =>
-        codeToHtml(code, { lang: lang in bundledLanguages ? lang : 'text', theme: 'vitesse-dark' }))
+        codeToHtml(code, { lang: lang in bundledLanguages ? lang : 'text', theme: 'vitesse-light' }))
       .then(result => alive && setHtml(result))
       .catch(() => {})
     return () => { alive = false }
@@ -20,7 +20,7 @@ function CodeBlock({ code, lang }: { code: string; lang: string }) {
 }
 
 export const Markdown = memo(({ text }: { text: string }) => (
-  <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-headings:font-display prose-headings:font-normal prose-headings:tracking-tight prose-strong:text-neutral-50 prose-a:text-lime-300 prose-code:font-mono prose-code:before:content-none prose-code:after:content-none prose-li:marker:text-neutral-500 text-[15px] text-neutral-200">
+  <div className="prose max-w-none prose-p:leading-relaxed prose-headings:font-extrabold prose-headings:uppercase prose-headings:tracking-tight prose-strong:text-neutral-50 prose-a:text-signal-ink prose-code:font-mono prose-code:before:content-none prose-code:after:content-none prose-li:marker:text-neutral-500 text-[15px] text-neutral-200">
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{

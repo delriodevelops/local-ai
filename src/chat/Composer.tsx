@@ -76,7 +76,7 @@ export default function Composer() {
 
   return (
     <form onSubmit={submit} className="mx-auto w-full max-w-3xl px-4 pb-3">
-      <div className="rounded-2xl border border-neutral-700 focus-within:border-lime-300/50 bg-neutral-900 p-2 duration-300 ease-snap shadow-[0_-24px_48px_-24px_rgba(0,0,0,0.6)]">
+      <div className="border-[1.5px] border-ink focus-within:border-signal bg-neutral-900 p-2 duration-300 ease-snap shadow-[0_-24px_48px_-24px_rgba(17,17,17,0.12)]">
         {(attachments.image || attachments.audio) && (
           <div className="flex flex-wrap items-center gap-2 px-1 pb-2">
             {attachments.image && (
@@ -90,7 +90,7 @@ export default function Composer() {
             {attachments.audio && (
               <span className="flex items-center gap-1">
                 <audio controls src={attachments.audio} className="h-9 w-60" />
-                <button type="button" title="Remove voice note" onClick={() => setAttachments(a => ({ ...a, audio: undefined }))} className="rounded-full p-1 text-neutral-400 hover:text-red-400">
+                <button type="button" title="Remove voice note" onClick={() => setAttachments(a => ({ ...a, audio: undefined }))} className="rounded-full p-1 text-neutral-400 hover:text-red-600">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </span>
@@ -117,7 +117,7 @@ export default function Composer() {
           </button>
           <button
             type="button" onClick={record} title={recorder.recording ? 'Stop recording' : 'Record a voice note'}
-            className={cn('w-10 h-10 shrink-0 rounded-xl flex items-center justify-center duration-200', recorder.recording ? 'bg-red-400/20 text-red-300 animate-pulse' : takesAudio ? 'text-neutral-200 hover:bg-neutral-800' : 'text-neutral-500 hover:bg-neutral-800')}
+            className={cn('w-10 h-10 shrink-0 rounded-xl flex items-center justify-center duration-200', recorder.recording ? 'bg-red-400/20 text-red-700 animate-pulse' : takesAudio ? 'text-neutral-200 hover:bg-neutral-800' : 'text-neutral-500 hover:bg-neutral-800')}
           >
             {recorder.recording ? <Square className="w-4 h-4 fill-current" /> : <Mic className="w-5 h-5" />}
           </button>
@@ -135,13 +135,13 @@ export default function Composer() {
             className="flex-1 resize-none bg-transparent px-2 py-2 text-[15px] outline-none placeholder:text-neutral-500 max-h-56"
           />
           {running ? (
-            <button type="button" onClick={stop} title="Stop" className="w-10 h-10 shrink-0 rounded-xl bg-neutral-100 text-neutral-950 flex items-center justify-center hover:bg-white duration-200">
+            <button type="button" onClick={stop} title="Stop" className="w-10 h-10 shrink-0 rounded-xl bg-ink text-paper flex items-center justify-center hover:bg-signal hover:text-ink duration-200">
               <Square className="w-4 h-4 fill-current" />
             </button>
           ) : (
             <button
               type="submit" title="Send" disabled={!canSend}
-              className="w-10 h-10 shrink-0 rounded-xl bg-signal text-neutral-950 flex items-center justify-center hover:bg-lime-200 hover:-translate-y-0.5 duration-200 ease-snap disabled:bg-neutral-700 disabled:text-neutral-500 disabled:translate-y-0"
+              className="w-10 h-10 shrink-0 rounded-xl bg-ink text-paper flex items-center justify-center hover:bg-signal hover:text-ink hover:-translate-y-0.5 duration-200 ease-snap disabled:bg-neutral-700 disabled:text-neutral-500 disabled:translate-y-0"
             >
               <ArrowUp className="w-5 h-5" />
             </button>

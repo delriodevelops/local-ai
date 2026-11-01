@@ -1,13 +1,13 @@
 import type { AssistantData, FlowEdge, FlowNode } from './types'
 
-export const COLORS = ['#c8f560', '#60a5fa', '#f472b6', '#fb923c', '#f87171', '#a78bfa', '#2dd4bf', '#facc15']
+export const COLORS = ['#ff3a1f', '#60a5fa', '#f472b6', '#fb923c', '#f87171', '#a78bfa', '#2dd4bf', '#facc15']
 
 export const ASSISTANTS: AssistantData[] = [
   { label: 'Researcher', color: '#60a5fa', instructions: 'Investigate the request. List the key facts, user needs and open questions. Be concise.' },
   { label: 'Designer', color: '#f472b6', instructions: 'Turn the input into a clear product or UX proposal: screens, flows and the main decisions.' },
   { label: 'Developer', color: '#fb923c', instructions: 'Turn the input into a concrete technical plan or code. Prefer simple, working solutions.' },
   { label: 'Critic', color: '#f87171', instructions: 'Find the weaknesses, risks and missing pieces in the input. Be direct and specific.' },
-  { label: 'Summarizer', color: '#c8f560', instructions: 'Combine everything you receive into one clear, well-structured answer. Keep what matters, drop repetition.' },
+  { label: 'Summarizer', color: '#ff3a1f', instructions: 'Combine everything you receive into one clear, well-structured answer. Keep what matters, drop repetition.' },
 ]
 
 let counter = 0
@@ -34,7 +34,7 @@ export const TEMPLATES: { id: string; name: string; description: string; build: 
     build: () => ({
       nodes: [
         { id: 'in', type: 'input', position: { x: 0, y: 80 }, data: { label: 'Your message' } },
-        assistant('a1', 260, 40, { label: 'Assistant', color: '#c8f560', instructions: 'You are a helpful assistant. Answer clearly and briefly.' }),
+        assistant('a1', 260, 40, { label: 'Assistant', color: '#ff3a1f', instructions: 'You are a helpful assistant. Answer clearly and briefly.' }),
         { id: 'out', type: 'output', position: { x: 620, y: 80 }, data: { label: 'Answer' } },
       ],
       edges: [edge('in', 'a1'), edge('a1', 'out')],
@@ -83,7 +83,7 @@ export const TEMPLATES: { id: string; name: string; description: string; build: 
         { id: 'sp', type: 'split', position: { x: 580, y: 120 }, data: { label: 'Each idea', max: 6 } },
         assistant('j', 820, 80, { label: 'Judge', color: '#f87171', instructions: 'Rate this idea from 1 to 10 for usefulness and originality, with one sentence of reasoning. Start with the idea itself.' }),
         { id: 'jn', type: 'join', position: { x: 1160, y: 120 }, data: { label: 'All ratings', separator: '\n\n' } },
-        assistant('rk', 1400, 80, { label: 'Ranker', color: '#c8f560', instructions: 'Rank the rated ideas from best to worst and recommend one, briefly.' }),
+        assistant('rk', 1400, 80, { label: 'Ranker', color: '#ff3a1f', instructions: 'Rank the rated ideas from best to worst and recommend one, briefly.' }),
         { id: 'out', type: 'output', position: { x: 1760, y: 120 }, data: { label: 'Answer' } },
       ],
       edges: [edge('in', 'g'), edge('g', 'sp'), edge('sp', 'j'), edge('j', 'jn'), edge('jn', 'rk'), edge('rk', 'out')],
@@ -131,7 +131,7 @@ export const TEMPLATES: { id: string; name: string; description: string; build: 
       nodes: [
         { id: 'in', type: 'input', position: { x: 0, y: 160 }, data: { label: 'Voice note' } },
         { id: 'stt', type: 'transcribe', position: { x: 320, y: 220 }, data: { label: 'What you said' } },
-        assistant('a', 660, 160, { label: 'Assistant', color: '#c8f560', instructions: 'Answer in 2–3 short spoken-style sentences. No lists, no markdown.' }),
+        assistant('a', 660, 160, { label: 'Assistant', color: '#ff3a1f', instructions: 'Answer in 2–3 short spoken-style sentences. No lists, no markdown.' }),
         { id: 'tts', type: 'speak', position: { x: 1020, y: 120 }, data: { label: 'Reply', voice: 'af_heart' } },
         { id: 'o1', type: 'output', position: { x: 1340, y: 140 }, data: { label: 'Spoken answer' } },
         { id: 'o2', type: 'output', position: { x: 1020, y: 380 }, data: { label: 'Text answer' } },

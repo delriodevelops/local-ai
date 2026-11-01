@@ -9,10 +9,10 @@ import { unloadModel } from '@/media/media'
 import type { MediaModel } from '@/media/worker'
 
 const STATE_STYLE: Record<ModelState, string> = {
-  off: 'bg-neutral-700',
+  off: 'bg-neutral-600',
   loading: 'bg-amber-300 animate-pulse',
-  ready: 'bg-lime-400',
-  busy: 'bg-lime-300 animate-pulse',
+  ready: 'bg-ink',
+  busy: 'bg-signal animate-pulse',
 }
 
 function Row({ name, device, state, detail, action }: { name: string; device: string; state: ModelState; detail?: string; action?: React.ReactNode }) {
@@ -48,18 +48,18 @@ export default function Monitor() {
 
   return (
     <Popover.Root onOpenChange={open => open && refresh()}>
-      <Popover.Trigger className="relative p-2.5 rounded-lg border border-neutral-700 bg-neutral-900 hover:border-neutral-500 text-neutral-300 duration-200" title="Resources">
+      <Popover.Trigger className="relative p-2.5 rounded-lg border border-ink bg-neutral-900 hover:bg-ink hover:text-paper text-neutral-300 duration-200" title="Resources">
         <Activity className="w-4 h-4" />
         {anyBusy && <span className="absolute -right-0.5 -top-0.5 w-2 h-2 rounded-full bg-signal animate-pulse" />}
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content align="end" sideOffset={6} className="z-50 w-80 rounded-xl border border-neutral-700 bg-neutral-900 p-4 shadow-2xl animate-rise">
+        <Popover.Content align="end" sideOffset={6} className="z-50 w-80 border-[1.5px] border-ink bg-neutral-900 p-4 animate-rise">
           <p className="label">This device</p>
           {profile && (
             <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 font-mono text-[11px]">
               <dt className="text-neutral-500">GPU</dt><dd className="truncate text-neutral-200">{profile.gpu}{profile.fp16 ? ' · fp16' : ''}</dd>
               <dt className="text-neutral-500">CPU</dt>
-              <dd className={profile.isolated ? 'text-neutral-200' : 'text-amber-300'}>
+              <dd className={profile.isolated ? 'text-neutral-200' : 'text-amber-800'}>
                 {profile.cores} threads · {profile.isolated ? 'multi-threaded' : 'single thread (reload the page)'}
               </dd>
               {profile.ramGB && <><dt className="text-neutral-500">RAM</dt><dd className="text-neutral-200">~{profile.ramGB} GB</dd></>}
@@ -92,7 +92,7 @@ export default function Monitor() {
 
           <button
             type="button" onClick={clearCache}
-            className="mt-4 w-full flex items-center justify-center gap-2 rounded-lg border border-neutral-700 px-3 py-2 text-xs text-neutral-300 hover:border-red-400/50 hover:text-red-300 duration-200"
+            className="mt-4 w-full flex items-center justify-center gap-2 rounded-lg border border-neutral-700 px-3 py-2 text-xs text-neutral-300 hover:border-red-400/50 hover:text-red-700 duration-200"
           >
             <Trash2 className="w-3.5 h-3.5" /> Delete downloaded models
           </button>

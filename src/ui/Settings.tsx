@@ -10,7 +10,7 @@ function Range({ label, hint, value, min, max, step, onChange, format }: {
     <div className="flex flex-col gap-2">
       <div className="flex justify-between">
         <span className="text-sm text-neutral-100">{label}</span>
-        <span className="font-mono text-xs text-lime-300">{format(value)}</span>
+        <span className="font-mono text-xs text-signal-ink">{format(value)}</span>
       </div>
       <Slider.Root value={[value]} min={min} max={max} step={step} onValueChange={([v]) => onChange(v)} className="relative flex h-5 items-center select-none touch-none">
         <Slider.Track className="relative h-1 grow rounded-full bg-neutral-700">
@@ -27,11 +27,11 @@ export default function Settings() {
   const { temperature, maxTokens, falKey, set } = useApp()
   return (
     <Popover.Root>
-      <Popover.Trigger className="p-2.5 rounded-lg border border-neutral-700 bg-neutral-900 hover:border-neutral-500 text-neutral-300 duration-200" title="Settings">
+      <Popover.Trigger className="p-2.5 rounded-lg border border-ink bg-neutral-900 hover:bg-ink hover:text-paper text-neutral-300 duration-200" title="Settings">
         <SlidersHorizontal className="w-4 h-4" />
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content align="end" sideOffset={6} className="z-50 w-72 rounded-xl border border-neutral-700 bg-neutral-900 p-4 flex flex-col gap-5 shadow-2xl animate-rise">
+        <Popover.Content align="end" sideOffset={6} className="z-50 w-72 border-[1.5px] border-ink bg-neutral-900 p-4 flex flex-col gap-5 animate-rise">
           <Range
             label="Creativity" hint="Low: precise and repeatable. High: varied and looser."
             value={temperature} min={0} max={1.5} step={0.1} format={v => v.toFixed(1)}
@@ -47,7 +47,7 @@ export default function Settings() {
             <input
               type="password" value={falKey} onChange={e => set({ falKey: e.target.value.trim() })}
               placeholder="Not set" autoComplete="off"
-              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 font-mono text-xs outline-none focus:border-lime-300/50"
+              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 font-mono text-xs outline-none focus:border-signal"
             />
             <span className="text-xs text-neutral-500">Stays in this browser. Video prompts are sent to fal.ai and billed to this key.</span>
           </label>

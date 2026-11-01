@@ -23,13 +23,13 @@ function useOutType(id: string) {
 }
 
 function Port({ type, kind, id, top, label }: { type: 'source' | 'target'; kind: PortType | 'any'; id: string; top?: string; label?: string }) {
-  const color = kind === 'any' ? '#a9ad9a' : PORT_COLOR[kind]
+  const color = kind === 'any' ? '#8a8a83' : PORT_COLOR[kind]
   return (
     <Handle
       type={type}
       id={id}
       position={type === 'target' ? Position.Left : Position.Right}
-      style={{ top, background: '#0b0c09', borderColor: color }}
+      style={{ top, background: '#f2f2ef', borderColor: color }}
       className="!w-3 !h-3 !border-2"
     >
       {label && (
@@ -42,10 +42,10 @@ function Port({ type, kind, id, top, label }: { type: 'source' | 'target'; kind:
 }
 
 const STATE_RING: Record<string, string> = {
-  running: 'border-lime-300/80 shadow-[0_0_32px_-6px_rgba(200,245,96,0.45)]',
-  done: 'border-neutral-600',
+  running: 'border-signal shadow-[0_0_32px_-6px_rgba(255,58,31,0.35)]',
+  done: 'border-ink',
   skipped: 'border-neutral-800 opacity-50',
-  error: 'border-red-400/70',
+  error: 'border-red-600',
 }
 
 function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64', local = true }: {
@@ -54,26 +54,26 @@ function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64'
   const { deleteElements } = useReactFlow()
   return (
     <div className={cn(
-      'group rounded-xl border bg-neutral-900/95 backdrop-blur text-neutral-100 duration-300 ease-snap',
+      'group border-[1.5px] bg-neutral-900 text-neutral-100 duration-300 ease-snap',
       width,
-      step ? STATE_RING[step.state] ?? 'border-neutral-700' : 'border-neutral-700',
-      selected && 'ring-1 ring-lime-300/60',
+      step ? STATE_RING[step.state] ?? 'border-ink' : 'border-ink',
+      selected && 'ring-1 ring-signal',
     )}>
       <div className="flex items-center gap-2 px-3 pt-2.5 pb-2 border-b border-neutral-800">
-        <span className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: color ?? '#3a3d33', color: color ? '#0b0c09' : '#cdd0c0' }}>
+        <span className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: color ?? '#111111', color: color ? '#111111' : '#f2f2ef' }}>
           {icon}
         </span>
         <span className="label flex-1">{kind}</span>
-        {!local && <span className="font-mono text-[9px] uppercase tracking-widest text-amber-300" title="Sends data to an online service">online</span>}
-        {step?.state === 'running' && <LoaderCircle className="w-3.5 h-3.5 text-lime-300 animate-spin" />}
-        {step?.state === 'done' && <Check className="w-3.5 h-3.5 text-lime-300" />}
+        {!local && <span className="font-mono text-[9px] uppercase tracking-widest text-amber-800" title="Sends data to an online service">online</span>}
+        {step?.state === 'running' && <LoaderCircle className="w-3.5 h-3.5 text-signal-ink animate-spin" />}
+        {step?.state === 'done' && <Check className="w-3.5 h-3.5 text-signal-ink" />}
         {step?.progress && step.state === 'running' && (
           <span className="font-mono text-[10px] text-neutral-400">{step.progress.index + 1}/{step.progress.total}</span>
         )}
         <button
           type="button"
           onClick={() => deleteElements({ nodes: [{ id }] })}
-          className="nodrag opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-red-400 duration-200"
+          className="nodrag opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-red-600 duration-200"
           title="Remove node"
         >
           <X className="w-3.5 h-3.5" />
@@ -81,8 +81,8 @@ function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64'
       </div>
       <div className="p-3 flex flex-col gap-2">
         {children}
-        {step?.state === 'running' && step.status && <p className="font-mono text-[10px] text-lime-300/80 truncate">{step.status}</p>}
-        {step?.state === 'error' && <p className="text-[11px] text-red-300 line-clamp-3">{step.error}</p>}
+        {step?.state === 'running' && step.status && <p className="font-mono text-[10px] text-signal-ink truncate">{step.status}</p>}
+        {step?.state === 'error' && <p className="text-[11px] text-red-700 line-clamp-3">{step.error}</p>}
       </div>
     </div>
   )
@@ -102,7 +102,7 @@ function Title({ id, value }: { id: string; value: string }) {
 
 function Field({ id, label, value, field, multiline = false, mono = false }: { id: string; label: string; value: string; field: string; multiline?: boolean; mono?: boolean }) {
   const updateNode = useApp(s => s.updateNode)
-  const className = cn('nodrag nowheel rounded-md bg-neutral-950 border border-neutral-800 focus:border-lime-300/50 px-2 py-1.5 text-xs text-neutral-200 outline-none', mono && 'font-mono')
+  const className = cn('nodrag nowheel rounded-md bg-neutral-950 border border-neutral-800 focus:border-signal px-2 py-1.5 text-xs text-neutral-200 outline-none', mono && 'font-mono')
   return (
     <label className="flex flex-col gap-1 text-xs text-neutral-400">
       {label}
@@ -161,9 +161,9 @@ export const AssistantNodeView = memo(({ id, data, selected }: NodeProps<Assista
         onChange={e => updateNode(id, { instructions: e.target.value })}
         rows={3}
         placeholder="What should this assistant do?"
-        className="nodrag nowheel resize-none rounded-md bg-neutral-950 border border-neutral-800 focus:border-lime-300/50 px-2 py-1.5 text-xs leading-relaxed text-neutral-300 outline-none"
+        className="nodrag nowheel resize-none rounded-md bg-neutral-950 border border-neutral-800 focus:border-signal px-2 py-1.5 text-xs leading-relaxed text-neutral-300 outline-none"
       />
-      {out === 'list' && <p className="text-[11px] text-sky-300/90">Gets a list: answers each item separately.</p>}
+      {out === 'list' && <p className="text-[11px] text-blue-700">Gets a list: answers each item separately.</p>}
       <Preview step={step} />
       <TypeTag type={out} />
       <Port type="target" id="in" kind="any" />
@@ -215,7 +215,7 @@ export const ConditionNodeView = memo(({ id, data, selected }: NodeProps<Conditi
       <Title id={id} value={data.label} />
       <Field id={id} label="If the text contains" value={data.match} field="match" mono />
       {step?.branch && (
-        <p className="font-mono text-[10px] uppercase tracking-widest text-lime-300">Went → {step.branch}</p>
+        <p className="font-mono text-[10px] uppercase tracking-widest text-signal-ink">Went → {step.branch}</p>
       )}
       <Port type="target" id="in" kind="text" />
       <Port type="source" id="yes" kind="text" top="40%" label="yes" />
@@ -296,7 +296,7 @@ export const VideoNodeView = memo(({ id, data, selected }: NodeProps<VideoNode>)
     <Shell id={id} kind="Create video" icon={<Clapperboard className="w-3 h-3" />} color={PORT_COLOR.video} selected={selected} step={step} width="w-64" local={false}>
       <Title id={id} value={data.label} />
       <Field id={id} label="fal.ai model" value={data.model} field="model" mono />
-      <p className="text-[11px] text-amber-200/80">Video models don't fit in a browser: this one runs on fal.ai with your key.</p>
+      <p className="text-[11px] text-amber-800">Video models don't fit in a browser: this one runs on fal.ai with your key.</p>
       <Preview step={step} />
       <TypeTag type="video" />
       <Port type="target" id="in" kind="text" />
@@ -308,7 +308,7 @@ export const VideoNodeView = memo(({ id, data, selected }: NodeProps<VideoNode>)
 export const OutputNodeView = memo(({ id, data, selected }: NodeProps<OutputNode>) => {
   const step = useStep(id)
   return (
-    <Shell id={id} kind="Answer" icon={<LogOut className="w-3 h-3" />} color="#c8f560" selected={selected} step={step} width="w-56">
+    <Shell id={id} kind="Answer" icon={<LogOut className="w-3 h-3" />} color="#ff3a1f" selected={selected} step={step} width="w-56">
       <Title id={id} value={data.label} />
       <p className="text-xs text-neutral-400">What reaches here is shown as the answer.</p>
       <Port type="target" id="in" kind="any" />

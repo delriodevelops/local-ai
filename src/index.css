@@ -1,24 +1,39 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
-/* Grafito con un punto de oliva: el fondo sobre el que brilla la señal lima */
+/* Estilo tipográfico internacional, como la landing: papel, tinta y un solo rojo.
+   La escala neutral está invertida respecto a la versión oscura: 950 es el papel del fondo y 50 la tinta,
+   así cada clase conserva su papel (fondo, panel, borde, texto) */
 @theme {
-  --color-neutral-50: #f4f5ee;
-  --color-neutral-100: #e6e8dc;
-  --color-neutral-200: #cdd0c0;
-  --color-neutral-300: #a9ad9a;
-  --color-neutral-400: #868a78;
-  --color-neutral-500: #646857;
-  --color-neutral-600: #3a3d33;
-  --color-neutral-700: #26281f;
-  --color-neutral-800: #1a1c16;
-  --color-neutral-900: #121410;
-  --color-neutral-950: #0b0c09;
-  --color-signal: #c8f560;
+  --color-neutral-50: #111111;
+  --color-neutral-100: #1a1a18;
+  --color-neutral-200: #2b2b28;
+  --color-neutral-300: #44443f;
+  --color-neutral-400: #5c5c56;
+  --color-neutral-500: #6f6f68;
+  --color-neutral-600: #b5b5ad;
+  --color-neutral-700: #d3d3cc;
+  --color-neutral-800: #e6e6e0;
+  --color-neutral-900: #fafaf8;
+  --color-neutral-950: #f2f2ef;
+  --color-ink: #111111;
+  --color-paper: #f2f2ef;
+  --color-signal: #ff3a1f;
+  /* Rojo más oscuro para texto pequeño: el rojo de la marca no llega a 4.5:1 sobre papel */
+  --color-signal-ink: #c42a12;
 
-  --font-sans: 'Instrument Sans Variable', system-ui, sans-serif;
-  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-sans: 'Archivo Variable', system-ui, sans-serif;
+  --font-display: 'Archivo Variable', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Esquinas rectas en toda la app (los círculos usan rounded-full, que no cambia) */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
 
   --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -30,49 +45,46 @@
 }
 
 @layer base {
-  html { color-scheme: dark; }
+  html { color-scheme: light; }
   body {
     @apply bg-neutral-950 text-neutral-100 font-sans antialiased;
     font-feature-settings: "kern" 1, "liga" 1;
   }
-  ::selection { background: #c8f560; color: #0b0c09; }
-  :focus-visible { outline: 1px solid #c8f560; outline-offset: 2px; }
+  ::selection { background: #ff3a1f; color: #111111; }
+  :focus-visible { outline: 2px solid #ff3a1f; outline-offset: 2px; }
   button { cursor: pointer; }
   button:disabled { cursor: not-allowed; }
 }
 
-/* Grano de película: quita la planitud de pantalla al fondo oscuro */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/></filter><rect width='300' height='300' filter='url(%23n)' opacity='1'/></svg>");
-  opacity: 0.035;
-  pointer-events: none;
-  z-index: 9998;
+/* Titulares: Archivo en negra, mayúsculas y estrecha, como en la landing */
+.display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.035em;
+  font-stretch: 80%;
 }
 
-/* Etiqueta de sistema: mayúsculas espaciadas en mono */
+/* Etiqueta de sistema: mayúsculas espaciadas */
 .label {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.16em;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-neutral-400);
 }
 
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-thumb { background: #3a3d33; border-radius: 48px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #b5b5ad; }
 ::-webkit-scrollbar-track { background: transparent; }
 
 .shiki-block pre,
 .prose pre {
-  border-radius: 12px;
   border: 1px solid var(--color-neutral-700);
   padding: 16px 18px;
   overflow-x: auto;
   font-size: 13px;
-  background-color: var(--color-neutral-950) !important;
+  background-color: #ffffff !important;
 }
 
 /* Malla de la bienvenida */
@@ -84,17 +96,24 @@ body::after {
 /* React Flow con la paleta de la app */
 .react-flow {
   --xy-background-color: var(--color-neutral-950);
-  --xy-controls-button-background-color: var(--color-neutral-900);
+  --xy-controls-button-background-color: #ffffff;
   --xy-controls-button-background-color-hover: var(--color-neutral-800);
-  --xy-controls-button-color: var(--color-neutral-300);
+  --xy-controls-button-color: var(--color-ink);
   --xy-controls-button-border-color: var(--color-neutral-700);
-  --xy-minimap-background-color: var(--color-neutral-900);
-  --xy-edge-stroke: #c8f560;
-  --xy-connectionline-stroke: #c8f560;
+  --xy-minimap-background-color: #ffffff;
+  --xy-edge-stroke: #111111;
+  --xy-connectionline-stroke: #ff3a1f;
 }
-.react-flow__controls { border: 1px solid var(--color-neutral-700); border-radius: 10px; overflow: hidden; }
-.react-flow__minimap { border: 1px solid var(--color-neutral-700); border-radius: 10px; overflow: hidden; }
+.react-flow__controls { border: 1.5px solid var(--color-ink); overflow: hidden; box-shadow: none; }
+.react-flow__minimap { border: 1.5px solid var(--color-ink); overflow: hidden; }
 .react-flow__node { font-family: var(--font-sans); }
+/* Nuestros nodos 'input' y 'output' comparten nombre con los de serie de React Flow: sin su marco ni su ancho */
+.react-flow .react-flow__node.react-flow__node-input,
+.react-flow .react-flow__node.react-flow__node-output,
+.react-flow .react-flow__node.react-flow__node-default {
+  padding: 0; border: none; border-radius: 0; background: transparent; width: auto; box-shadow: none;
+  color: inherit; font-size: inherit; text-align: left;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .mesh-trace, .mesh-node, .animate-rise { animation: none; }

@@ -20,7 +20,7 @@ function CopyButton({ text }: { text: string }) {
       onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1200) }}
       className="p-1.5 rounded-md text-neutral-500 hover:text-neutral-100 hover:bg-neutral-800 duration-200"
     >
-      {copied ? <Check className="w-4 h-4 text-lime-300" /> : <Copy className="w-4 h-4" />}
+      {copied ? <Check className="w-4 h-4 text-signal-ink" /> : <Copy className="w-4 h-4" />}
     </button>
   )
 }
@@ -37,19 +37,19 @@ function StepRow({ step, index, last }: { step: StepResult; index: number; last:
       {!last && <span className="absolute left-[11px] top-6 bottom-0 w-px bg-neutral-800" />}
       <span
         className="absolute left-0 top-0.5 w-[23px] h-[23px] rounded-md flex items-center justify-center text-neutral-950 font-mono text-[10px]"
-        style={{ background: step.color ?? '#3a3d33', color: step.color ? '#0b0c09' : '#cdd0c0' }}
+        style={{ background: step.color ?? '#111111', color: step.color ? '#111111' : '#f2f2ef' }}
       >
         {Icon ? <Icon className="w-3 h-3" /> : String(index + 1).padStart(2, '0')}
       </span>
       <button type="button" onClick={() => setOpen(o => !o)} className="w-full flex items-center gap-2 text-left pb-2" disabled={!text && !isMedia(step.value)}>
         <span className="label text-neutral-300">{step.label}</span>
-        {step.state === 'running' && <LoaderCircle className="w-3.5 h-3.5 text-lime-300 animate-spin" />}
+        {step.state === 'running' && <LoaderCircle className="w-3.5 h-3.5 text-signal-ink animate-spin" />}
         {step.progress && step.state === 'running' && <span className="font-mono text-[10px] text-neutral-500">{step.progress.index + 1}/{step.progress.total}</span>}
-        {step.branch && <span className="font-mono text-[10px] text-lime-300">→ {step.branch}</span>}
+        {step.branch && <span className="font-mono text-[10px] text-signal-ink">→ {step.branch}</span>}
         {step.ms !== undefined && <span className="font-mono text-[10px] text-neutral-500">{(step.ms / 1000).toFixed(1)}s</span>}
         {step.state === 'skipped' && <span className="font-mono text-[10px] text-neutral-500">skipped</span>}
-        {step.state === 'running' && step.status && <span className="font-mono text-[10px] text-lime-300/80 truncate">{step.status}</span>}
-        {step.error && <span className="text-xs text-red-400 truncate">{step.error}</span>}
+        {step.state === 'running' && step.status && <span className="font-mono text-[10px] text-signal-ink truncate">{step.status}</span>}
+        {step.error && <span className="text-xs text-red-600 truncate">{step.error}</span>}
         {text && <ChevronDown className={cn('w-3.5 h-3.5 ml-auto text-neutral-500 duration-200', open && 'rotate-180')} />}
       </button>
       {isMedia(step.value) && <div className="pb-4"><MediaView value={step.value!} compact={!open} /></div>}
@@ -96,7 +96,7 @@ function TurnView({ turn }: { turn: Turn }) {
       {answers.map(answer => (
         <div key={answer.nodeId} className="border-l-2 border-signal pl-5">
           <div className="flex items-center gap-2 mb-2">
-            <span className="label text-lime-300">{answer.label}</span>
+            <span className="label text-signal-ink">{answer.label}</span>
             {!isMedia(answer.value) && <CopyButton text={asText(answer.value)} />}
           </div>
           {isMedia(answer.value) ? <MediaView value={answer.value!} /> : <Markdown text={asText(answer.value)} />}
@@ -126,7 +126,7 @@ export default function Thread() {
       <div className="mx-auto w-full max-w-3xl px-4 py-8 flex flex-col gap-10">
         {!turns.length && <Welcome />}
         {turns.map(turn => <TurnView key={turn.id} turn={turn} />)}
-        {error && <p className="rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300">{error}</p>}
+        {error && <p className="rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-700">{error}</p>}
         <div ref={end} />
       </div>
     </div>

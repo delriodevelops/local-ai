@@ -34,7 +34,7 @@ function Menu({ trigger, children }: { trigger: ReactNode; children: ReactNode }
       <Popover.Portal>
         <Popover.Content
           align="start" sideOffset={6}
-          className="z-50 w-72 max-h-[70vh] overflow-y-auto rounded-xl border border-neutral-700 bg-neutral-900/95 backdrop-blur-md p-1.5 shadow-2xl shadow-black/60 animate-rise"
+          className="z-50 w-72 max-h-[70vh] overflow-y-auto border-[1.5px] border-ink bg-neutral-900 p-1.5 animate-rise"
         >
           {children}
         </Popover.Content>
@@ -47,7 +47,7 @@ const ToolbarButton = ({ children, ...props }: React.ButtonHTMLAttributes<HTMLBu
   <button
     type="button"
     {...props}
-    className="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-900/90 backdrop-blur px-3 py-2 text-sm text-neutral-200 hover:border-neutral-500 duration-200 ease-snap"
+    className="flex items-center gap-2 border-[1.5px] border-ink bg-neutral-900 px-3 py-2 text-sm font-medium text-neutral-50 hover:bg-ink hover:text-paper duration-200 ease-snap"
   >
     {children}
   </button>
@@ -98,16 +98,16 @@ function Flow() {
         onEdgesChange={onEdgesChange}
         onConnect={(c: Connection) => connect(c)}
         isValidConnection={c => checkConnection(c, nodes, edges).ok}
-        colorMode="dark"
+        colorMode="light"
         fitView
         fitViewOptions={{ padding: 0.2 }}
         minZoom={0.2}
         proOptions={{ hideAttribution: true }}
         deleteKeyCode={['Backspace', 'Delete']}
       >
-        <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="#26281f" />
+        <Background variant={BackgroundVariant.Dots} gap={22} size={1} color="#c9c9c2" />
         <Controls showInteractive={false} className="!shadow-none" />
-        <MiniMap pannable zoomable className="!hidden md:!block" maskColor="rgba(11,12,9,0.75)" nodeColor="#3a3d33" />
+        <MiniMap pannable zoomable className="!hidden md:!block" maskColor="rgba(242,242,239,0.75)" nodeColor="#b5b5ad" />
         <Panel position="top-left" className="flex gap-2">
           <Menu trigger={<ToolbarButton><Plus className="w-4 h-4" /> Add node</ToolbarButton>}>
             <p className="label px-2.5 pt-1.5 pb-1">Assistants</p>

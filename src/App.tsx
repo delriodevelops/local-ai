@@ -68,9 +68,9 @@ export default function App() {
       )}
 
       <main className="flex-1 min-w-0 flex flex-col">
-        <header className="flex items-center gap-2 px-3 py-3 border-b border-neutral-800/80">
+        <header className="flex items-center gap-2 px-3 py-3 border-b-[1.5px] border-ink">
           {!sidebar && (
-            <button type="button" onClick={() => setSidebar(true)} title="Open sidebar" className="p-2.5 rounded-lg border border-neutral-700 bg-neutral-900 hover:border-neutral-500 text-neutral-300 duration-200">
+            <button type="button" onClick={() => setSidebar(true)} title="Open sidebar" className="p-2.5 rounded-lg border border-ink bg-neutral-900 hover:bg-ink hover:text-paper text-neutral-300 duration-200">
               <PanelLeft className="w-4 h-4" />
             </button>
           )}
@@ -81,7 +81,7 @@ export default function App() {
                 <button
                   key={v.id} type="button" role="tab" aria-selected={shown === v.id} title={v.label}
                   onClick={() => set({ view: v.id })}
-                  className={cn('flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs duration-200 ease-snap', shown === v.id ? 'bg-neutral-700 text-neutral-50' : 'text-neutral-400 hover:text-neutral-100')}
+                  className={cn('flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs duration-200 ease-snap', shown === v.id ? 'bg-ink text-paper' : 'text-neutral-400 hover:text-neutral-100')}
                 >
                   <v.icon className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">{v.label}</span>
@@ -94,7 +94,7 @@ export default function App() {
         </header>
 
         {!hasWebGPU() && (
-          <p className="mx-3 mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-200">
+          <p className="mx-3 mt-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-sm text-amber-900">
             This browser has no WebGPU, so models can't run here. Use a recent Chrome or Edge on desktop.
           </p>
         )}
