@@ -1,4 +1,4 @@
-import { useMemo, useRef, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, type ReactNode } from 'react'
 import {
   Background, BackgroundVariant, Controls, MiniMap, Panel, ReactFlow, ReactFlowProvider, useReactFlow,
   type Connection, type Edge,
@@ -59,6 +59,11 @@ function Flow() {
   const running = useSession(s => s.running)
   const { screenToFlowPosition, fitView } = useReactFlow()
   const wrapper = useRef<HTMLDivElement>(null)
+  const templateKey = useApp(s => s.templateKey)
+
+  useEffect(() => {
+    if (templateKey) requestAnimationFrame(() => fitView({ padding: 0.2, duration: 400 }))
+  }, [templateKey, fitView])
 
   // Las conexiones toman el color de lo que transportan y se animan mientras pasa la señal
   const styledEdges = useMemo<Edge[]>(() => edges.map(edge => {
@@ -129,12 +134,12 @@ function Flow() {
                 key={t.id}
                 icon={<LayoutTemplate className="w-4 h-4" />}
                 title={t.name} text={t.description}
-                onSelect={() => { loadTemplate(t.id); requestAnimationFrame(() => fitView({ padding: 0.2, duration: 400 })) }}
+                onSelect={() => loadTemplate(t.id)}
               />
             ))}
           </Menu>
         </Panel>
-        <Panel position="top-right" className="hidden xl:flex gap-4 pt-2.5 font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+        <Panel position="bottom-right" className="hidden 2xl:flex gap-4 !mb-3 !mr-[220px] font-mono text-[10px] uppercase tracking-widest text-neutral-500">
           <span><i className="inline-block w-2 h-2 rounded-full bg-[#c8f560] mr-1.5" />text</span>
           <span><i className="inline-block w-2 h-2 rounded-full bg-[#60a5fa] mr-1.5" />list</span>
           <span>drag from a dot to connect · backspace deletes</span>

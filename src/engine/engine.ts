@@ -54,7 +54,8 @@ export type GenerateOptions = {
 // Una respuesta en streaming; devuelve el texto completo
 export async function generate(messages: ChatCompletionMessageParam[], { temperature, maxTokens, signal, onToken }: GenerateOptions) {
   if (!engine || useEngine.getState().status !== 'ready') throw new Error('No model loaded')
-  const stream = await engine.chat.completions.create({ messages, stream: true, temperature, max_tokens: maxTokens })
+  // La penalización evita que los modelos pequeños entren en bucle con contextos largos
+  const stream = await engine.chat.completions.create({ messages, stream: true, temperature, max_tokens: maxTokens, repetition_penalty: 1.1 })
   let text = ''
   for await (const chunk of stream) {
     if (signal.aborted) {

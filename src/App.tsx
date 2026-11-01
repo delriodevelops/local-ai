@@ -95,7 +95,7 @@ export default function App() {
           {shown !== 'chat' && (
             <section className="flex-1 min-w-0 flex flex-col">
               <Suspense fallback={<p className="m-auto label">Loading canvas…</p>}>
-                <div className="flex-1 min-h-0"><Canvas /></div>
+                <div className="flex-1 min-h-0"><Canvas key={shown} /></div>
               </Suspense>
               {shown === 'flow' && !desktop && <Composer />}
             </section>

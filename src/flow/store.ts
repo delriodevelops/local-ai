@@ -13,6 +13,8 @@ type AppState = {
   maxTokens: number
   modelId: string | null
   view: View
+  // Sube cada vez que se carga una plantilla, para reencuadrar el lienzo
+  templateKey: number
   onNodesChange: (changes: NodeChange<FlowNode>[]) => void
   onEdgesChange: (changes: EdgeChange[]) => void
   connect: (connection: Connection) => void
@@ -34,6 +36,7 @@ export const useApp = create<AppState>()(
       maxTokens: 512,
       modelId: null,
       view: 'split',
+      templateKey: 0,
       onNodesChange: changes => set(s => ({ nodes: applyNodeChanges(changes, s.nodes) })),
       onEdgesChange: changes => set(s => ({ edges: applyEdgeChanges(changes, s.edges) })),
       connect: connection => set(s => ({ edges: addEdge({ ...connection, animated: false }, s.edges) })),
@@ -43,7 +46,7 @@ export const useApp = create<AppState>()(
       })),
       loadTemplate: id => {
         const template = TEMPLATES.find(t => t.id === id)
-        if (template) set(template.build())
+        if (template) set(s => ({ ...template.build(), templateKey: s.templateKey + 1 }))
       },
       set: patch => set(patch),
     }),
