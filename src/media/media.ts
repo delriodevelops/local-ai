@@ -12,7 +12,8 @@ export const VOICES = [
 type Lane = 'main' | 'voice'
 const workers = new Map<Lane, Worker>()
 let nextId = 0
-type Pending = { lane: Lane; job: MediaTask; resolve: (v: string) => void; reject: (e: Error) => void; onStatus: (t: string) => void }
+// retried: es la repetición en WebAssembly de un trabajo que falló en la gráfica
+type Pending = { lane: Lane; job: MediaTask; resolve: (v: string) => void; reject: (e: Error) => void; onStatus: (t: string) => void; retried?: boolean }
 const pending = new Map<number, Pending>()
 
 // Si Kokoro falla en la gráfica (error o audio corrupto), el resto de la sesión va en WebAssembly.
@@ -22,6 +23,10 @@ let kokoroWasm = (() => { try { return sessionStorage.getItem(KOKORO_WASM) === '
 function preferWasm() {
   kokoroWasm = true
   try { sessionStorage.setItem(KOKORO_WASM, '1') } catch { /* sin almacenamiento basta con la variable */ }
+}
+function forgetWasm() {
+  kokoroWasm = false
+  try { sessionStorage.removeItem(KOKORO_WASM) } catch { /* sin almacenamiento basta con la variable */ }
 }
 
 // Kokoro tiene su propio worker y lo demás comparte otro, para que una voz larga no bloquee a Janus ni a Whisper
@@ -65,8 +70,10 @@ function getWorker(lane: Lane) {
       preferWasm()
       close(lane)
       job.onStatus('Loading Kokoro on the processor…')
-      return post(data.id, job)
+      return post(data.id, { ...job, retried: true })
     }
+    // Tampoco funcionó en WebAssembly: la gráfica no era el problema, así que la próxima vez se vuelve a probar
+    if (job.retried) forgetWasm()
     job.reject(new Error(data.error))
     close(lane)
   }

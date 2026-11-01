@@ -42,6 +42,14 @@ export default function App() {
   useEffect(() => {
     const url = new URL(window.location.href)
     const template = url.searchParams.get('template')
+    // La dirección de la demo abierta fuera de su marco (otra pestaña): es la app normal, y su plantilla
+    // no debe sustituir el flujo guardado
+    if (url.searchParams.has('embed') && !EMBED) {
+      url.searchParams.delete('embed')
+      url.searchParams.delete('template')
+      window.history.replaceState(null, '', url)
+      return
+    }
     if (!template || !TEMPLATES.some(t => t.id === template)) return
     useApp.getState().loadTemplate(template)
     set({ view: desktop ? 'split' : 'flow' })

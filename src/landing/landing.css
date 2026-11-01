@@ -149,7 +149,7 @@ a{color:#111111}a:hover{color:#ff3a1f}
 }
 /* En móviles (también apaisados) y tabletas táctiles la app no se carga: landing/main.ts usa esta misma consulta */
 @media (max-width:760px),(pointer:coarse){
-  .demo-stage{display:none}
+  .demo-stage,.demo-intro{display:none}
   .demo-alt{display:flex}
 }
 

@@ -27,6 +27,11 @@ export const Markdown = memo(({ text }: { text: string }) => (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
+        // Los enlaces salen en otra pestaña: en esta se perdería el modelo cargado, y en la demo de la landing,
+        // el marco. Los que apuntan a la propia respuesta (notas al pie) se quedan aquí
+        a: ({ href, children }) => (href?.startsWith('#')
+          ? <a href={href}>{children}</a>
+          : <a href={href} target="_blank" rel="noreferrer">{children}</a>),
         pre: ({ children }) => <>{children}</>,
         code: ({ className, children }) => {
           const lang = /language-(\w+)/.exec(className ?? '')?.[1]

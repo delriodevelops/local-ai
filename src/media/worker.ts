@@ -91,9 +91,11 @@ const loadedOn = (model: MediaModel, backend: MediaBackend) => self.postMessage(
 // Kokoro falló en la gráfica. No se reintenta aquí: Transformers.js guarda la primera sesión de ONNX, aunque falle,
 // y hace esperar a todas las siguientes, así que q8 en este worker fallaría igual
 class GpuFailure extends Error {}
-// Un fallo de red (al descargar el modelo o una voz) no es culpa de la gráfica: sale tal cual, sin pasar a WebAssembly
+// Un fallo de red (al descargar el modelo o una voz) no es culpa de la gráfica: sale tal cual, sin pasar a WebAssembly.
+// fetch rechaza con TypeError en todos los navegadores ("Failed to fetch", "NetworkError…", "Load failed" en Safari)
 const offline = (error: unknown) =>
-  (error instanceof TypeError && /fetch|network/i.test(error.message)) || /Could not locate file/i.test(String(error))
+  (error instanceof TypeError && /fetch|network|load failed/i.test(error.message))
+  || /Could not locate file|Unable to get model file/i.test(String(error))
 const gpuFailure = (error: unknown) => (offline(error) ? error : new GpuFailure(error instanceof Error ? error.message : String(error)))
 
 // En algunas gráficas (Intel, AMD) Kokoro fp32 en WebGPU no da error pero devuelve ruido (picos de 1e5 en vez
