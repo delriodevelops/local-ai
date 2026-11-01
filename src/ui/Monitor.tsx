@@ -28,6 +28,9 @@ function Row({ name, device, state, detail, action }: { name: string; device: st
   )
 }
 
+// La caché es de todo el origen (en GitHub Pages, la comparten todos los proyectos de la cuenta): solo se tocan las de modelos
+const MODEL_CACHES = /^(webllm\/(model|config|wasm)|transformers-cache|experimental_transformers-hash-cache|kokoro-voices)$/
+
 // Qué corre dónde, a qué velocidad y cuánto ocupa: como el monitor de Strata, dentro de la página
 export default function Monitor() {
   const { profile, refresh } = useDevice()
@@ -40,7 +43,7 @@ export default function Monitor() {
   // Borra los modelos guardados en la caché del navegador; se vuelven a descargar si hacen falta
   const clearCache = async () => {
     if (!window.confirm('Delete every downloaded model from this browser? They will download again when needed.')) return
-    for (const key of await caches.keys()) await caches.delete(key)
+    for (const key of await caches.keys()) if (MODEL_CACHES.test(key)) await caches.delete(key)
     refresh()
   }
 

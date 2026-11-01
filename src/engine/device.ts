@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 
 export type DeviceProfile = {
+  // navigator.gpu puede existir sin adaptador (gráfica bloqueada, Linux sin flags): entonces no hay WebGPU
+  webgpu: boolean
   gpu: string
   fp16: boolean
   maxBufferGB: number
@@ -27,6 +29,7 @@ export async function readProfile(): Promise<DeviceProfile> {
   const estimate = await navigator.storage?.estimate?.()
   const name = [info?.vendor, info?.architecture, info?.description].filter(Boolean).join(' ').trim()
   return {
+    webgpu: !!adapter,
     gpu: adapter ? name || 'WebGPU graphics card' : 'No WebGPU',
     fp16: !!adapter?.features.has('shader-f16'),
     maxBufferGB: (adapter?.limits.maxBufferSize ?? 0) / 1e9,
@@ -48,6 +51,7 @@ export type Fit = { level: 'good' | 'tight' | 'no'; reason: string }
 // Valoración aproximada: WebGPU no dice cuánta memoria tiene la gráfica, así que se estima con la RAM
 export function rateModel(model: { id: string; sizeGB: number }, profile: DeviceProfile | null, cached: boolean): Fit {
   if (!profile) return { level: 'good', reason: '' }
+  if (!profile.webgpu) return { level: 'no', reason: 'no WebGPU adapter in this browser' }
   if (/f16/.test(model.id) && !profile.fp16) return { level: 'no', reason: 'needs fp16, not supported here' }
   const free = profile.quotaGB - profile.usedGB
   if (!cached && model.sizeGB > free) return { level: 'no', reason: `needs ${model.sizeGB.toFixed(1)} GB, ${free.toFixed(1)} GB free` }

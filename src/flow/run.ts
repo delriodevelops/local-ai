@@ -1,6 +1,6 @@
 import { generate } from '@/engine/engine'
 import { decodeAudio, media, preload } from '@/media/media'
-import type { MediaModel } from '@/media/worker'
+import type { MediaModel, MediaTask } from '@/media/worker'
 import { generateVideo } from '@/media/video'
 import { OUTPUTS, topologicalOrder } from './graph'
 import type { Attachments, FlowEdge, FlowNode, StepResult, Value } from './types'
@@ -54,8 +54,19 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
   const label = (id: string) => nodes.find(n => n.id === id)?.data.label ?? 'Input'
   const skipOutputs = (node: FlowNode) => Object.keys(OUTPUTS[node.type]).forEach(h => results.set(`${node.id}:${h}`, null))
 
-  // Mientras corren los primeros pasos, se cargan los modelos de imagen y audio que harán falta después
-  preload([...new Set(nodes.map(n => MEDIA_MODEL[n.type]).filter((m): m is MediaModel => !!m))])
+  // Mientras corren los primeros pasos, se cargan los modelos de imagen y audio que harán falta después.
+  // Solo los de nodos a los que puede llegar algo: sin grabación, la rama de voz no corre y Whisper sobra
+  const carries: Record<string, boolean> = { out: !!input.trim(), image: !!attachments.image, audio: !!attachments.audio }
+  const reachable = new Set<string>()
+  const reach = (id: string) => {
+    if (reachable.has(id)) return
+    reachable.add(id)
+    edges.filter(e => e.source === id).forEach(e => reach(e.target))
+  }
+  nodes
+    .filter(n => n.type === 'input')
+    .forEach(n => edges.filter(e => e.source === n.id && carries[e.sourceHandle ?? 'out']).forEach(e => reach(e.target)))
+  preload([...new Set(nodes.filter(n => reachable.has(n.id)).map(n => MEDIA_MODEL[n.type]).filter((m): m is MediaModel => !!m))])
 
   const finished = new Map<string, Promise<void>>()
   const runNode = async (node: FlowNode) => {
@@ -81,10 +92,17 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
       return
     }
 
-    current.state = 'running'
-    const started = performance.now()
-    flush()
+    // Un paso con modelo sigue 'waiting' mientras hace cola en él, y el reloj solo cuenta el tiempo de trabajo
+    let active = 0
+    let since: number | null = null
+    const start = () => { since = performance.now(); current.state = 'running'; current.status = undefined; flush() }
+    const pause = () => { if (since !== null) active += performance.now() - since; since = null }
+    if (node.type === 'assistant' || MEDIA_MODEL[node.type]) {
+      current.status = 'Queued'
+      flush()
+    } else start()
     const onStatus = (status: string) => { current.status = status; flush() }
+    const runMedia = (job: MediaTask) => media(job, onStatus, { signal, onStart: start }).finally(pause)
     const text = () => live.map(i => asText(i.value)).filter(Boolean).join('\n\n')
 
     try {
@@ -97,8 +115,8 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
             : texts.map(t => `## ${label(t.source)}\n\n${asText(t.value)}`).join('\n\n')
           const ask = (content: string, onToken: (text: string) => void) => generate(
             [{ role: 'system', content: node.data.instructions || 'You are a helpful assistant.' }, { role: 'user', content }],
-            { temperature, maxTokens, signal, onToken },
-          )
+            { temperature, maxTokens, signal, onToken, onStart: start },
+          ).finally(pause)
 
           if (items.length) {
             const answers: string[] = []
@@ -106,10 +124,16 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
               if (signal.aborted) break
               current.progress = { index, total: items.length }
               const content = context ? `${context}\n\n## Item\n\n${item}` : item
-              answers.push(await ask(content, partial => {
-                current.value = { type: 'list', items: [...answers, partial] }
-                flush()
-              }))
+              try {
+                answers.push(await ask(content, partial => {
+                  current.value = { type: 'list', items: [...answers, partial] }
+                  flush()
+                }))
+              } catch (error) {
+                // Parado mientras el siguiente elemento esperaba turno: se queda con los que ya terminó
+                if (signal.aborted && answers.length) break
+                throw error
+              }
             }
             current.value = { type: 'list', items: answers }
           } else {
@@ -142,25 +166,27 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
         }
         case 'describe': {
           const image = live.find(i => i.value.type === 'image')!.value as { url: string }
-          current.value = { type: 'text', text: await media({ task: 'describe', image: image.url, prompt: node.data.prompt || 'Describe this image in detail.' }, onStatus) }
+          current.value = { type: 'text', text: await runMedia({ task: 'describe', image: image.url, prompt: node.data.prompt || 'Describe this image in detail.' }) }
           results.set(`${node.id}:out`, current.value)
           break
         }
         case 'imagine': {
           const prompt = [text(), node.data.style].filter(Boolean).join(', ')
-          current.value = { type: 'image', url: await media({ task: 'imagine', prompt }, onStatus) }
+          current.value = { type: 'image', url: await runMedia({ task: 'imagine', prompt }) }
           results.set(`${node.id}:out`, current.value)
           break
         }
         case 'transcribe': {
           const audio = live.find(i => i.value.type === 'audio')!.value as { url: string }
           onStatus('Decoding audio…')
-          current.value = { type: 'text', text: await media({ task: 'transcribe', audio: await decodeAudio(audio.url) }, onStatus) }
+          const samples = await decodeAudio(audio.url)
+          onStatus('Queued')
+          current.value = { type: 'text', text: await runMedia({ task: 'transcribe', audio: samples }) }
           results.set(`${node.id}:out`, current.value)
           break
         }
         case 'speak': {
-          current.value = { type: 'audio', url: await media({ task: 'speak', text: text(), voice: node.data.voice }, onStatus) }
+          current.value = { type: 'audio', url: await runMedia({ task: 'speak', text: text(), voice: node.data.voice }) }
           results.set(`${node.id}:out`, current.value)
           break
         }
@@ -178,14 +204,18 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
           break
         }
       }
+      pause()
       current.status = undefined
       current.state = 'done'
-      current.ms = Math.round(performance.now() - started)
+      current.ms = Math.round(active)
     } catch (error) {
-      current.state = 'error'
       current.status = undefined
-      current.error = error instanceof Error ? error.message : String(error)
       skipOutputs(node)
+      // Parado antes de acabar: el repaso final lo deja en 'idle', sin error
+      if (!signal.aborted) {
+        current.state = 'error'
+        current.error = error instanceof Error ? error.message : String(error)
+      }
     }
     flush()
   }
@@ -193,7 +223,11 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
   await Promise.all(finished.values())
 
   // Lo que no llegó a ejecutarse porque se paró
-  steps.forEach(s => { if (s.state === 'waiting' || s.state === 'running') s.state = signal.aborted ? 'idle' : 'skipped' })
+  steps.forEach(s => {
+    if (s.state !== 'waiting' && s.state !== 'running') return
+    s.state = signal.aborted ? 'idle' : 'skipped'
+    s.status = undefined
+  })
   if (timer) clearTimeout(timer)
   onUpdate(steps.map(s => ({ ...s })))
   return steps

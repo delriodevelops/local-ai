@@ -26,6 +26,8 @@ export const useEngine = create<EngineState>((set, get) => ({
   async load(modelId) {
     if (get().modelId === modelId && get().status === 'ready') return
     set({ status: 'loading', modelId, progress: 0, progressText: 'Starting…', error: null })
+    // La velocidad medida era la del modelo anterior
+    useResources.getState().set({ tokensPerSecond: null })
     const initProgressCallback = ({ progress, text }: { progress: number; text: string }) =>
       set({ progress, progressText: text })
     try {
@@ -50,14 +52,19 @@ export type GenerateOptions = {
   maxTokens: number
   signal: AbortSignal
   onToken: (text: string) => void
+  // Cuando la respuesta consigue el motor y empieza de verdad, tras la cola
+  onStart?: () => void
 }
 
 // Una respuesta en streaming; devuelve el texto completo.
 // El motor atiende una respuesta cada vez: las ramas paralelas con asistentes hacen cola aquí
-export function generate(messages: ChatCompletionMessageParam[], { temperature, maxTokens, signal, onToken }: GenerateOptions) {
+export function generate(messages: ChatCompletionMessageParam[], { temperature, maxTokens, signal, onToken, onStart }: GenerateOptions) {
   return exclusive('llm', async () => {
+    // Parado mientras esperaba turno: no ha llegado a empezar
+    if (signal.aborted) throw new DOMException('Stopped', 'AbortError')
     if (!engine || useEngine.getState().status !== 'ready') throw new Error('No model loaded')
-    if (signal.aborted) return ''
+    onStart?.()
+    const { modelId } = useEngine.getState()
     const resources = useResources.getState()
     resources.set({ llmBusy: true })
     try {
@@ -78,7 +85,7 @@ export function generate(messages: ChatCompletionMessageParam[], { temperature, 
         onToken(text)
       }
       const seconds = (performance.now() - started) / 1000
-      if (tokens > 8 && seconds > 0) resources.set({ tokensPerSecond: tokens / seconds })
+      if (tokens > 8 && seconds > 0 && useEngine.getState().modelId === modelId) resources.set({ tokensPerSecond: tokens / seconds })
       return text
     } finally {
       resources.set({ llmBusy: false })
