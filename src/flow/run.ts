@@ -1,5 +1,6 @@
 import { generate } from '@/engine/engine'
-import { decodeAudio, media } from '@/media/media'
+import { decodeAudio, media, preload } from '@/media/media'
+import type { MediaModel } from '@/media/worker'
 import { generateVideo } from '@/media/video'
 import { OUTPUTS, topologicalOrder } from './graph'
 import type { Attachments, FlowEdge, FlowNode, StepResult, Value } from './types'
@@ -16,6 +17,8 @@ type RunOptions = {
   onUpdate: (steps: StepResult[]) => void
 }
 
+const MEDIA_MODEL: Partial<Record<FlowNode['type'], MediaModel>> = { describe: 'janus', imagine: 'janus', transcribe: 'whisper', speak: 'kokoro' }
+
 const asText = (value: Value) =>
   value.type === 'text' ? value.text : value.type === 'list' ? value.items.join('\n\n') : ''
 
@@ -28,7 +31,8 @@ export function splitItems(text: string, max: number) {
     .slice(0, max)
 }
 
-// Ejecuta el flujo nodo a nodo. Hay un modelo de cada tipo, así que las ramas paralelas se resuelven por turnos
+// Ejecuta el flujo. Cada nodo arranca en cuanto terminan los que le alimentan: las ramas que usan modelos
+// distintos (gráfica y procesador) trabajan a la vez, y las que comparten modelo hacen cola en él
 export async function runFlow({ input, attachments, nodes, edges, temperature, maxTokens, falKey, signal, onUpdate }: RunOptions) {
   const order = topologicalOrder(nodes, edges)
   const steps: StepResult[] = order
@@ -50,8 +54,13 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
   const label = (id: string) => nodes.find(n => n.id === id)?.data.label ?? 'Input'
   const skipOutputs = (node: FlowNode) => Object.keys(OUTPUTS[node.type]).forEach(h => results.set(`${node.id}:${h}`, null))
 
-  for (const node of order) {
-    if (signal.aborted) break
+  // Mientras corren los primeros pasos, se cargan los modelos de imagen y audio que harán falta después
+  preload([...new Set(nodes.map(n => MEDIA_MODEL[n.type]).filter((m): m is MediaModel => !!m))])
+
+  const finished = new Map<string, Promise<void>>()
+  const runNode = async (node: FlowNode) => {
+    await Promise.all(edges.filter(e => e.target === node.id).map(e => finished.get(e.source)))
+    if (signal.aborted) return
     const incoming = edges
       .filter(e => e.target === node.id)
       .map(e => ({ source: e.source, value: results.get(`${e.source}:${e.sourceHandle ?? 'out'}`) ?? null }))
@@ -61,7 +70,7 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
       results.set(`${node.id}:out`, input.trim() ? { type: 'text', text: input } : null)
       results.set(`${node.id}:image`, attachments.image ? { type: 'image', url: attachments.image } : null)
       results.set(`${node.id}:audio`, attachments.audio ? { type: 'audio', url: attachments.audio } : null)
-      continue
+      return
     }
 
     const current = step(node.id)
@@ -69,10 +78,11 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
       current.state = 'skipped'
       skipOutputs(node)
       flush()
-      continue
+      return
     }
 
     current.state = 'running'
+    const started = performance.now()
     flush()
     const onStatus = (status: string) => { current.status = status; flush() }
     const text = () => live.map(i => asText(i.value)).filter(Boolean).join('\n\n')
@@ -170,6 +180,7 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
       }
       current.status = undefined
       current.state = 'done'
+      current.ms = Math.round(performance.now() - started)
     } catch (error) {
       current.state = 'error'
       current.status = undefined
@@ -178,6 +189,8 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
     }
     flush()
   }
+  for (const node of order) finished.set(node.id, runNode(node))
+  await Promise.all(finished.values())
 
   // Lo que no llegó a ejecutarse porque se paró
   steps.forEach(s => { if (s.state === 'waiting' || s.state === 'running') s.state = signal.aborted ? 'idle' : 'skipped' })

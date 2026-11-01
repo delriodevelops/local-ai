@@ -7,6 +7,19 @@
     <meta name="theme-color" content="#0b0c09" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <title>MeshMind</title>
+    <script>
+      // Activa el aislamiento entre orígenes (hilos en WebAssembly) con un service worker.
+      // La primera visita recarga una vez para que el worker controle la página; el flag evita bucles.
+      if (!self.crossOriginIsolated && window.isSecureContext && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./isolation-sw.js').then(reg => {
+          const reloaded = sessionStorage.getItem('isolation-reload')
+          if (!navigator.serviceWorker.controller && !reloaded) {
+            sessionStorage.setItem('isolation-reload', '1')
+            location.reload()
+          }
+        })
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

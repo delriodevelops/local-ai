@@ -46,6 +46,7 @@ function StepRow({ step, index, last }: { step: StepResult; index: number; last:
         {step.state === 'running' && <LoaderCircle className="w-3.5 h-3.5 text-lime-300 animate-spin" />}
         {step.progress && step.state === 'running' && <span className="font-mono text-[10px] text-neutral-500">{step.progress.index + 1}/{step.progress.total}</span>}
         {step.branch && <span className="font-mono text-[10px] text-lime-300">→ {step.branch}</span>}
+        {step.ms !== undefined && <span className="font-mono text-[10px] text-neutral-500">{(step.ms / 1000).toFixed(1)}s</span>}
         {step.state === 'skipped' && <span className="font-mono text-[10px] text-neutral-500">skipped</span>}
         {step.state === 'running' && step.status && <span className="font-mono text-[10px] text-lime-300/80 truncate">{step.status}</span>}
         {step.error && <span className="text-xs text-red-400 truncate">{step.error}</span>}

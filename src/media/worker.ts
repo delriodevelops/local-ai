@@ -1,14 +1,24 @@
 import { AutoProcessor, MultiModalityCausalLM, pipeline, env, type Tensor } from '@huggingface/transformers'
 import { KokoroTTS } from 'kokoro-js'
 
-// Modelos de imagen y audio, fuera del hilo principal. Cada uno se descarga la primera vez que hace falta
+// Modelos de imagen y audio, fuera del hilo principal. Cada uno se descarga la primera vez que hace falta.
+// Hay dos copias de este worker: una para la gráfica (Janus, Whisper) y otra para el procesador (Kokoro),
+// así una no bloquea a la otra y trabajan a la vez
 env.allowLocalModels = false
+// Con aislamiento entre orígenes, la parte que corre en WebAssembly usa varios núcleos (sin él, solo uno)
+if (env.backends.onnx.wasm) {
+  env.backends.onnx.wasm.numThreads = self.crossOriginIsolated ? Math.max(2, Math.min(navigator.hardwareConcurrency - 2, 8)) : 1
+}
 
 const JANUS = 'onnx-community/Janus-Pro-1B-ONNX'
 const WHISPER = 'onnx-community/whisper-base'
 const KOKORO = 'onnx-community/Kokoro-82M-v1.0-ONNX'
 
+export type MediaModel = 'janus' | 'whisper' | 'kokoro'
+
 export type MediaTask =
+  | { task: 'load'; model: MediaModel }
+  | { task: 'unload'; model: MediaModel }
   | { task: 'describe'; image: string; prompt: string }
   | { task: 'imagine'; prompt: string }
   | { task: 'transcribe'; audio: Float32Array }
@@ -94,8 +104,26 @@ const clean = (text: string) => text
   .replace(/\s+/g, ' ')
   .trim()
 
+const loaders: Record<MediaModel, (report: Report) => Promise<unknown>> = { janus, whisper, kokoro }
+
+// Libera la memoria (de la gráfica o RAM) de un modelo cargado
+async function unload(model: MediaModel) {
+  const pending = loading.get(model)
+  loading.delete(model)
+  const loaded = await pending?.catch(() => null) as { model?: { dispose(): Promise<unknown> }; dispose?: () => Promise<unknown> } | null
+  await (loaded?.model?.dispose() ?? loaded?.dispose?.())
+}
+
 async function run(job: MediaTask, report: Report): Promise<string> {
   switch (job.task) {
+    case 'load': {
+      await loaders[job.model](report)
+      return 'ready'
+    }
+    case 'unload': {
+      await unload(job.model)
+      return 'freed'
+    }
     case 'describe': {
       const { processor, model } = await janus(report)
       report('Looking at the image…')

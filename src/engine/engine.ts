@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { ChatCompletionMessageParam, WebWorkerMLCEngine } from '@mlc-ai/web-llm'
 import { webllm } from './models'
+import { exclusive, useResources } from './resources'
 
 type Status = 'empty' | 'loading' | 'ready' | 'error'
 
@@ -51,19 +52,36 @@ export type GenerateOptions = {
   onToken: (text: string) => void
 }
 
-// Una respuesta en streaming; devuelve el texto completo
-export async function generate(messages: ChatCompletionMessageParam[], { temperature, maxTokens, signal, onToken }: GenerateOptions) {
-  if (!engine || useEngine.getState().status !== 'ready') throw new Error('No model loaded')
-  // La penalización evita que los modelos pequeños entren en bucle con contextos largos
-  const stream = await engine.chat.completions.create({ messages, stream: true, temperature, max_tokens: maxTokens, repetition_penalty: 1.1 })
-  let text = ''
-  for await (const chunk of stream) {
-    if (signal.aborted) {
-      engine.interruptGenerate()
-      break
+// Una respuesta en streaming; devuelve el texto completo.
+// El motor atiende una respuesta cada vez: las ramas paralelas con asistentes hacen cola aquí
+export function generate(messages: ChatCompletionMessageParam[], { temperature, maxTokens, signal, onToken }: GenerateOptions) {
+  return exclusive('llm', async () => {
+    if (!engine || useEngine.getState().status !== 'ready') throw new Error('No model loaded')
+    if (signal.aborted) return ''
+    const resources = useResources.getState()
+    resources.set({ llmBusy: true })
+    try {
+      // La penalización evita que los modelos pequeños entren en bucle con contextos largos
+      const stream = await engine.chat.completions.create({ messages, stream: true, temperature, max_tokens: maxTokens, repetition_penalty: 1.1 })
+      let text = ''
+      let tokens = 0
+      let started = 0
+      for await (const chunk of stream) {
+        if (signal.aborted) {
+          engine.interruptGenerate()
+          break
+        }
+        // Cada fragmento del stream es un token; se mide desde el primero para no contar la lectura del prompt
+        started ||= performance.now()
+        tokens++
+        text += chunk.choices[0]?.delta?.content ?? ''
+        onToken(text)
+      }
+      const seconds = (performance.now() - started) / 1000
+      if (tokens > 8 && seconds > 0) resources.set({ tokensPerSecond: tokens / seconds })
+      return text
+    } finally {
+      resources.set({ llmBusy: false })
     }
-    text += chunk.choices[0]?.delta?.content ?? ''
-    onToken(text)
-  }
-  return text
+  })
 }

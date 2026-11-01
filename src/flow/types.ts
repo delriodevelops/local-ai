@@ -55,6 +55,8 @@ export type StepResult = {
   status?: string
   // Por qué salida siguió una condición
   branch?: 'yes' | 'no'
+  // Lo que tardó el paso, en milisegundos
+  ms?: number
   error?: string
 }
 
