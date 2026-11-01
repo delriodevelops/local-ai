@@ -52,3 +52,16 @@ document.querySelector('.motion')?.addEventListener('click', () => {
 })
 systemReduced.addEventListener('change', apply)
 apply()
+
+// La app incrustada (05) solo se descarga en pantallas anchas: en el móvil el marco está oculto y sin src.
+// Una vez cargada se queda, aunque la ventana se estreche
+// Mismo corte que el CSS (max-width: 760px), negado, para que no quede un hueco con anchos fraccionarios
+const narrow = window.matchMedia('(max-width: 760px)')
+const demo = document.querySelector<HTMLIFrameElement>('.demo-frame')
+function loadDemo() {
+  if (!demo || narrow.matches || demo.src) return
+  demo.src = demo.dataset.src!
+  narrow.removeEventListener('change', loadDemo)
+}
+narrow.addEventListener('change', loadDemo)
+loadDemo()

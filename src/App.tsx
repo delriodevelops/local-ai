@@ -21,6 +21,9 @@ const VIEWS: { id: View; label: string; icon: typeof Workflow; desktopOnly?: boo
   { id: 'flow', label: 'Flow', icon: Workflow },
 ]
 
+// La landing incrusta la app con ?embed=1: se lee una vez y no se quita de la URL, para que valga en recargas
+const EMBED = new URLSearchParams(window.location.search).get('embed') === '1'
+
 function useIsDesktop() {
   const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches)
   useEffect(() => {
@@ -34,15 +37,15 @@ function useIsDesktop() {
 
 export default function App() {
   const desktop = useIsDesktop()
-  const [sidebar, setSidebar] = useState(() => window.matchMedia('(min-width: 1440px)').matches)
+  const [sidebar, setSidebar] = useState(() => !EMBED && window.matchMedia('(min-width: 1440px)').matches)
   const { view, modelId, set } = useApp()
   const load = useEngine(s => s.load)
   // En móvil no caben chat y lienzo a la vez
   const shown: View = !desktop && view === 'split' ? 'chat' : view
 
-  // Si el último modelo usado ya está descargado, se carga solo
+  // Si el último modelo usado ya está descargado, se carga solo; incrustada no, que pasar por la landing no ocupe la GPU
   useEffect(() => {
-    if (modelId && hasWebGPU()) isCached(modelId).then(cached => { if (cached) load(modelId) })
+    if (!EMBED && modelId && hasWebGPU()) isCached(modelId).then(cached => { if (cached) load(modelId) })
   }, [])
 
   // Desde la landing se llega con ?template=…: se abre esa plantilla y se limpia la URL
