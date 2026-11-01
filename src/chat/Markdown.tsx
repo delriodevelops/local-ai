@@ -32,6 +32,11 @@ export const Markdown = memo(({ text }: { text: string }) => (
         a: ({ href, children }) => (href?.startsWith('#')
           ? <a href={href}>{children}</a>
           : <a href={href} target="_blank" rel="noreferrer">{children}</a>),
+        // Una imagen de otro sitio se cargaría sola y su dirección puede llevar datos de la conversación
+        // (lo que devuelve una herramienta MCP, o lo que un agente copie de ella): se enseña como enlace
+        img: ({ src, alt }) => (typeof src === 'string' && src.startsWith('data:')
+          ? <img src={src} alt={alt ?? ''} />
+          : <a href={typeof src === 'string' ? src : undefined} target="_blank" rel="noreferrer">{alt || 'Image'}</a>),
         pre: ({ children }) => <>{children}</>,
         code: ({ className, children }) => {
           const lang = /language-(\w+)/.exec(className ?? '')?.[1]

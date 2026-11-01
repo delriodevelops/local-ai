@@ -34,10 +34,11 @@ function ServerRow({ server }: { server: McpServer }) {
             <ChevronDown className={cn('w-3.5 h-3.5 text-neutral-500 duration-200', open && 'rotate-180')} />
           </span>
           <span className="block truncate font-mono text-[10.5px] text-neutral-500">
-            {busy ? 'connecting…' : server.tools.length ? `${server.tools.length} tools` : 'not connected'} · {server.url}
+            {busy ? 'connecting…' : server.tools.length ? `${server.tools.length} tools` : status?.state === 'ready' ? 'no tools' : 'not connected'} · {server.url}
           </span>
         </button>
-        <button type="button" title="Connect again" disabled={busy} onClick={() => refreshServer(useApp.getState().mcpServers.find(s => s.id === server.id) ?? server)} className="p-1.5 rounded-md text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 disabled:opacity-40">
+        {/* Conexión nueva, no la guardada: si el servidor reinició, la sesión anterior ya no le vale */}
+        <button type="button" title="Connect again" disabled={busy} onClick={() => refreshServer(useApp.getState().mcpServers.find(s => s.id === server.id) ?? server, true)} className="p-1.5 rounded-md text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 disabled:opacity-40">
           {busy ? <LoaderCircle className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
         </button>
         <button type="button" title="Remove" onClick={() => forgetServer(server.id)} className="p-1.5 rounded-md text-neutral-400 hover:text-red-600 hover:bg-neutral-800">
@@ -91,9 +92,12 @@ export default function McpServers() {
     e.preventDefault()
     let address: URL
     try { address = new URL(url.trim()) } catch { return setError('Write the full address, starting with https://') }
+    // "localhost:8000/mcp" también es una URL válida (con "localhost:" como esquema)
+    if (address.protocol !== 'https:' && address.protocol !== 'http:') return setError('Write the full address, starting with https:// (or http:// for a local bridge).')
     if (servers.some(s => s.url === address.href)) return setError('That server is already in the list.')
     setError(null)
-    add({ id: newId('mcp'), label: address.hostname.replace(/^(www|mcp|api)\./, ''), url: address.href, token: token.trim(), tools: [] })
+    // host conserva el puerto: dos puentes locales no se llaman igual
+    add({ id: newId('mcp'), label: address.host.replace(/^(www|mcp|api)\./, ''), url: address.href, token: token.trim(), tools: [] })
     setUrl('')
     setToken('')
   }

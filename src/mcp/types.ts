@@ -8,6 +8,9 @@ export type JsonSchema = {
   enum?: unknown[]
   default?: unknown
   items?: JsonSchema
+  // Los servidores en Python describen `int | None` como anyOf: [{type: integer}, {type: null}]
+  anyOf?: JsonSchema[]
+  oneOf?: JsonSchema[]
 }
 
 export type McpTool = { name: string; title?: string; description?: string; inputSchema: JsonSchema }

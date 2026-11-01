@@ -4,7 +4,7 @@ Wire AI models into flows that run entirely in your browser: text, images and vo
 
 **Try it:** [delriodevelops.github.io/meshmind](https://delriodevelops.github.io/meshmind/) · the app itself lives at [/meshmind/app/](https://delriodevelops.github.io/meshmind/app/)
 
-Build a flow on a canvas and MeshMind runs every model on your own GPU. No server, no API key, nothing leaves your machine. Assistants work in parallel, lists get handled item by item, conditions route the answer, photos get described and reimagined, voice notes get transcribed and answered out loud. Every step lights up as it runs.
+Build a flow on a canvas and MeshMind runs every model on your own GPU. No server, no API key; only the nodes marked online (Create video, MCP tool, Agent tools) send data, and only to the services you choose. Assistants work in parallel, lists get handled item by item, conditions route the answer, photos get described and reimagined, voice notes get transcribed and answered out loud. Every step lights up as it runs.
 
 ## Nodes
 
@@ -20,7 +20,7 @@ Build a flow on a canvas and MeshMind runs every model on your own GPU. No serve
 | **Transcribe** | audio | text | Speech to text |
 | **Speak** | text | audio | Text to a natural voice, five voices |
 | **Create video** | text | video | Optional and **online**: runs on [fal.ai](https://fal.ai) with your own key |
-| **MCP tool** | text or list | text or list, image | **Online**: calls one tool of an MCP server. Arguments are typed in the node; `{input}` is what reaches it. A list makes one call per item |
+| **MCP tool** | text or list | text or list, image | **Online**: calls one tool of an MCP server. Arguments are typed in the node; `{input}` is what reaches it. A list makes one call per item (only the first image goes out) |
 | **Agent** | text | text | **Online tools, local model**: an assistant that decides which MCP tools to call (up to 5 tools and 4 calls) |
 | **Answer** | anything | – | What reaches it is shown in the chat |
 

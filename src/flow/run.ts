@@ -211,7 +211,7 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
             if (problem) throw new Error(problem)
             return mcp.callTool(server, node.data.tool, args, { signal, onProgress: onStatus })
           }
-          // Con una lista, una llamada por elemento, una detrás de otra
+          // Con una lista, una llamada por elemento, una detrás de otra. Por la salida de imagen solo sale la primera
           const items = live.flatMap(i => (i.value.type === 'list' ? i.value.items : []))
           let image: string | undefined
           if (items.length) {
@@ -220,18 +220,28 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
               if (signal.aborted) break
               current.progress = { index, total: items.length }
               flush()
-              const output = await call(item)
-              answers.push(output.text)
+              let output
+              try {
+                output = await call(item)
+              } catch (error) {
+                // Parado a mitad de la lista: se queda con los elementos que ya terminaron
+                if (signal.aborted && answers.length) break
+                throw error
+              }
+              if (output.text) answers.push(output.text)
               image ??= output.images[0]
+              current.value = { type: 'list', items: [...answers] }
             }
-            current.value = { type: 'list', items: answers }
+            current.value = answers.length || !image ? { type: 'list', items: answers } : { type: 'image', url: image }
           } else {
             onStatus(`Calling ${node.data.tool}…`)
             const output = await call(text())
             current.value = output.text || !output.images.length ? { type: 'text', text: output.text } : { type: 'image', url: output.images[0] }
             image = output.images[0]
           }
-          results.set(`${node.id}:out`, current.value.type === 'image' ? null : current.value)
+          // Un resultado solo de imagen no deja texto vacío por la salida de texto
+          const empty = current.value.type === 'image' || (current.value.type === 'list' && !current.value.items.length)
+          results.set(`${node.id}:out`, empty ? null : current.value)
           results.set(`${node.id}:image`, image ? { type: 'image', url: image } : null)
           break
         }
@@ -244,7 +254,6 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
           })
           if (!tools.length) throw new Error('Choose at least one tool for this agent (connect its server in MCP settings).')
           const names = tools.map(t => t.tool.name)
-          let started = false
           const answer = await runAgent({
             instructions: node.data.instructions,
             input: text(),
@@ -254,7 +263,10 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
             temperature,
             maxTokens,
             signal,
-            onStart: () => { if (!started) start(); started = true },
+            // Entre respuestas el agente vuelve a hacer cola en el modelo: esa espera no cuenta como trabajo.
+            // Las llamadas a herramientas sí cuentan, hasta la siguiente cola
+            onQueued: () => { pause(); current.state = 'waiting'; current.status = 'Queued'; flush() },
+            onStart: start,
             onText: partial => { current.value = { type: 'text', text: partial }; flush() },
             onStatus: status => { current.status = status; flush() },
             onCalls: calls => { current.calls = calls; flush() },

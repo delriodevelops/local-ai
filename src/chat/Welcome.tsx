@@ -41,7 +41,7 @@ export default function Welcome() {
             Think in <span className="text-signal">meshes.</span>
           </h1>
           <p className="text-neutral-300 max-w-md text-[15px] leading-relaxed">
-            Wire AI models into a flow: run them in parallel, split work into items, route by conditions, see, paint, listen and speak. It all runs in your browser. No server, no API key.
+            Wire AI models into a flow: run them in parallel, split work into items, route by conditions, see, paint, listen and speak. Every model runs in your browser, with no server and no API key; only the nodes marked online send data, and only where you choose.
           </p>
         </div>
         <div className="hidden @xl:block animate-rise" style={{ animationDelay: '120ms' }}>

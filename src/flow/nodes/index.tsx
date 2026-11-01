@@ -410,8 +410,11 @@ export const AgentNodeView = memo(({ id, data, selected }: NodeProps<AgentNode>)
   const status = useServerTools(servers)
   const nextColor = COLORS[(COLORS.indexOf(data.color) + 1) % COLORS.length]
   const chosen = (ref: ToolRef) => data.tools.some(t => t.serverId === ref.serverId && t.name === ref.name)
+  // Las herramientas elegidas que siguen existiendo: las de un servidor quitado no se ven ni se pueden desmarcar,
+  // así que no cuentan y se descartan al marcar otra
+  const available = data.tools.filter(t => servers.some(s => s.id === t.serverId && s.tools.some(x => x.name === t.name)))
   const toggle = (ref: ToolRef) => updateNode(id, {
-    tools: chosen(ref) ? data.tools.filter(t => !(t.serverId === ref.serverId && t.name === ref.name)) : [...data.tools, ref].slice(-MAX_TOOLS),
+    tools: chosen(ref) ? data.tools.filter(t => !(t.serverId === ref.serverId && t.name === ref.name)) : [...available, ref].slice(-MAX_TOOLS),
   })
   return (
     <Shell id={id} kind="Agent" icon={<Bot className="w-3 h-3" />} color={data.color} selected={selected} step={step} width="w-80" local={false}>
@@ -433,7 +436,7 @@ export const AgentNodeView = memo(({ id, data, selected }: NodeProps<AgentNode>)
         className="nodrag nowheel resize-none rounded-md bg-neutral-950 border border-neutral-800 focus:border-signal px-2 py-1.5 text-xs leading-relaxed text-neutral-300 outline-none"
       />
       <div className="flex items-center justify-between text-xs text-neutral-400">
-        <span>Tools · {data.tools.length} of {MAX_TOOLS}</span>
+        <span>Tools · {available.length} of {MAX_TOOLS}</span>
         <label className="flex items-center gap-1.5">
           up to
           <input

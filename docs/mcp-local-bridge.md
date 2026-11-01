@@ -51,9 +51,9 @@ A public website calling `127.0.0.1` counts as reaching into your local network,
 
 ## When it doesn't connect
 
-- **"Could not reach the local server"**: the bridge isn't running, the port is different, or the browser blocked the local network request (see above).
+- **"Could not reach the local server"**: the bridge isn't running, the port is different, the browser blocked the local network request (see above), or the bridge's CORS setting doesn't include MeshMind's address exactly (scheme, host and port must match). The browser reports all of these the same way, so check them in that order.
 - **"There is no MCP endpoint at this address"**: the path is wrong; try `/mcp` or `/sse`.
-- **"This server does not accept connections from websites"**: the bridge's CORS setting doesn't include MeshMind's address exactly (scheme, host and port must match).
+- **"This server does not accept connections from websites"**: shown for a bridge reached through a non-local address (another computer, a tunnel); the causes are the same as above.
 
 ## Online servers without CORS
 

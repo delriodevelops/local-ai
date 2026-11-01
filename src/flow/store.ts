@@ -75,15 +75,22 @@ export const useApp = create<AppState>()(
         const template = TEMPLATES.find(t => t.id === id)
         if (!template) return
         const { servers = [], ...flow } = template.build()
-        set(s => ({
-          ...flow,
-          templateKey: s.templateKey + 1,
-          // Los servidores MCP que usa la plantilla se añaden si faltan
-          mcpServers: [
-            ...s.mcpServers,
-            ...SUGGESTED.filter(m => servers.includes(m.id) && !s.mcpServers.some(x => x.id === m.id)).map(m => ({ ...m, token: '', tools: [] })),
-          ],
-        }))
+        set(s => {
+          // Los servidores MCP que usa la plantilla se añaden si faltan. Si ya estaba (también añadido a mano, con
+          // la misma dirección y otro id), se usa ese, y los nodos de la plantilla pasan a apuntarle
+          const alias = new Map<string, string>()
+          const missing: McpServer[] = []
+          SUGGESTED.filter(m => servers.includes(m.id)).forEach(m => {
+            const existing = s.mcpServers.find(x => x.id === m.id || x.url === m.url)
+            if (existing) alias.set(m.id, existing.id)
+            else missing.push({ ...m, token: '', tools: [] })
+          })
+          const serverOf = (id: string) => alias.get(id) ?? id
+          const nodes = flow.nodes.map(n => (n.type === 'tool' ? { ...n, data: { ...n.data, serverId: serverOf(n.data.serverId) } }
+            : n.type === 'agent' ? { ...n, data: { ...n.data, tools: n.data.tools.map(t => ({ ...t, serverId: serverOf(t.serverId) })) } }
+            : n) as FlowNode)
+          return { nodes, edges: flow.edges, templateKey: s.templateKey + 1, mcpServers: [...s.mcpServers, ...missing] }
+        })
       },
       set: patch => set(patch),
     }),

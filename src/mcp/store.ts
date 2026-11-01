@@ -7,22 +7,29 @@ export const useMcp = create<{ status: Record<string, McpStatus | undefined>; op
 
 const setStatus = (id: string, status: McpStatus) => useMcp.setState(s => ({ status: { ...s.status, [id]: status } }))
 
-// Conecta, pide las herramientas y las guarda con el servidor
-export async function refreshServer(server: McpServer) {
+// Conecta, pide las herramientas y las guarda con el servidor.
+// fresh: cierra antes la conexión que hubiera ("Connect again"), por si el servidor reinició y olvidó la sesión
+export async function refreshServer(server: McpServer, fresh = false) {
   setStatus(server.id, { state: 'connecting' })
-  const mcp = await import('./client')
+  let mcp: typeof import('./client') | undefined
   try {
+    mcp = await import('./client')
+    mcp.restore(server.id)
+    if (fresh) mcp.disconnect(server.id)
     const tools = await mcp.listTools(server)
     useApp.getState().updateServer(server.id, { tools })
     setStatus(server.id, { state: 'ready' })
   } catch (error) {
-    setStatus(server.id, { state: 'error', ...mcp.explain(error, server.url) })
+    // Sin el módulo (sin red, o la web se actualizó y su archivo ya no existe) solo queda recargar
+    setStatus(server.id, mcp
+      ? { state: 'error', ...mcp.explain(error, server.url, !!server.token) }
+      : { state: 'error', message: 'Could not load the MCP client.', hint: 'Reload the page.' })
   }
 }
 
 export async function forgetServer(id: string) {
   useApp.getState().removeServer(id)
   useMcp.setState(s => ({ status: { ...s.status, [id]: undefined } }))
-  const mcp = await import('./client')
-  mcp.disconnect(id)
+  const mcp = await import('./client').catch(() => undefined)
+  mcp?.disconnect(id, true)
 }
