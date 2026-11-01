@@ -26,7 +26,7 @@ const Message = ({ message, isStreaming }) => {
               {
                 message?.icon
                   ? <ion-icon name={message.icon}></ion-icon>
-                  : <Image src={"/default.png"} width={50} height={50} alt="MeshMind" className='bg-lime-500 rounded-full aspect-square p-1 self-start text-black' />
+                  : <Image src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/default.png`} width={50} height={50} alt="MeshMind" className='bg-lime-500 rounded-full aspect-square p-1 self-start text-black' />
               }
             </span>
           )

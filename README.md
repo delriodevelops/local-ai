@@ -2,6 +2,8 @@
 
 Chain AI assistants that run entirely in your browser, and watch the reasoning step by step.
 
+**Try it:** [delriodevelops.github.io/meshmind](https://delriodevelops.github.io/meshmind/)
+
 Pick a language model and MeshMind downloads it once and runs it on your own GPU with [WebLLM](https://github.com/mlc-ai/web-llm). No server, no API key, nothing leaves your machine. Then line up specialised assistants, such as Product Research → UX Designer → Developer, so each one works on the previous one's answer, and follow the whole chain as a diagram.
 
 ## Features

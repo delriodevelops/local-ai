@@ -33,7 +33,7 @@ function Welcome() {
   return (
     <div className="m-auto max-w-2xl px-4 flex flex-col items-center text-center gap-6">
       <div className="flex flex-col items-center gap-2">
-        <img src="/icon.svg" alt="" width={56} height={56} className="rounded-xl" />
+        <img src={`${process.env.NEXT_PUBLIC_BASE_PATH || ''}/icon.svg`} alt="" width={56} height={56} className="rounded-xl" />
         <h1 className="text-3xl font-semibold">MeshMind</h1>
         <p className="text-neutral-400">Chain AI assistants that run entirely in your browser.</p>
       </div>
