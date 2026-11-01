@@ -1,0 +1,108 @@
+body{margin:0;background:#f2f2ef}
+a{color:#111111}a:hover{color:#ff3a1f}
+@property --n{syntax:'<integer>';inherits:false;initial-value:0}
+
+/* Entrada: la retícula se dibuja, el círculo cae, el título sube */
+@keyframes draw-down{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes rise{from{transform:translateY(108%)}to{transform:translateY(0)}}
+@keyframes fade-up{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@keyframes drop{0%{transform:scale(0)}70%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes drift{0%,100%{translate:0 0}50%{translate:-3vw 2vw}}
+@keyframes widths{0%,100%{font-variation-settings:"wdth" 70}50%{font-variation-settings:"wdth" 125}}
+@keyframes cue{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+@keyframes pulse{0%,14%,100%{background:#f2f2ef;color:#111111}4%,9%{background:#ff3a1f;color:#111111}}
+@keyframes count{from{--n:0}}
+@keyframes countdown{from{--n:99}}
+@keyframes ticker{to{transform:translateX(-50%)}}
+
+.gridline{transform-origin:top;animation:draw-down 1.4s cubic-bezier(.87,0,.13,1) both;animation-delay:calc(var(--i) * 70ms)}
+.rise{animation:rise 1.2s cubic-bezier(.16,1,.3,1) both}
+.fade-up{animation:fade-up 1s cubic-bezier(.16,1,.3,1) both}
+.disc{animation:drop 1.6s cubic-bezier(.87,0,.13,1) both .2s, drift 14s cubic-bezier(.45,0,.55,1) 1.8s infinite}
+.breathe{animation:widths 9s cubic-bezier(.65,0,.35,1) infinite}
+.cue{animation:cue 2.4s cubic-bezier(.65,0,.35,1) infinite}
+.ticker{animation:ticker 40s linear infinite}
+
+/* Animaciones ligadas al scroll: avanzan y retroceden con él */
+@keyframes slide-l{to{translate:-18vw 0}}
+@keyframes slide-r{to{translate:18vw 0}}
+@keyframes swell{to{scale:3.4;opacity:0}}
+@keyframes scrub{from{translate:14% 0}to{translate:-14% 0}}
+@keyframes num{from{font-stretch:125%;translate:0 30%}to{font-stretch:62%;translate:0 0}}
+@keyframes mask{from{clip-path:inset(0 0 100% 0);translate:0 40px}to{clip-path:inset(0 0 0 0);translate:0 0}}
+@keyframes up{from{opacity:0;translate:0 48px}}
+@keyframes wire-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes pop{from{opacity:0;scale:.82}}
+@keyframes row-in{from{opacity:0;translate:-56px 0}}
+@keyframes curtain{from{clip-path:inset(10% 8% 10% 8%)}to{clip-path:inset(0 0 0 0)}}
+@keyframes lane-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes stretch-in{from{font-stretch:62%}to{font-stretch:125%}}
+@keyframes disc-par{from{translate:0 -12%}to{translate:0 24%}}
+@keyframes wipe-up{from{clip-path:inset(28% 0 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes rise-in{from{clip-path:inset(100% 0 0 0);translate:0 20%}to{clip-path:inset(0 0 0 0);translate:0 0}}
+@keyframes grow{to{transform:scaleX(1)}}
+
+.progress{position:fixed;left:0;top:0;right:0;height:4px;background:#ff3a1f;transform-origin:left;transform:scaleX(0);z-index:50;animation:grow linear both;animation-timeline:scroll(root)}
+.hero .line-l{animation:slide-l linear both;animation-timeline:view();animation-range:exit 0% exit 100%}
+.hero .line-r{animation:slide-r linear both;animation-timeline:view();animation-range:exit 0% exit 100%}
+.hero .disc-wrap{animation:swell linear both;animation-timeline:view();animation-range:exit 0% exit 90%}
+.scrub{animation:scrub linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
+.num{display:inline-block;animation:num linear both;animation-timeline:view();animation-range:entry 0% cover 45%}
+.mask{animation:mask linear both;animation-timeline:view();animation-range:entry 10% entry 90%}
+.reveal{animation:up linear both;animation-timeline:view();animation-range:entry 0% entry 80%}
+.wire{stroke-dasharray:1;stroke-dashoffset:0;animation:wire-draw linear both;animation-timeline:view();animation-range:entry 30% cover 50%}
+.node{animation:pulse 3.6s linear infinite,pop linear both;animation-timeline:auto,view();animation-range:normal,entry 10% entry 70%;transition:translate .45s cubic-bezier(.16,1,.3,1)}
+.row{animation:row-in linear both;animation-timeline:view();animation-range:entry 0% entry 75%;transition:background-color .45s cubic-bezier(.16,1,.3,1)}
+.curtain{animation:curtain linear both;animation-timeline:view();animation-range:entry 0% entry 90%}
+.lane{transform-origin:left;animation:lane-fill linear both;animation-timeline:view();animation-range:entry 40% cover 55%}
+.count{counter-reset:n var(--n);animation:count 2.2s cubic-bezier(.16,1,.3,1) both;animation-timeline:view();animation-range:entry 20% cover 45%}
+.count::after{content:counter(n)}
+.countdown{counter-reset:n var(--n);animation:countdown 2.2s cubic-bezier(.16,1,.3,1) both;animation-timeline:view();animation-range:entry 20% cover 45%}
+.countdown::after{content:counter(n)}
+.tpl{animation:up linear both;animation-timeline:view();animation-range:entry 0% entry 70%}
+.cta-word{display:block;animation:stretch-in linear both;animation-timeline:view();animation-range:entry 10% cover 50%}
+.cta-word.alt{animation-direction:reverse}
+.cta-disc{animation:disc-par linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
+.wipe-up{animation:wipe-up linear both;animation-timeline:view();animation-range:entry 0% entry 60%}
+.wm-wrap{overflow:hidden;animation:rise-in linear both;animation-timeline:view();animation-range:entry 0% entry 100%}
+
+/* Hover */
+.nav a{background:linear-gradient(#ff3a1f,#ff3a1f) 0 100%/0 2px no-repeat;padding-bottom:3px;transition:background-size .45s cubic-bezier(.16,1,.3,1),color .3s}
+.nav a:hover{background-size:100% 2px}
+.btn{background-image:linear-gradient(#ff3a1f,#ff3a1f);background-size:0% 100%;background-repeat:no-repeat;transition:background-size .5s cubic-bezier(.16,1,.3,1),color .3s,transform .35s cubic-bezier(.16,1,.3,1)}
+.btn:hover{background-size:100% 100%;color:#111111 !important;transform:translateY(-3px)}
+.btn.on-red{background-image:linear-gradient(#f2f2ef,#f2f2ef)}
+.btn .arrow{display:inline-block;transition:transform .35s cubic-bezier(.16,1,.3,1)}
+.btn:hover .arrow{transform:translate(4px,-4px)}
+.meta-cell{transition:border-color .3s,translate .45s cubic-bezier(.16,1,.3,1)}
+.meta-cell:hover{border-top-color:#ff3a1f !important;translate:0 -6px}
+.ticker-band:hover .ticker{animation-play-state:paused}
+.ticker span{transition:color .25s}
+.ticker span:hover{color:#ff3a1f}
+.node:hover{background:#ff3a1f !important;translate:0 -8px}
+.row .verb{display:inline-block;transition:font-variation-settings .6s cubic-bezier(.16,1,.3,1),transform .6s cubic-bezier(.16,1,.3,1);font-variation-settings:"wdth" 75}
+.row:hover{background:#ff3a1f}
+.row:hover .verb{font-variation-settings:"wdth" 125;transform:translateX(12px)}
+.row .meta{transition:translate .5s cubic-bezier(.16,1,.3,1)}
+.row:hover .meta{translate:-8px 0}
+.lane-row:hover .lane{filter:brightness(1.25)}
+.tpl{position:relative;transition:color .3s cubic-bezier(.16,1,.3,1)}
+.tpl::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#ff3a1f;transform:scaleX(0);transform-origin:left;transition:transform .55s cubic-bezier(.16,1,.3,1)}
+.tpl:hover{color:#ff3a1f}
+.tpl:hover::after{transform:scaleX(1)}
+.tpl .t-name{display:block;transition:translate .5s cubic-bezier(.16,1,.3,1)}
+.tpl:hover .t-name{translate:12px 0}
+.tpl .arr{position:absolute;right:4px;top:24px;font-size:30px;opacity:0;translate:-16px 16px;transition:opacity .35s,translate .5s cubic-bezier(.16,1,.3,1)}
+.tpl:hover .arr{opacity:1;translate:0 0}
+:focus-visible{outline:2px solid #ff3a1f;outline-offset:3px}
+
+@media (max-width:760px){.row{grid-template-columns:44px minmax(0,1fr) !important}.row .meta{display:none !important}}
+/* Movimiento reducido: fuera desplazamientos, parallax y movimiento continuo; se quedan fundidos, colores,
+   contadores, líneas que se dibujan y hovers */
+@keyframes fade{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){
+  .breathe,.disc,.ticker,.cue,.cta-disc,.scrub,.cta-word,.hero .line-l,.hero .line-r,.hero .disc-wrap{animation:none}
+  .gridline,.rise,.fade-up,.mask,.reveal,.row,.tpl,.num,.curtain,.wipe-up,.wm-wrap{animation-name:fade}
+  .node{animation-name:pulse,fade}
+  .btn:hover,.node:hover,.meta-cell:hover{transform:none;translate:none}
+}

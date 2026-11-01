@@ -1,32 +1,334 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Wire AI assistants into flows that run entirely in your browser." />
-    <meta name="theme-color" content="#0b0c09" />
-    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <title>MeshMind</title>
-    <script>
-      // Activa el aislamiento entre orígenes (hilos en WebAssembly) con un service worker.
-      // Las cabeceras solo cuentan desde la carga siguiente a que el worker controle la página, así que
-      // se espera a que esté activo y se recarga. Como mucho dos veces por pestaña, para no entrar en bucle
-      // si el navegador no admite el aislamiento.
-      if (!self.crossOriginIsolated && window.isSecureContext && 'serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./isolation-sw.js')
-          .then(() => navigator.serviceWorker.ready)
-          .then(() => {
-            const reloads = Number(sessionStorage.getItem('isolation-reloads') || 0)
-            if (reloads < 2) {
-              sessionStorage.setItem('isolation-reloads', String(reloads + 1))
-              location.reload()
-            }
-          })
-      }
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MeshMind — AI flows that run in your browser</title>
+  <meta name="description" content="Wire AI models into flows that think, see, listen and speak. Everything runs on your own graphics card and processor, inside a browser tab. No server, no API key." />
+  <meta name="theme-color" content="#f2f2ef" />
+  <meta property="og:title" content="MeshMind — AI flows that run in your browser" />
+  <meta property="og:description" content="Wire AI models into flows that think, see, listen and speak. No server, no API key." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+  <script>
+    // Registra ya el service worker de aislamiento: así la app abre con todos los núcleos sin recargar
+    if (window.isSecureContext && 'serviceWorker' in navigator) navigator.serviceWorker.register('%BASE_URL%isolation-sw.js')
+  </script>
+  <script type="module" src="/src/landing/main.ts"></script>
+</head>
+<body>
+<main style="font-family: 'Archivo Variable', system-ui, sans-serif; color: #111111; background: #f2f2ef; overflow: clip">
+  <div class="progress" aria-hidden="true"></div>
+
+  <header style="position: relative; z-index: 3; max-width: 1440px; margin: 0 auto; padding: 24px 40px; display: flex; flex-wrap: wrap; gap: 16px 40px; align-items: baseline; font-size: 13px; line-height: 1.3">
+    <span style="font-weight: 800; font-size: 15px; letter-spacing: -0.01em; flex: 1 1 200px">MeshMind<br><span style="font-weight: 400; color: #555555">Local AI flows</span></span>
+    <nav class="nav" style="display: flex; gap: 32px; flex: 1 1 360px; flex-wrap: wrap">
+      <a href="#canvas" style="text-decoration: none">01 Canvas</a>
+      <a href="#senses" style="text-decoration: none">02 Senses</a>
+      <a href="#machine" style="text-decoration: none">03 Machine</a>
+      <a href="#start" style="text-decoration: none">04 Start</a>
+    </nav>
+    <a class="btn" href="./app/" style="display: inline-block; background-color: #111111; color: #f2f2ef; padding: 14px 20px; text-decoration: none; font-weight: 600">Open the app <span class="arrow">↗</span></a>
+  </header>
+
+  <section class="hero" style="position: relative; max-width: 1440px; margin: 0 auto; padding: 40px 40px 0">
+    <div aria-hidden="true" style="position: absolute; inset: 0 40px; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px; pointer-events: none">
+      <span class="gridline" style="--i: 0; border-left: 1px solid rgba(17,17,17,.1)"></span>
+      <span class="gridline" style="--i: 1; border-left: 1px solid rgba(17,17,17,.1)"></span>
+      <span class="gridline" style="--i: 2; border-left: 1px solid rgba(17,17,17,.1)"></span>
+      <span class="gridline" style="--i: 3; border-left: 1px solid rgba(17,17,17,.1)"></span>
+      <span class="gridline" style="--i: 4; border-left: 1px solid rgba(17,17,17,.1)"></span>
+      <span class="gridline" style="--i: 5; border-left: 1px solid rgba(17,17,17,.1)"></span>
+      <span class="gridline" style="--i: 6; border-left: 1px solid rgba(17,17,17,.1)"></span>
+      <span class="gridline" style="--i: 7; border-left: 1px solid rgba(17,17,17,.1)"></span>
+      <span class="gridline" style="--i: 8; border-left: 1px solid rgba(17,17,17,.1)"></span>
+      <span class="gridline" style="--i: 9; border-left: 1px solid rgba(17,17,17,.1)"></span>
+      <span class="gridline" style="--i: 10; border-left: 1px solid rgba(17,17,17,.1)"></span>
+      <span class="gridline" style="--i: 11; border-left: 1px solid rgba(17,17,17,.1); border-right: 1px solid rgba(17,17,17,.1)"></span>
+    </div>
+
+    <div class="disc-wrap" aria-hidden="true" style="position: absolute; z-index: 0; right: 7vw; top: 150px; width: clamp(150px, 25vw, 380px); aspect-ratio: 1">
+      <div class="disc" style="width: 100%; height: 100%; border-radius: 50%; background: #ff3a1f"></div>
+    </div>
+
+    <h1 style="position: relative; z-index: 1; margin: 0; padding-top: 48px; font-weight: 800; font-size: clamp(84px, 19vw, 300px); line-height: .8; letter-spacing: -0.045em; text-transform: uppercase">
+      <span class="line-l" style="display: block; overflow: hidden; padding-bottom: .04em">
+        <span class="rise" style="display: block; animation-delay: .35s"><span class="breathe" style="display: inline-block">Mesh</span></span>
+      </span>
+      <span class="line-r" style="display: block; overflow: hidden; padding-bottom: .04em; margin-left: 18vw">
+        <span class="rise" style="display: block; animation-delay: .5s"><span class="breathe" style="display: inline-block; animation-delay: -4.5s">Mind</span></span>
+      </span>
+    </h1>
+
+    <div style="position: relative; z-index: 1; margin-top: 64px; display: flex; flex-wrap: wrap; gap: 32px 24px; align-items: end">
+      <p class="fade-up" style="flex: 1 1 380px; margin: 0; font-size: clamp(24px, 2.4vw, 34px); line-height: 1.15; font-weight: 600; letter-spacing: -0.015em; animation-delay: .9s">( 01 ) Wire AI models into flows that think, see, listen and speak.</p>
+      <p class="fade-up" style="flex: 1 1 320px; margin: 0; font-size: 17px; line-height: 1.6; color: #444444; animation-delay: 1.05s">Every model runs on your own graphics card and processor, inside a browser tab. No server, no account, no API key. The models download once and stay with you.</p>
+      <div class="fade-up" style="flex: 0 1 260px; display: flex; gap: 20px; align-items: end; justify-content: flex-end; animation-delay: 1.2s">
+        <span style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em">Scroll</span>
+        <span style="position: relative; width: 1px; height: 72px; background: rgba(17,17,17,.15)"><span class="cue" style="position: absolute; inset: 0; background: #111111"></span></span>
+      </div>
+    </div>
+
+    <div style="position: relative; z-index: 1; margin-top: 72px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px">
+      <div class="fade-up" style="animation-delay: 1.3s">
+        <div class="meta-cell" style="border-top: 2px solid #111111; padding-top: 14px">
+          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #555555">Text</div>
+          <div style="margin-top: 6px; font-size: 20px; font-weight: 600">Qwen 2.5 · Llama 3.2</div>
+        </div>
+      </div>
+      <div class="fade-up" style="animation-delay: 1.4s">
+        <div class="meta-cell" style="border-top: 2px solid #111111; padding-top: 14px">
+          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #555555">Image</div>
+          <div style="margin-top: 6px; font-size: 20px; font-weight: 600">Janus-Pro 1B</div>
+        </div>
+      </div>
+      <div class="fade-up" style="animation-delay: 1.5s">
+        <div class="meta-cell" style="border-top: 2px solid #111111; padding-top: 14px">
+          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #555555">Sound</div>
+          <div style="margin-top: 6px; font-size: 20px; font-weight: 600">Whisper · Kokoro</div>
+        </div>
+      </div>
+      <div class="fade-up" style="animation-delay: 1.6s">
+        <div class="meta-cell" style="border-top: 2px solid #ff3a1f; padding-top: 14px">
+          <div style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #555555">Server</div>
+          <div style="margin-top: 6px; font-size: 20px; font-weight: 600">None. It runs in your tab.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="ticker-band" aria-hidden="true" style="margin-top: 120px; border-top: 2px solid #111111; border-bottom: 2px solid #111111; padding: 18px 0; overflow: hidden">
+    <div class="scrub">
+      <div class="ticker" style="display: flex; width: max-content; gap: 56px; white-space: nowrap; font-weight: 800; font-size: 56px; letter-spacing: -0.03em; text-transform: uppercase; font-variation-settings: 'wdth' 70">
+        <span>Think</span><span style="color:#ff3a1f">●</span><span>See</span><span style="color:#ff3a1f">●</span><span>Paint</span><span style="color:#ff3a1f">●</span><span>Listen</span><span style="color:#ff3a1f">●</span><span>Speak</span><span style="color:#ff3a1f">●</span><span>Split</span><span style="color:#ff3a1f">●</span><span>Join</span><span style="color:#ff3a1f">●</span><span>Decide</span><span style="color:#ff3a1f">●</span>
+        <span>Think</span><span style="color:#ff3a1f">●</span><span>See</span><span style="color:#ff3a1f">●</span><span>Paint</span><span style="color:#ff3a1f">●</span><span>Listen</span><span style="color:#ff3a1f">●</span><span>Speak</span><span style="color:#ff3a1f">●</span><span>Split</span><span style="color:#ff3a1f">●</span><span>Join</span><span style="color:#ff3a1f">●</span><span>Decide</span><span style="color:#ff3a1f">●</span>
+      </div>
+    </div>
+  </div>
+
+  <section id="canvas" style="max-width: 1440px; margin: 0 auto; padding: 160px 40px 120px">
+    <div style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end">
+      <span style="display: inline-block; overflow: hidden"><span class="num" style="font-weight: 800; font-size: clamp(120px, 15vw, 220px); line-height: .78; letter-spacing: -0.05em; color: #ff3a1f; font-stretch: 62%">01</span></span>
+      <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 18px">
+        <h2 class="mask" style="margin: 0; font-weight: 800; font-size: clamp(44px, 5.6vw, 84px); line-height: .92; letter-spacing: -0.035em; text-transform: uppercase">The canvas</h2>
+        <p class="reveal" style="margin: 0; max-width: 560px; font-size: 18px; line-height: 1.6; color: #444444">Drop nodes, drag a wire, press enter. Three experts answer in parallel, a fourth merges them, and you watch the signal travel through every step.</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 80px; overflow-x: auto">
+      <div style="position: relative; min-width: 900px; aspect-ratio: 2.4">
+        <svg viewBox="0 0 1200 500" style="position: absolute; inset: 0; width: 100%; height: 100%" aria-hidden="true">
+          <g fill="none" stroke="#111111" stroke-width="2">
+            <path class="wire" pathLength="1" d="M198 250 C 270 250, 270 90, 342 90"/>
+            <path class="wire" pathLength="1" d="M198 250 L 342 250"/>
+            <path class="wire" pathLength="1" d="M198 250 C 270 250, 270 410, 342 410"/>
+            <path class="wire" pathLength="1" d="M522 90 C 600 90, 600 250, 678 250" style="animation-range: entry 45% cover 60%"/>
+            <path class="wire" pathLength="1" d="M522 250 L 678 250" style="animation-range: entry 45% cover 60%"/>
+            <path class="wire" pathLength="1" d="M522 410 C 600 410, 600 250, 678 250" style="animation-range: entry 45% cover 60%"/>
+            <path class="wire" pathLength="1" d="M858 250 L 1002 250" style="animation-range: entry 60% cover 70%"/>
+          </g>
+          <circle r="9" fill="#ff3a1f"><animateMotion dur="3.6s" repeatCount="indefinite" path="M198 250 C 270 250, 270 90, 342 90 L 522 90 C 600 90, 600 250, 678 250 L 858 250 L 1002 250"/></circle>
+          <circle r="9" fill="#ff3a1f"><animateMotion dur="3.6s" begin="0.15s" repeatCount="indefinite" path="M198 250 L 522 250 L 858 250 L 1002 250"/></circle>
+          <circle r="9" fill="#ff3a1f"><animateMotion dur="3.6s" begin="0.3s" repeatCount="indefinite" path="M198 250 C 270 250, 270 410, 342 410 L 522 410 C 600 410, 600 250, 678 250 L 858 250 L 1002 250"/></circle>
+        </svg>
+        <div class="node" style="position: absolute; left: 1.5%; top: 40%; width: 15%; height: 20%; box-sizing: border-box; border: 2px solid #111111; padding: 12px; display: flex; flex-direction: column; justify-content: space-between">
+          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em">Message</span>
+          <span style="font-weight: 700; font-size: 18px; line-height: 1.1">A bakery run by a fox</span>
+        </div>
+        <div class="node" style="position: absolute; left: 28.5%; top: 8%; width: 15%; height: 20%; box-sizing: border-box; border: 2px solid #111111; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; animation-delay: .9s">
+          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em">Assistant</span>
+          <span style="font-weight: 700; font-size: 22px">Researcher</span>
+        </div>
+        <div class="node" style="position: absolute; left: 28.5%; top: 40%; width: 15%; height: 20%; box-sizing: border-box; border: 2px solid #111111; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; animation-delay: .9s">
+          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em">Assistant</span>
+          <span style="font-weight: 700; font-size: 22px">Designer</span>
+        </div>
+        <div class="node" style="position: absolute; left: 28.5%; top: 72%; width: 15%; height: 20%; box-sizing: border-box; border: 2px solid #111111; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; animation-delay: .9s">
+          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em">Assistant</span>
+          <span style="font-weight: 700; font-size: 22px">Critic</span>
+        </div>
+        <div class="node" style="position: absolute; left: 56.5%; top: 40%; width: 15%; height: 20%; box-sizing: border-box; border: 2px solid #111111; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; animation-delay: 1.9s">
+          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em">Assistant</span>
+          <span style="font-weight: 700; font-size: 22px">Summarizer</span>
+        </div>
+        <div style="position: absolute; left: 83.5%; top: 40%; width: 15%; height: 20%; box-sizing: border-box; background: #111111; color: #f2f2ef; padding: 12px; display: flex; flex-direction: column; justify-content: space-between">
+          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em">Answer</span>
+          <span style="font-weight: 700; font-size: 22px">One clear reply</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="senses" style="max-width: 1440px; margin: 0 auto; padding: 80px 40px 140px">
+    <div style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end; margin-bottom: 64px">
+      <span style="display: inline-block; overflow: hidden"><span class="num" style="font-weight: 800; font-size: clamp(120px, 15vw, 220px); line-height: .78; letter-spacing: -0.05em; color: #ff3a1f; font-stretch: 62%">02</span></span>
+      <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 18px">
+        <h2 class="mask" style="margin: 0; font-weight: 800; font-size: clamp(44px, 5.6vw, 84px); line-height: .92; letter-spacing: -0.035em; text-transform: uppercase">Every sense</h2>
+        <p class="reveal" style="margin: 0; max-width: 560px; font-size: 18px; line-height: 1.6; color: #444444">Each wire carries a type — text, list, image, sound — and the canvas only lets you plug what fits.</p>
+      </div>
+    </div>
+    <div style="border-top: 2px solid #111111">
+      <div class="row" style="display: grid; grid-template-columns: 64px minmax(0, 5fr) minmax(0, 4fr) minmax(0, 2fr); gap: 24px; align-items: center; padding: 22px 8px; border-bottom: 1px solid #111111">
+        <span style="font-size: 14px">01</span>
+        <span><span class="verb" style="font-weight: 800; font-size: clamp(48px, 6vw, 96px); line-height: .9; letter-spacing: -0.04em; text-transform: uppercase">Think</span></span>
+        <span class="meta" style="font-size: 16px; line-height: 1.45">Assistants with roles<br>Qwen 2.5 · Llama 3.2</span>
+        <span class="meta" style="font-size: 13px; text-transform: uppercase; letter-spacing: .12em; text-align: right">Graphics card</span>
+      </div>
+      <div class="row" style="display: grid; grid-template-columns: 64px minmax(0, 5fr) minmax(0, 4fr) minmax(0, 2fr); gap: 24px; align-items: center; padding: 22px 8px; border-bottom: 1px solid #111111">
+        <span style="font-size: 14px">02</span>
+        <span><span class="verb" style="font-weight: 800; font-size: clamp(48px, 6vw, 96px); line-height: .9; letter-spacing: -0.04em; text-transform: uppercase">Sort</span></span>
+        <span class="meta" style="font-size: 16px; line-height: 1.45">Split into items, judge each one<br>Join and decide by condition</span>
+        <span class="meta" style="font-size: 13px; text-transform: uppercase; letter-spacing: .12em; text-align: right">Instant</span>
+      </div>
+      <div class="row" style="display: grid; grid-template-columns: 64px minmax(0, 5fr) minmax(0, 4fr) minmax(0, 2fr); gap: 24px; align-items: center; padding: 22px 8px; border-bottom: 1px solid #111111">
+        <span style="font-size: 14px">03</span>
+        <span><span class="verb" style="font-weight: 800; font-size: clamp(48px, 6vw, 96px); line-height: .9; letter-spacing: -0.04em; text-transform: uppercase">See</span></span>
+        <span class="meta" style="font-size: 16px; line-height: 1.45">Describes and reads photos<br>Janus-Pro 1B</span>
+        <span class="meta" style="font-size: 13px; text-transform: uppercase; letter-spacing: .12em; text-align: right">Graphics card</span>
+      </div>
+      <div class="row" style="display: grid; grid-template-columns: 64px minmax(0, 5fr) minmax(0, 4fr) minmax(0, 2fr); gap: 24px; align-items: center; padding: 22px 8px; border-bottom: 1px solid #111111">
+        <span style="font-size: 14px">04</span>
+        <span><span class="verb" style="font-weight: 800; font-size: clamp(48px, 6vw, 96px); line-height: .9; letter-spacing: -0.04em; text-transform: uppercase">Paint</span></span>
+        <span class="meta" style="font-size: 16px; line-height: 1.45">Turns a prompt into an image<br>Janus-Pro 1B</span>
+        <span class="meta" style="font-size: 13px; text-transform: uppercase; letter-spacing: .12em; text-align: right">Graphics card</span>
+      </div>
+      <div class="row" style="display: grid; grid-template-columns: 64px minmax(0, 5fr) minmax(0, 4fr) minmax(0, 2fr); gap: 24px; align-items: center; padding: 22px 8px; border-bottom: 1px solid #111111">
+        <span style="font-size: 14px">05</span>
+        <span><span class="verb" style="font-weight: 800; font-size: clamp(48px, 6vw, 96px); line-height: .9; letter-spacing: -0.04em; text-transform: uppercase">Listen</span></span>
+        <span class="meta" style="font-size: 16px; line-height: 1.45">Transcribes your voice notes<br>Whisper</span>
+        <span class="meta" style="font-size: 13px; text-transform: uppercase; letter-spacing: .12em; text-align: right">Graphics card</span>
+      </div>
+      <div class="row" style="display: grid; grid-template-columns: 64px minmax(0, 5fr) minmax(0, 4fr) minmax(0, 2fr); gap: 24px; align-items: center; padding: 22px 8px; border-bottom: 1px solid #111111">
+        <span style="font-size: 14px">06</span>
+        <span><span class="verb" style="font-weight: 800; font-size: clamp(48px, 6vw, 96px); line-height: .9; letter-spacing: -0.04em; text-transform: uppercase">Speak</span></span>
+        <span class="meta" style="font-size: 16px; line-height: 1.45">Reads answers in a natural voice<br>Kokoro, five voices</span>
+        <span class="meta" style="font-size: 13px; text-transform: uppercase; letter-spacing: .12em; text-align: right">Processor</span>
+      </div>
+      <div class="row" style="display: grid; grid-template-columns: 64px minmax(0, 5fr) minmax(0, 4fr) minmax(0, 2fr); gap: 24px; align-items: center; padding: 22px 8px; border-bottom: 1px solid #111111">
+        <span style="font-size: 14px">07</span>
+        <span><span class="verb" style="font-weight: 800; font-size: clamp(48px, 6vw, 96px); line-height: .9; letter-spacing: -0.04em; text-transform: uppercase">Film</span></span>
+        <span class="meta" style="font-size: 16px; line-height: 1.45">Text to video, optional<br>fal.ai with your own key</span>
+        <span class="meta" style="font-size: 13px; text-transform: uppercase; letter-spacing: .12em; text-align: right">Online</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="machine" class="curtain" style="background: #111111; color: #f2f2ef">
+    <div style="max-width: 1440px; margin: 0 auto; padding: 140px 40px; display: flex; flex-wrap: wrap; gap: 72px 64px">
+      <div style="flex: 1 1 460px; display: flex; flex-direction: column; gap: 24px">
+        <span style="display: inline-block; overflow: hidden"><span class="num" style="font-weight: 800; font-size: clamp(120px, 15vw, 220px); line-height: .78; letter-spacing: -0.05em; color: #ff3a1f; font-stretch: 62%">03</span></span>
+        <h2 class="mask" style="margin: 0; font-weight: 800; font-size: clamp(44px, 5.6vw, 84px); line-height: .92; letter-spacing: -0.035em; text-transform: uppercase">Your whole machine</h2>
+        <p class="reveal" style="margin: 0; max-width: 520px; font-size: 18px; line-height: 1.6; color: #bdbdb8">The graphics card paints while the processor speaks, on every core. The next model loads while the current one works, so nothing waits.</p>
+        <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 14px; max-width: 560px">
+          <div class="lane-row" style="display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 16px; align-items: center">
+            <span style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #bdbdb8">Graphics card</span>
+            <div style="display: flex; gap: 6px; height: 28px">
+              <span class="lane" style="flex: 3; background: #f2f2ef"></span>
+              <span class="lane" style="flex: 2; background: #f2f2ef; animation-range: entry 50% cover 60%"></span>
+              <span class="lane" style="flex: 3; background: #ff3a1f; animation-range: entry 60% cover 65%"></span>
+            </div>
+          </div>
+          <div class="lane-row" style="display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 16px; align-items: center">
+            <span style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #bdbdb8">Processor</span>
+            <div style="display: flex; gap: 6px; height: 28px">
+              <span style="flex: 3"></span>
+              <span class="lane" style="flex: 4; background: #ff3a1f; animation-range: entry 50% cover 62%"></span>
+              <span style="flex: 1"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="flex: 1 1 520px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 2px solid #f2f2ef">
+        <div style="padding: 28px 24px 36px 0; border-bottom: 1px solid #3a3a3a; border-right: 1px solid #3a3a3a">
+          <div class="countdown" style="--n: 0; font-weight: 800; font-size: clamp(72px, 8vw, 128px); line-height: .9; letter-spacing: -0.05em; font-variation-settings: 'wdth' 70"></div>
+          <div style="margin-top: 10px; font-size: 15px; color: #bdbdb8">servers reading your prompts</div>
+        </div>
+        <div style="padding: 28px 0 36px 24px; border-bottom: 1px solid #3a3a3a">
+          <div style="font-weight: 800; font-size: clamp(72px, 8vw, 128px); line-height: .9; letter-spacing: -0.05em; font-variation-settings: 'wdth' 70"><span class="count" style="--n: 250"></span><span style="font-size: .35em; letter-spacing: 0"> KB</span></div>
+          <div style="margin-top: 10px; font-size: 15px; color: #bdbdb8">to open the app</div>
+        </div>
+        <div style="padding: 28px 24px 36px 0; border-right: 1px solid #3a3a3a">
+          <div class="count" style="--n: 4; font-weight: 800; font-size: clamp(72px, 8vw, 128px); line-height: .9; letter-spacing: -0.05em; font-variation-settings: 'wdth' 70"></div>
+          <div style="margin-top: 10px; font-size: 15px; color: #bdbdb8">kinds of model in one flow</div>
+        </div>
+        <div style="padding: 28px 0 36px 24px">
+          <div style="font-weight: 800; font-size: clamp(72px, 8vw, 128px); line-height: .9; letter-spacing: -0.05em; color: #ff3a1f; font-variation-settings: 'wdth' 70">GPU+CPU</div>
+          <div style="margin-top: 10px; font-size: 15px; color: #bdbdb8">working at the same time</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="start" style="max-width: 1440px; margin: 0 auto; padding: 160px 40px 140px">
+    <div style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end; margin-bottom: 56px">
+      <span style="display: inline-block; overflow: hidden"><span class="num" style="font-weight: 800; font-size: clamp(120px, 15vw, 220px); line-height: .78; letter-spacing: -0.05em; color: #ff3a1f; font-stretch: 62%">04</span></span>
+      <h2 class="mask" style="flex: 1 1 420px; margin: 0; font-weight: 800; font-size: clamp(44px, 5.6vw, 84px); line-height: .92; letter-spacing: -0.035em; text-transform: uppercase">Start from a template</h2>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr)); column-gap: 48px; border-top: 2px solid #111111">
+      <a class="tpl" href="./app/?template=single" style="display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 16px; padding: 24px 40px 24px 0; border-bottom: 1px solid #111111; text-decoration: none">
+        <span style="font-size: 14px; padding-top: 8px">01</span>
+        <span><span class="t-name" style="font-weight: 700; font-size: 34px; letter-spacing: -0.02em">Single assistant</span><span style="display: block; margin-top: 6px; font-size: 15px; color: #555555">Message, assistant, answer.</span></span>
+        <span class="arr" aria-hidden="true">↗</span>
+      </a>
+      <a class="tpl" href="./app/?template=panel" style="display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 16px; padding: 24px 40px 24px 0; border-bottom: 1px solid #111111; text-decoration: none">
+        <span style="font-size: 14px; padding-top: 8px">02</span>
+        <span><span class="t-name" style="font-weight: 700; font-size: 34px; letter-spacing: -0.02em">Panel of experts</span><span style="display: block; margin-top: 6px; font-size: 15px; color: #555555">Three answer in parallel, a fourth merges them.</span></span>
+        <span class="arr" aria-hidden="true">↗</span>
+      </a>
+      <a class="tpl" href="./app/?template=review" style="display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 16px; padding: 24px 40px 24px 0; border-bottom: 1px solid #111111; text-decoration: none">
+        <span style="font-size: 14px; padding-top: 8px">03</span>
+        <span><span class="t-name" style="font-weight: 700; font-size: 34px; letter-spacing: -0.02em">Draft &amp; review</span><span style="display: block; margin-top: 6px; font-size: 15px; color: #555555">A reviewer approves it or sends it back.</span></span>
+        <span class="arr" aria-hidden="true">↗</span>
+      </a>
+      <a class="tpl" href="./app/?template=brainstorm" style="display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 16px; padding: 24px 40px 24px 0; border-bottom: 1px solid #111111; text-decoration: none">
+        <span style="font-size: 14px; padding-top: 8px">04</span>
+        <span><span class="t-name" style="font-weight: 700; font-size: 34px; letter-spacing: -0.02em">Brainstorm &amp; rank</span><span style="display: block; margin-top: 6px; font-size: 15px; color: #555555">Ideas, judged one by one, ranked.</span></span>
+        <span class="arr" aria-hidden="true">↗</span>
+      </a>
+      <a class="tpl" href="./app/?template=story" style="display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 16px; padding: 24px 40px 24px 0; border-bottom: 1px solid #111111; text-decoration: none">
+        <span style="font-size: 14px; padding-top: 8px">05</span>
+        <span><span class="t-name" style="font-weight: 700; font-size: 34px; letter-spacing: -0.02em">Illustrate &amp; narrate</span><span style="display: block; margin-top: 6px; font-size: 15px; color: #555555">A short story with a picture and a voice.</span></span>
+        <span class="arr" aria-hidden="true">↗</span>
+      </a>
+      <a class="tpl" href="./app/?template=remix" style="display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 16px; padding: 24px 40px 24px 0; border-bottom: 1px solid #111111; text-decoration: none">
+        <span style="font-size: 14px; padding-top: 8px">06</span>
+        <span><span class="t-name" style="font-weight: 700; font-size: 34px; letter-spacing: -0.02em">Photo remix</span><span style="display: block; margin-top: 6px; font-size: 15px; color: #555555">Your photo, described and painted again.</span></span>
+        <span class="arr" aria-hidden="true">↗</span>
+      </a>
+      <a class="tpl" href="./app/?template=voice" style="display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 16px; padding: 24px 40px 24px 0; border-bottom: 1px solid #111111; text-decoration: none">
+        <span style="font-size: 14px; padding-top: 8px">07</span>
+        <span><span class="t-name" style="font-weight: 700; font-size: 34px; letter-spacing: -0.02em">Voice assistant</span><span style="display: block; margin-top: 6px; font-size: 15px; color: #555555">Talk to it, hear it answer.</span></span>
+        <span class="arr" aria-hidden="true">↗</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="wipe-up" style="position: relative; background: #ff3a1f; overflow: hidden">
+    <div aria-hidden="true" class="cta-disc" style="position: absolute; right: -8vw; top: -12vw; width: 46vw; aspect-ratio: 1; border-radius: 50%; background: #f2f2ef"></div>
+    <div style="position: relative; max-width: 1440px; margin: 0 auto; padding: 140px 40px; display: flex; flex-direction: column; gap: 48px">
+      <h2 style="margin: 0; font-weight: 800; font-size: clamp(72px, 12vw, 200px); line-height: .8; letter-spacing: -0.05em; text-transform: uppercase">
+        <span class="cta-word" style="font-stretch: 125%">Draw</span>
+        <span class="cta-word alt" style="font-stretch: 62%; margin-left: 12vw">your first</span>
+        <span class="cta-word" style="font-stretch: 100%">mesh.</span>
+      </h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center">
+        <a class="btn on-red" href="./app/" style="display: inline-block; background-color: #111111; color: #f2f2ef; padding: 22px 32px; font-size: 18px; font-weight: 600; text-decoration: none">Open MeshMind <span class="arrow">↗</span></a>
+        <span style="font-size: 15px; font-weight: 500">Chrome or Edge on a desktop. Nothing to install.</span>
+      </div>
+    </div>
+  </section>
+
+  <footer style="max-width: 1440px; margin: 0 auto; padding: 48px 40px 32px">
+    <div class="wm-wrap">
+      <div class="breathe" style="font-weight: 800; font-size: 16.5vw; line-height: .8; letter-spacing: -0.05em; text-transform: uppercase; white-space: nowrap">MeshMind</div>
+    </div>
+    <div style="margin-top: 32px; padding-top: 16px; border-top: 2px solid #111111; display: flex; flex-wrap: wrap; gap: 12px 40px; justify-content: space-between; font-size: 13px">
+      <span>WebLLM · Transformers.js · Kokoro · React Flow</span>
+      <span>Set in Archivo</span>
+      <a href="https://github.com/delriodevelops/meshmind" style="text-decoration: none">Source on GitHub ↗</a>
+      <a href="https://github.com/delriodevelops" style="text-decoration: none">Made by delriodevelops</a>
+    </div>
+  </footer>
+</main>
+</body>
 </html>

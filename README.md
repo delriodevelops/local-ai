@@ -2,7 +2,7 @@
 
 Wire AI models into flows that run entirely in your browser: text, images and voice.
 
-**Try it:** [delriodevelops.github.io/meshmind](https://delriodevelops.github.io/meshmind/)
+**Try it:** [delriodevelops.github.io/meshmind](https://delriodevelops.github.io/meshmind/) · the app itself lives at [/meshmind/app/](https://delriodevelops.github.io/meshmind/app/)
 
 Build a flow on a canvas and MeshMind runs every model on your own GPU. No server, no API key, nothing leaves your machine. Assistants work in parallel, lists get handled item by item, conditions route the answer, photos get described and reimagined, voice notes get transcribed and answered out loud. Every step lights up as it runs.
 
@@ -46,7 +46,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173), choose a model (start with a recommended one) and send a message, or pick a template from the welcome screen.
+Open [http://localhost:5173](http://localhost:5173) for the landing page or [http://localhost:5173/app/](http://localhost:5173/app/) for the app, choose a model (start with a recommended one) and send a message, or pick a template from the welcome screen.
 
 ## Stack
 

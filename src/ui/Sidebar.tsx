@@ -16,10 +16,10 @@ export default function Sidebar({ onClose }: { onClose: () => void }) {
   return (
     <aside className="flex flex-col h-full w-72 bg-neutral-900 border-r border-neutral-800 px-3 pt-3 pb-2">
       <header className="flex items-center justify-between pb-3 mb-3 border-b border-neutral-800">
-        <div className="flex items-center gap-2 pl-1">
+        <a href={import.meta.env.BASE_URL} title="About MeshMind" className="flex items-center gap-2 pl-1 text-neutral-50 hover:text-signal duration-200">
           <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" width={22} height={22} className="rounded-md" />
           <span className="font-display text-2xl leading-none tracking-tight">MeshMind</span>
-        </div>
+        </a>
         <div className="flex items-center gap-1">
           <button type="button" onClick={reset} title="New chat" className="p-2 rounded-lg text-neutral-300 hover:bg-neutral-800 duration-200"><SquarePen className="w-4 h-4" /></button>
           <button type="button" onClick={onClose} title="Close sidebar" className="p-2 rounded-lg text-neutral-300 hover:bg-neutral-800 duration-200"><PanelLeftClose className="w-4 h-4" /></button>

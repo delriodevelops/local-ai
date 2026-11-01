@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { MessagesSquare, PanelLeft, Columns2, Workflow } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useApp, type View } from '@/flow/store'
+import { TEMPLATES } from '@/flow/presets'
 import { useEngine } from '@/engine/engine'
 import { hasWebGPU, isCached } from '@/engine/models'
 import Sidebar from '@/ui/Sidebar'
@@ -42,6 +43,17 @@ export default function App() {
   // Si el último modelo usado ya está descargado, se carga solo
   useEffect(() => {
     if (modelId && hasWebGPU()) isCached(modelId).then(cached => { if (cached) load(modelId) })
+  }, [])
+
+  // Desde la landing se llega con ?template=…: se abre esa plantilla y se limpia la URL
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    const template = url.searchParams.get('template')
+    if (!template || !TEMPLATES.some(t => t.id === template)) return
+    useApp.getState().loadTemplate(template)
+    set({ view: desktop ? 'split' : 'flow' })
+    url.searchParams.delete('template')
+    window.history.replaceState(null, '', url)
   }, [])
 
   return (
