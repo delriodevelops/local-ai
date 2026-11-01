@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import { createJSONStorage, persist, type StateStorage } from 'zustand/middleware'
 import { addEdge, applyEdgeChanges, applyNodeChanges, type Connection, type EdgeChange, type NodeChange } from '@xyflow/react'
 import { EMBED } from '@/embed'
+import { SUGGESTED } from '@/mcp/servers'
+import type { McpServer } from '@/mcp/types'
 import { TEMPLATES } from './presets'
 import type { FlowEdge, FlowNode } from './types'
 
@@ -17,6 +19,8 @@ type AppState = {
   modelId: string | null
   // Clave de fal.ai para el nodo de vídeo; solo se guarda en este navegador
   falKey: string
+  // Servidores MCP online, con su token y la última lista de herramientas que dieron
+  mcpServers: McpServer[]
   view: View
   theme: Theme
   // Sube cada vez que se carga una plantilla, para reencuadrar el lienzo
@@ -26,6 +30,9 @@ type AppState = {
   connect: (connection: Connection) => void
   addNode: (node: FlowNode) => void
   updateNode: (id: string, data: Partial<FlowNode['data']>) => void
+  addServer: (server: McpServer) => void
+  updateServer: (id: string, patch: Partial<McpServer>) => void
+  removeServer: (id: string) => void
   loadTemplate: (id: string) => void
   set: (patch: Partial<Pick<AppState, 'temperature' | 'maxTokens' | 'modelId' | 'view' | 'falKey' | 'theme'>>) => void
 }
@@ -50,6 +57,7 @@ export const useApp = create<AppState>()(
       maxTokens: 512,
       modelId: null,
       falKey: '',
+      mcpServers: [],
       view: 'split',
       theme: 'system',
       templateKey: 0,
@@ -60,9 +68,22 @@ export const useApp = create<AppState>()(
       updateNode: (id, data) => set(s => ({
         nodes: s.nodes.map(n => (n.id === id ? { ...n, data: { ...n.data, ...data } } as FlowNode : n)),
       })),
+      addServer: server => set(s => ({ mcpServers: [...s.mcpServers.filter(m => m.id !== server.id), server] })),
+      updateServer: (id, patch) => set(s => ({ mcpServers: s.mcpServers.map(m => (m.id === id ? { ...m, ...patch } : m)) })),
+      removeServer: id => set(s => ({ mcpServers: s.mcpServers.filter(m => m.id !== id) })),
       loadTemplate: id => {
         const template = TEMPLATES.find(t => t.id === id)
-        if (template) set(s => ({ ...template.build(), templateKey: s.templateKey + 1 }))
+        if (!template) return
+        const { servers = [], ...flow } = template.build()
+        set(s => ({
+          ...flow,
+          templateKey: s.templateKey + 1,
+          // Los servidores MCP que usa la plantilla se añaden si faltan
+          mcpServers: [
+            ...s.mcpServers,
+            ...SUGGESTED.filter(m => servers.includes(m.id) && !s.mcpServers.some(x => x.id === m.id)).map(m => ({ ...m, token: '', tools: [] })),
+          ],
+        }))
       },
       set: patch => set(patch),
     }),
@@ -70,8 +91,8 @@ export const useApp = create<AppState>()(
       name: 'meshmind',
       version: 1,
       storage: createJSONStorage(() => (EMBED ? readOnly : localStorage)),
-      partialize: ({ nodes, edges, temperature, maxTokens, modelId, falKey, view, theme }) =>
-        ({ nodes: nodes.map(({ selected: _, ...n }) => n) as FlowNode[], edges, temperature, maxTokens, modelId, falKey, view, theme }),
+      partialize: ({ nodes, edges, temperature, maxTokens, modelId, falKey, mcpServers, view, theme }) =>
+        ({ nodes: nodes.map(({ selected: _, ...n }) => n) as FlowNode[], edges, temperature, maxTokens, modelId, falKey, mcpServers, view, theme }),
     },
   ),
 )

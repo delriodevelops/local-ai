@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { ChatCompletionMessageParam, WebWorkerMLCEngine } from '@mlc-ai/web-llm'
+import type { ChatCompletionMessageParam, ResponseFormat, WebWorkerMLCEngine } from '@mlc-ai/web-llm'
 import { webllm } from './models'
 import { exclusive, useResources } from './resources'
 
@@ -54,11 +54,14 @@ export type GenerateOptions = {
   onToken: (text: string) => void
   // Cuando la respuesta consigue el motor y empieza de verdad, tras la cola
   onStart?: () => void
+  // Formato obligado (las llamadas a herramientas del agente) y penalización por repetir, que estorba al escribir JSON
+  responseFormat?: ResponseFormat
+  repetitionPenalty?: number
 }
 
 // Una respuesta en streaming; devuelve el texto completo.
 // El motor atiende una respuesta cada vez: las ramas paralelas con asistentes hacen cola aquí
-export function generate(messages: ChatCompletionMessageParam[], { temperature, maxTokens, signal, onToken, onStart }: GenerateOptions) {
+export function generate(messages: ChatCompletionMessageParam[], { temperature, maxTokens, signal, onToken, onStart, responseFormat, repetitionPenalty = 1.1 }: GenerateOptions) {
   return exclusive('llm', async () => {
     // Parado mientras esperaba turno: no ha llegado a empezar
     if (signal.aborted) throw new DOMException('Stopped', 'AbortError')
@@ -69,7 +72,9 @@ export function generate(messages: ChatCompletionMessageParam[], { temperature, 
     resources.set({ llmBusy: true })
     try {
       // La penalización evita que los modelos pequeños entren en bucle con contextos largos
-      const stream = await engine.chat.completions.create({ messages, stream: true, temperature, max_tokens: maxTokens, repetition_penalty: 1.1 })
+      const stream = await engine.chat.completions.create({
+        messages, stream: true, temperature, max_tokens: maxTokens, repetition_penalty: repetitionPenalty, response_format: responseFormat,
+      })
       let text = ''
       let tokens = 0
       let started = 0

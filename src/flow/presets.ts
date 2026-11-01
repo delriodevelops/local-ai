@@ -13,7 +13,8 @@ export const ASSISTANTS: AssistantData[] = [
 let counter = 0
 export const newId = (kind: string) => `${kind}-${Date.now().toString(36)}-${(counter++).toString(36)}`
 
-type Spec = { nodes: FlowNode[]; edges: FlowEdge[] }
+// servers: ids de servidores MCP sugeridos que la plantilla necesita (se añaden al cargarla)
+type Spec = { nodes: FlowNode[]; edges: FlowEdge[]; servers?: string[] }
 
 const edge = (source: string, target: string, sourceHandle = 'out'): FlowEdge => ({
   id: `${source}-${sourceHandle}-${target}`,
@@ -137,6 +138,42 @@ export const TEMPLATES: { id: string; name: string; description: string; build: 
         { id: 'o2', type: 'output', position: { x: 1020, y: 380 }, data: { label: 'Text answer' } },
       ],
       edges: [edge('in', 'stt', 'audio'), edge('stt', 'a'), edge('a', 'tts'), edge('tts', 'o1'), edge('a', 'o2')],
+    }),
+  },
+  {
+    id: 'repo',
+    name: 'Ask a GitHub repo',
+    description: 'DeepWiki answers from the docs of a repository (MCP, online); a local assistant turns it into a short answer.',
+    build: () => ({
+      nodes: [
+        { id: 'in', type: 'input', position: { x: 0, y: 140 }, data: { label: 'Your question' } },
+        { id: 'dw', type: 'tool', position: { x: 300, y: 0 }, data: { label: 'DeepWiki', serverId: 'deepwiki', tool: 'ask_wiki_question', args: { repoName: 'mlc-ai/web-llm', question: '{input}' } } },
+        assistant('a', 700, 120, { label: 'Explainer', color: '#2dd4bf', instructions: 'Answer the question using the documentation you get. Short and practical; keep any code that helps.' }),
+        { id: 'out', type: 'output', position: { x: 1080, y: 160 }, data: { label: 'Answer' } },
+      ],
+      edges: [edge('in', 'dw'), edge('in', 'a'), edge('dw', 'a'), edge('a', 'out')],
+      servers: ['deepwiki'],
+    }),
+  },
+  {
+    id: 'agent',
+    name: 'Docs agent',
+    description: 'An agent that looks things up with MCP tools (Microsoft Learn, DeepWiki) before answering.',
+    build: () => ({
+      nodes: [
+        { id: 'in', type: 'input', position: { x: 0, y: 120 }, data: { label: 'Your question' } },
+        {
+          id: 'ag', type: 'agent', position: { x: 300, y: 40 },
+          data: {
+            label: 'Docs agent', color: '#2dd4bf', maxSteps: 3,
+            instructions: 'You answer technical questions. Look up the answer with a tool first, then reply in a few sentences and name where it came from.',
+            tools: [{ serverId: 'mslearn', name: 'microsoft_docs_search' }, { serverId: 'deepwiki', name: 'ask_wiki_question' }],
+          },
+        },
+        { id: 'out', type: 'output', position: { x: 740, y: 120 }, data: { label: 'Answer' } },
+      ],
+      edges: [edge('in', 'ag'), edge('ag', 'out')],
+      servers: ['mslearn', 'deepwiki'],
     }),
   },
 ]

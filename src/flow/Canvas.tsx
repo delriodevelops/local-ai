@@ -4,7 +4,7 @@ import {
   type Connection, type Edge, type NodeChange,
 } from '@xyflow/react'
 import * as Popover from '@radix-ui/react-popover'
-import { AudioLines, Clapperboard, Eye, GitBranch, ImagePlus, LayoutTemplate, LogIn, LogOut, Merge, Mic, Plus, Sparkles, Split } from 'lucide-react'
+import { AudioLines, Bot, Clapperboard, Eye, GitBranch, ImagePlus, LayoutTemplate, LogIn, LogOut, Merge, Mic, Plus, Sparkles, Split, Wrench } from 'lucide-react'
 import '@xyflow/react/dist/style.css'
 import { useApp } from './store'
 import { useScheme } from '@/ui/theme'
@@ -71,7 +71,7 @@ const ToolbarButton = ({ children, ...props }: React.ButtonHTMLAttributes<HTMLBu
 )
 
 function Flow() {
-  const { nodes, edges, onNodesChange, onEdgesChange, connect, addNode, loadTemplate } = useApp()
+  const { nodes, edges, onNodesChange, onEdgesChange, connect, addNode, loadTemplate, mcpServers } = useApp()
   const steps = useSession(s => s.turns.at(-1)?.steps)
   const running = useSession(s => s.running)
   const { screenToFlowPosition, fitView } = useReactFlow()
@@ -159,6 +159,9 @@ function Flow() {
             <MenuItem icon={<AudioLines className="w-4 h-4" />} title="Speak" text="Text → natural voice." onSelect={() => add({ type: 'speak', data: { label: 'Speak', voice: 'af_heart' } })} />
             <p className="label px-2.5 pt-3 pb-1">Online · your key</p>
             <MenuItem icon={<Clapperboard className="w-4 h-4" />} title="Create video" text="Text → video on fal.ai. Needs a fal key in Settings." onSelect={() => add({ type: 'video', data: { label: 'Create video', model: 'fal-ai/ltx-video' } })} />
+            <p className="label px-2.5 pt-3 pb-1">MCP tools · online</p>
+            <MenuItem icon={<Wrench className="w-4 h-4" />} title="MCP tool" text="Calls one tool of an MCP server you added." onSelect={() => add({ type: 'tool', data: { label: 'MCP tool', serverId: mcpServers[0]?.id ?? '', tool: '', args: {} } })} />
+            <MenuItem icon={<Bot className="w-4 h-4" />} title="Agent" text="An assistant that decides which MCP tools to call." onSelect={() => add({ type: 'agent', data: { label: 'Agent', color: '#2dd4bf', instructions: '', tools: [], maxSteps: 3 } })} />
             <p className="label px-2.5 pt-3 pb-1">Ends</p>
             <MenuItem icon={<LogIn className="w-4 h-4" />} title="Message" text="Where your chat message enters." onSelect={() => add({ type: 'input', data: { label: 'Your message' } })} />
             <MenuItem icon={<LogOut className="w-4 h-4" />} title="Answer" text="What reaches it is shown in the chat." onSelect={() => add({ type: 'output', data: { label: 'Answer' } })} />

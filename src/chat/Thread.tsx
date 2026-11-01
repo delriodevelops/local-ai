@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { AudioLines, Check, ChevronDown, Clapperboard, Copy, Eye, GitBranch, ImagePlus, LoaderCircle, Merge, Mic, Split } from 'lucide-react'
+import { AudioLines, Check, ChevronDown, Clapperboard, Copy, Eye, GitBranch, ImagePlus, LoaderCircle, Merge, Mic, Split, Wrench } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { Markdown } from './Markdown'
 import { useSession } from './session'
@@ -25,7 +25,7 @@ function CopyButton({ text }: { text: string }) {
   )
 }
 
-const KIND_ICON = { join: Merge, split: Split, condition: GitBranch, describe: Eye, imagine: ImagePlus, transcribe: Mic, speak: AudioLines, video: Clapperboard } as const
+const KIND_ICON = { join: Merge, split: Split, condition: GitBranch, describe: Eye, imagine: ImagePlus, transcribe: Mic, speak: AudioLines, video: Clapperboard, tool: Wrench } as const
 
 function StepRow({ step, index, last }: { step: StepResult; index: number; last: boolean }) {
   const [open, setOpen] = useState(false)
@@ -54,6 +54,17 @@ function StepRow({ step, index, last }: { step: StepResult; index: number; last:
         {step.error && <span className="text-xs text-red-600 truncate">{step.error}</span>}
         {text && <ChevronDown className={cn('w-3.5 h-3.5 ml-auto text-neutral-500 duration-200', open && 'rotate-180')} />}
       </button>
+      {/* Las herramientas que llamó un agente, con sus argumentos */}
+      {!!step.calls?.length && (
+        <ul className="pb-2 flex flex-col gap-1">
+          {step.calls.map((call, i) => (
+            <li key={i} className="font-mono text-[10.5px] text-neutral-500 truncate" title={call.error ?? call.result}>
+              <span className={call.error ? 'text-red-600' : 'text-signal-ink'}>→</span> {call.tool} <span className="text-neutral-600">{call.args}</span>
+              {call.error && <span className="text-red-600"> · {call.error}</span>}
+            </li>
+          ))}
+        </ul>
+      )}
       {isMedia(step.value) && <div className="pb-4"><MediaView value={step.value!} compact={!open} /></div>}
       {text && (
         <div className={cn('pb-4 text-sm', !open && step.state !== 'running' && 'line-clamp-2 text-neutral-400')}>

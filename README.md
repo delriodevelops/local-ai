@@ -20,11 +20,22 @@ Build a flow on a canvas and MeshMind runs every model on your own GPU. No serve
 | **Transcribe** | audio | text | Speech to text |
 | **Speak** | text | audio | Text to a natural voice, five voices |
 | **Create video** | text | video | Optional and **online**: runs on [fal.ai](https://fal.ai) with your own key |
+| **MCP tool** | text or list | text or list, image | **Online**: calls one tool of an MCP server. Arguments are typed in the node; `{input}` is what reaches it. A list makes one call per item |
+| **Agent** | text | text | **Online tools, local model**: an assistant that decides which MCP tools to call (up to 5 tools and 4 calls) |
 | **Answer** | anything | – | What reaches it is shown in the chat |
 
 Connections are coloured by what they carry (text, list, image, audio, video) and the canvas refuses connections that don't fit or would create a loop.
 
-Seven templates to start from: *Single assistant*, *Panel of experts*, *Draft & review*, *Brainstorm & rank*, *Illustrate & narrate*, *Photo remix* and *Voice assistant*.
+Nine templates to start from: *Single assistant*, *Panel of experts*, *Draft & review*, *Brainstorm & rank*, *Illustrate & narrate*, *Photo remix*, *Voice assistant*, and two that use MCP: *Ask a GitHub repo* and *Docs agent*.
+
+## MCP tools
+
+Settings → **MCP servers** connects [MCP](https://modelcontextprotocol.io) servers on the web: paste the address (and a token if it needs one) or add DeepWiki, Context7, Microsoft Learn or Hugging Face with one click. Their tools then appear in the **MCP tool** and **Agent** nodes. The models keep running on your machine; only a tool call's arguments go to that server.
+
+- The server has to accept connections from websites (CORS). Many public servers do; the ones that don't can be relayed through a local bridge.
+- Servers that run on your computer (stdio) need a bridge too: see [docs/mcp-local-bridge.md](docs/mcp-local-bridge.md).
+- Tokens are sent as `Authorization: Bearer` and stay in this browser. Servers that only offer a sign-in page (OAuth) are not supported yet.
+- The agent writes tool calls in Qwen's `<tool_call>` format, constrained by each tool's JSON schema, so the arguments always parse. Small models tend to answer without tools; Qwen 2.5 3B or larger decides better.
 
 ## Models
 
@@ -50,6 +61,6 @@ Open [http://localhost:5173](http://localhost:5173) for the landing page or [htt
 
 ## Stack
 
-Vite, React 19, TypeScript, [React Flow](https://reactflow.dev) for the canvas, WebLLM and Transformers.js in their own Web Workers, Zustand (flow and settings, saved in the browser), Dexie (chat history in IndexedDB), Radix UI, Tailwind CSS 4, react-markdown with Shiki.
+Vite, React 19, TypeScript, [React Flow](https://reactflow.dev) for the canvas, WebLLM and Transformers.js in their own Web Workers, the official [MCP TypeScript client](https://github.com/modelcontextprotocol/typescript-sdk), Zustand (flow and settings, saved in the browser), Dexie (chat history in IndexedDB), Radix UI, Tailwind CSS 4, react-markdown with Shiki.
 
 Models, the canvas and syntax highlighting load on demand, so the first load is about 250 KB.

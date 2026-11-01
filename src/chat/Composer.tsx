@@ -44,7 +44,7 @@ export default function Composer() {
   const { running, send, stop } = useSession()
   const nodes = useApp(s => s.nodes)
   const needsModel = usesLLM(nodes)
-  const assistants = nodes.filter(n => n.type === 'assistant').length
+  const assistants = nodes.filter(n => n.type === 'assistant' || n.type === 'agent').length
   const takesImage = nodes.some(n => n.type === 'describe')
   const takesAudio = nodes.some(n => n.type === 'transcribe')
   const recorder = useRecorder(audio => setAttachments(a => ({ ...a, audio })))

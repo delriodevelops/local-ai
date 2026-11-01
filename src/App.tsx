@@ -11,6 +11,7 @@ import Sidebar from '@/ui/Sidebar'
 import ModelPicker from '@/ui/ModelPicker'
 import Settings from '@/ui/Settings'
 import Monitor from '@/ui/Monitor'
+import McpServers from '@/ui/McpServers'
 import Thread from '@/chat/Thread'
 import Composer from '@/chat/Composer'
 
@@ -108,6 +109,7 @@ export default function App() {
           )}
         </div>
       </main>
+      <McpServers />
     </div>
   )
 }

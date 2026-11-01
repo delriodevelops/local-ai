@@ -1,8 +1,9 @@
 import * as Popover from '@radix-ui/react-popover'
 import * as Slider from '@radix-ui/react-slider'
-import { Monitor, Moon, SlidersHorizontal, Sun } from 'lucide-react'
+import { ChevronRight, Monitor, Moon, Plug, SlidersHorizontal, Sun } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useApp, type Theme } from '@/flow/store'
+import { useMcp } from '@/mcp/store'
 
 const THEMES: { id: Theme; label: string; icon: typeof Sun }[] = [
   { id: 'system', label: 'System', icon: Monitor },
@@ -31,7 +32,7 @@ function Range({ label, hint, value, min, max, step, onChange, format }: {
 }
 
 export default function Settings() {
-  const { temperature, maxTokens, falKey, theme, set } = useApp()
+  const { temperature, maxTokens, falKey, theme, mcpServers, set } = useApp()
   return (
     <Popover.Root>
       <Popover.Trigger className="p-2.5 rounded-lg border border-ink bg-neutral-900 hover:bg-ink hover:text-paper text-neutral-300 duration-200" title="Settings">
@@ -49,6 +50,20 @@ export default function Settings() {
             value={maxTokens} min={128} max={2048} step={64} format={v => `${v} tokens`}
             onChange={v => set({ maxTokens: v })}
           />
+          {/* La ventana vive fuera del popover: si estuviera dentro, se cerraría con él */}
+          <Popover.Close asChild>
+            <button
+              type="button" onClick={() => useMcp.setState({ open: true })}
+              className="flex items-center gap-3 border-t border-neutral-800 pt-4 text-left group"
+            >
+              <Plug className="w-4 h-4 text-neutral-300" />
+              <span className="flex-1">
+                <span className="block text-sm text-neutral-100">MCP servers</span>
+                <span className="block text-xs text-neutral-500">{mcpServers.length ? `${mcpServers.length} added` : 'Give your flows online tools'}</span>
+              </span>
+              <ChevronRight className="w-4 h-4 text-neutral-500 group-hover:text-neutral-100 duration-200" />
+            </button>
+          </Popover.Close>
           <label className="flex flex-col gap-2 border-t border-neutral-800 pt-4">
             <span className="text-sm text-neutral-100">fal.ai key <span className="text-neutral-500">· only for video</span></span>
             <input
