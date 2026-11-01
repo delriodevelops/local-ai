@@ -95,7 +95,7 @@ function Title({ id, value }: { id: string; value: string }) {
     <input
       value={value}
       onChange={e => updateNode(id, { label: e.target.value })}
-      className="nodrag bg-transparent text-[15px] font-medium outline-none focus:text-neutral-50 w-full"
+      className="nodrag bg-transparent text-[15px] font-medium border-b border-transparent focus:border-signal outline-none w-full"
       aria-label="Node name"
     />
   )

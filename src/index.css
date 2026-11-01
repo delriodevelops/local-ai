@@ -111,6 +111,13 @@
   color: var(--color-neutral-400);
 }
 
+/* Los botones que se invierten al pasar el ratón (hover:bg-ink hover:text-paper) tienen hijos con gris propio:
+   al invertir, esos grises quedarían sobre tinta sin contraste, así que heredan el color del botón */
+.hover\:text-paper:hover :is([class*='text-neutral-'], .label) { color: inherit; }
+
+/* El velo de los diálogos es tinta al 40 %: en oscuro la tinta es clara y aclararía la página en vez de oscurecerla */
+.dark .bg-ink\/40 { background-color: rgb(0 0 0 / 0.6); }
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-thumb { background: var(--color-neutral-600); }
 ::-webkit-scrollbar-track { background: transparent; }
