@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
+import { createJSONStorage } from 'zustand/middleware'
 import { MessagesSquare, PanelLeft, Columns2, Workflow } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useApp, type View } from '@/flow/store'
@@ -21,6 +22,35 @@ const VIEWS: { id: View; label: string; icon: typeof Workflow; desktopOnly?: boo
   { id: 'flow', label: 'Flow', icon: Workflow },
 ]
 
+// La landing incrusta la app con ?embed=1: se lee una vez y no se quita de la URL, para que valga en recargas
+const EMBED = new URLSearchParams(window.location.search).get('embed') === '1'
+
+if (EMBED) {
+  // Misma web que la app: sin esto la demo guardaría la plantilla encima del flujo del visitante.
+  // El estado ya cargado se queda en memoria; lo que cambie la demo va a su propia clave, solo en esta pestaña
+  useApp.persist.setOptions({ name: 'meshmind-demo', storage: createJSONStorage(() => sessionStorage) })
+  // Los enlaces (logo, respuestas del modelo) se abren fuera del marco, no dentro
+  document.head.append(Object.assign(document.createElement('base'), { target: '_top' }))
+  // scrollIntoView también desplaza la landing que contiene el marco (y el hilo lo llama a cada token):
+  // incrustada, solo se mueve el contenedor con scroll más cercano
+  Element.prototype.scrollIntoView = function (arg?: boolean | ScrollIntoViewOptions) {
+    const options = typeof arg === 'object' ? arg : { block: arg === false ? 'end' : 'start' } as ScrollIntoViewOptions
+    let box = this.parentElement
+    while (box && !(box.scrollHeight > box.clientHeight && /auto|scroll/.test(getComputedStyle(box).overflowY))) box = box.parentElement
+    if (!box) return
+    const el = this.getBoundingClientRect()
+    const area = box.getBoundingClientRect()
+    const top = el.top - area.top
+    const bottom = el.bottom - area.bottom
+    const block = options.block ?? 'start'
+    const delta = block === 'end' ? bottom
+      : block === 'center' ? (top + bottom) / 2
+      : block === 'nearest' ? (top < 0 ? top : bottom > 0 ? bottom : 0)
+      : top
+    box.scrollBy({ top: delta, behavior: options.behavior })
+  }
+}
+
 function useIsDesktop() {
   const [desktop, setDesktop] = useState(() => window.matchMedia('(min-width: 1024px)').matches)
   useEffect(() => {
@@ -34,15 +64,15 @@ function useIsDesktop() {
 
 export default function App() {
   const desktop = useIsDesktop()
-  const [sidebar, setSidebar] = useState(() => window.matchMedia('(min-width: 1440px)').matches)
+  const [sidebar, setSidebar] = useState(() => !EMBED && window.matchMedia('(min-width: 1440px)').matches)
   const { view, modelId, set } = useApp()
   const load = useEngine(s => s.load)
   // En móvil no caben chat y lienzo a la vez
   const shown: View = !desktop && view === 'split' ? 'chat' : view
 
-  // Si el último modelo usado ya está descargado, se carga solo
+  // Si el último modelo usado ya está descargado, se carga solo; incrustada no, que pasar por la landing no ocupe la GPU
   useEffect(() => {
-    if (modelId && hasWebGPU()) isCached(modelId).then(cached => { if (cached) load(modelId) })
+    if (!EMBED && modelId && hasWebGPU()) isCached(modelId).then(cached => { if (cached) load(modelId) })
   }, [])
 
   // Desde la landing se llega con ?template=…: se abre esa plantilla y se limpia la URL
@@ -69,7 +99,8 @@ export default function App() {
 
       <main className="flex-1 min-w-0 flex flex-col">
         <header className="flex items-center gap-2 px-3 py-3 border-b-[1.5px] border-ink">
-          {!sidebar && (
+          {/* Incrustada no hay historial: en la landing no se enseñan ni se borran las conversaciones guardadas */}
+          {!sidebar && !EMBED && (
             <button type="button" onClick={() => setSidebar(true)} title="Open sidebar" className="p-2.5 rounded-lg border border-ink bg-neutral-900 hover:bg-ink hover:text-paper text-neutral-300 duration-200">
               <PanelLeft className="w-4 h-4" />
             </button>

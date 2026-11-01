@@ -57,6 +57,9 @@ a{color:#111111}a:hover{color:#ff3a1f}
 @keyframes iris{from{clip-path:circle(0% at 50% 100%)}to{clip-path:circle(150% at 50% 100%)}}
 @keyframes ch-in{from{translate:0 110%;rotate:8deg}}
 @keyframes grow{to{transform:scaleX(1)}}
+@keyframes demo-in{from{transform:perspective(1600px) rotateX(18deg) scale(.86);opacity:.2}to{transform:perspective(1600px) rotateX(0) scale(1);opacity:1}}
+@keyframes demo-bar{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes live{0%,100%{opacity:1}50%{opacity:.25}}
 
 .progress{position:fixed;left:0;top:0;right:0;height:4px;background:#ff3a1f;transform-origin:left;transform:scaleX(0);z-index:50;animation:grow linear both;animation-timeline:scroll(root)}
 .reveal{animation:up linear both;animation-timeline:view();animation-range:entry 0% entry 80%}
@@ -83,6 +86,26 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .cta-disc{animation:disc-par linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
 .ch{display:inline-block;animation:ch-in linear both;animation-timeline:view();animation-range:entry calc(5% + var(--k) * 3%) entry calc(55% + var(--k) * 3%)}
 .wm .ch{animation-range:entry calc(var(--k) * 4%) entry calc(60% + var(--k) * 4%)}
+
+/* ---------- 05: la app real en un marco que se endereza al entrar ---------- */
+.demo{transform-origin:50% 100%;border:1.5px solid #111111;background:#f2f2ef;animation:demo-in linear both;animation-timeline:view();animation-range:entry 0% cover 45%}
+.demo-bar{display:flex;gap:12px;align-items:center;padding:10px 14px;border-bottom:1.5px solid #111111;font-size:12px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;overflow:hidden;animation:demo-bar linear both;animation-timeline:view();animation-range:entry 30% cover 40%}
+.demo-bar .live{flex:none;width:8px;height:8px;border-radius:50%;background:#ff3a1f;animation:live 1.6s cubic-bezier(.65,0,.35,1) infinite}
+.demo-frame{display:block;width:100%;height:80vh;min-height:560px;border:0;background:#f2f2ef}
+/* Con el foco dentro no se espera al scroll: lo enfocado tiene que verse */
+.demo-stage .demo:focus-within,.demo-stage .demo:focus-within .demo-bar{animation:none}
+.demo-full{flex:none;font:inherit;letter-spacing:inherit;text-transform:inherit;color:#111111;background:linear-gradient(#ff3a1f,#ff3a1f) 0 100%/0 2px no-repeat;border:0;padding:0 0 3px;cursor:pointer;transition:background-size .45s cubic-bezier(.16,1,.3,1)}
+.demo-full:hover,.demo-full:focus-visible{background-size:100% 2px}
+/* La capa deja pasar la rueda a la página hasta que el visitante hace clic; al salir el ratón vuelve */
+.demo-view{position:relative}
+.demo-shield{position:absolute;inset:0;display:flex;align-items:end;justify-content:center;padding:0 0 24px;border:0;background:transparent;cursor:pointer;font:inherit}
+.demo-shield span{background:#111111;color:#f2f2ef;padding:10px 14px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;transition:background-color .3s,color .3s}
+.demo-shield:hover span,.demo-shield:focus-visible span{background:#ff3a1f;color:#111111}
+.demo.is-live .demo-shield{display:none}
+.demo-stage .demo:fullscreen{display:flex;flex-direction:column;animation:none}
+.demo:fullscreen .demo-view{flex:1;min-height:0}
+.demo:fullscreen .demo-frame{height:100%;min-height:0}
+.demo-alt{display:none;flex-direction:column;align-items:start;gap:24px;border-top:2px solid #111111;padding-top:24px}
 
 /* La velocidad del scroll inclina lo que se mueve (--v la pone landing/main.ts) */
 .skew{transform:skewY(calc(var(--v) * 3deg));transition:transform .4s cubic-bezier(.16,1,.3,1)}
@@ -124,6 +147,11 @@ a{color:#111111}a:hover{color:#ff3a1f}
   .row .meta{display:none !important}
   .hero-pin{height:220vh}
 }
+/* En móviles (también apaisados) y tabletas táctiles la app no se carga: landing/main.ts usa esta misma consulta */
+@media (max-width:760px),(pointer:coarse){
+  .demo-stage{display:none}
+  .demo-alt{display:flex}
+}
 
 /* ---------- Movimiento reducido ---------- */
 /* Lo decide landing/main.ts (y el script del <head>): la preferencia del sistema, salvo que el visitante
@@ -134,9 +162,9 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .reduce-motion .breathe,.reduce-motion .disc,.reduce-motion .ticker,.reduce-motion .cue,.reduce-motion .cta-disc,
 .reduce-motion .scrub,.reduce-motion .cta-word,.reduce-motion .ghost,.reduce-motion .ch,
 .reduce-motion .hero-stage .line-l,.reduce-motion .hero-stage .line-r,.reduce-motion .hero-stage .disc-wrap,.reduce-motion .hero-stage .grid,.reduce-motion .hero-stage .cue-wrap,
-.reduce-motion .row .verb{animation:none}
+.reduce-motion .row .verb,.reduce-motion .demo-bar .live{animation:none}
 .reduce-motion .gridline,.reduce-motion .rise,.reduce-motion .mask,.reduce-motion .reveal,.reduce-motion .tpl,.reduce-motion .num,
-.reduce-motion .curtain,.reduce-motion .iris,.reduce-motion .cam{animation-name:fade}
+.reduce-motion .curtain,.reduce-motion .iris,.reduce-motion .cam,.reduce-motion .demo,.reduce-motion .demo-bar{animation-name:fade}
 .reduce-motion .row{animation-name:fade,none}
 .reduce-motion .node{animation-name:pulse,fade}
 .reduce-motion .skew{transform:none}
