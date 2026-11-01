@@ -338,18 +338,21 @@
       </div>
     </div>
     <div class="demo-stage">
-      <div class="demo" data-lenis-prevent>
+      <div class="demo">
         <div class="demo-bar">
           <span class="live" aria-hidden="true"></span>
           <span style="flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis">Live · this is the real app, running in your browser</span>
-          <a href="./app/?template=panel" style="text-decoration: none">Full screen ↗</a>
+          <button type="button" class="demo-full" hidden>Full screen</button>
         </div>
-        <iframe class="demo-frame" data-src="./app/?template=panel&amp;embed=1" title="MeshMind, the live app with the panel of experts template" loading="lazy" allow="microphone"></iframe>
+        <div class="demo-view">
+          <iframe class="demo-frame" data-src="./app/?template=panel&amp;embed=1" title="MeshMind, the live app with the panel of experts template" loading="lazy" allow="microphone" inert data-lenis-prevent></iframe>
+          <button type="button" class="demo-shield"><span>Click to try it</span></button>
+        </div>
       </div>
     </div>
     <div class="demo-alt">
       <p style="margin: 0; font-size: 17px; line-height: 1.6; color: #444444">The live demo needs a bigger screen. On a desktop with Chrome or Edge, it runs right here, on your own graphics card.</p>
-      <a class="btn" href="./app/?template=panel" style="display: inline-block; background-color: #111111; color: #f2f2ef; padding: 18px 24px; font-weight: 600; text-decoration: none">Open the app <span class="arrow">↗</span></a>
+      <a class="btn" href="./app/" style="display: inline-block; background-color: #111111; color: #f2f2ef; padding: 18px 24px; font-weight: 600; text-decoration: none">Open the app <span class="arrow">↗</span></a>
     </div>
   </section>
 
