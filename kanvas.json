@@ -123,6 +123,11 @@
           "at": "2026-11-01T19:55:02Z",
           "by": "claude-code",
           "text": "Publicado en https://delriodevelops.github.io/meshmind/ con la landing nueva (scroll cinematográfico, Lenis, sección 05 con la app real incrustada) y la app en /meshmind/app/. Falta subir la última tanda (móvil, voz en GPU, modo oscuro, demo): va justo ahora tras la revisión."
+        },
+        {
+          "at": "2026-11-01T20:26:33Z",
+          "by": "claude-code",
+          "text": "Publicado f15b15f (2026-11-01): móvil en vertical, voz en GPU, modo oscuro, demo de la landing con arreglos de revisión y MCP. Comprobado en https://delriodevelops.github.io/meshmind/: los cuatro servidores MCP sugeridos conectan desde github.io y la plantilla 'Docs agent' con Qwen2.5 1.5B llamó sola a microsoft_docs_search y respondió con la documentación real. Falta la revisión de MCP, que sigue en marcha."
         }
       ]
     },
