@@ -1,14 +1,16 @@
 import { AutoProcessor, MultiModalityCausalLM, pipeline, env, type Tensor } from '@huggingface/transformers'
 import { KokoroTTS } from 'kokoro-js'
+import { env as kokoroEnv } from 'kokoro-transformers'
 
 // Modelos de imagen y audio, fuera del hilo principal. Cada uno se descarga la primera vez que hace falta.
 // Hay dos copias de este worker: una para la gráfica (Janus, Whisper) y otra para el procesador (Kokoro),
 // así una no bloquea a la otra y trabajan a la vez
 env.allowLocalModels = false
-// Con aislamiento entre orígenes, la parte que corre en WebAssembly usa varios núcleos (sin él, solo uno)
-if (env.backends.onnx.wasm) {
-  env.backends.onnx.wasm.numThreads = self.crossOriginIsolated ? Math.max(2, Math.min(navigator.hardwareConcurrency - 2, 8)) : 1
-}
+// Con aislamiento entre orígenes, la parte que corre en WebAssembly usa varios núcleos (sin él, solo uno).
+// Kokoro trae su propia copia de Transformers.js y de ONNX Runtime, con su propia configuración
+const threads = self.crossOriginIsolated ? Math.max(2, Math.min(navigator.hardwareConcurrency - 2, 8)) : 1
+if (env.backends.onnx.wasm) env.backends.onnx.wasm.numThreads = threads
+if (kokoroEnv.backends.onnx.wasm) kokoroEnv.backends.onnx.wasm.numThreads = threads
 
 const JANUS = 'onnx-community/Janus-Pro-1B-ONNX'
 const WHISPER = 'onnx-community/whisper-base'
@@ -95,18 +97,19 @@ function wav(samples: Float32Array, rate: number) {
   return new Blob([buffer], { type: 'audio/wav' })
 }
 
-// La voz no debe leer el Markdown: fuera asteriscos, almohadillas, enlaces y viñetas
+// La voz no debe leer el Markdown: fuera asteriscos, almohadillas, enlaces y viñetas.
+// Cada viñeta o título acaba en punto, para que sea su propia frase y no se junte todo en un solo tramo
 const clean = (text: string) => text
   .replace(/```[\s\S]*?```/g, ' ')
   .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
-  .replace(/^\s*([#>]+|[-*+]|\d+[.)])\s+/gm, '')
+  .replace(/^[ \t]*([#>]+|[-*+]|\d+[.)])[ \t]+(.*?)[\s:;,]*$/gm, (_, _marker, line: string) => /[.!?][^\w]*$/.test(line) || !line ? line : `${line}.`)
   .replace(/[*_`~]/g, '')
   .replace(/\s+/g, ' ')
   .trim()
 
 const loaders: Record<MediaModel, (report: Report) => Promise<unknown>> = { janus, whisper, kokoro }
 
-// Libera la memoria (de la gráfica o RAM) de un modelo cargado
+// Libera la memoria de la gráfica de un modelo cargado; la RAM de WebAssembly solo vuelve al cerrar el worker (media.ts)
 async function unload(model: MediaModel) {
   const pending = loading.get(model)
   loading.delete(model)
@@ -155,13 +158,16 @@ async function run(job: MediaTask, report: Report): Promise<string> {
     }
     case 'speak': {
       const tts = await kokoro(report)
-      // Por tramos de unas frases: el modelo corta los textos largos, y tts.stream() se queda esperando más texto
-      const chunks = clean(job.text).match(/[^.!?]+[.!?]+["')\]]*\s*|[^.!?]+$/g)?.reduce<string[]>((acc, sentence) => {
+      // Por tramos de unas frases: el modelo corta en silencio lo que pase de ~500 fonemas, y tts.stream() se
+      // queda esperando más texto. Una frase demasiado larga se parte por palabras
+      const sentences = (clean(job.text).match(/[^.!?]+[.!?]+["')\]]*\s*|[^.!?]+$/g) ?? [])
+        .flatMap(s => (s.length <= 250 ? [s] : s.match(/.{1,250}(?:\s|$)|\S+/g) ?? [s]))
+      const chunks = sentences.reduce<string[]>((acc, sentence) => {
         const last = acc.at(-1)
         if (last && last.length + sentence.length < 280) acc[acc.length - 1] = last + sentence
         else acc.push(sentence)
         return acc
-      }, []) ?? []
+      }, [])
       const parts: Float32Array[] = []
       let rate = 24000
       for (const [i, chunk] of chunks.entries()) {

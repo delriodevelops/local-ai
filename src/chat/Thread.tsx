@@ -49,6 +49,8 @@ function StepRow({ step, index, last }: { step: StepResult; index: number; last:
         {step.ms !== undefined && <span className="font-mono text-[10px] text-neutral-500">{(step.ms / 1000).toFixed(1)}s</span>}
         {step.state === 'skipped' && <span className="font-mono text-[10px] text-neutral-500">skipped</span>}
         {step.state === 'running' && step.status && <span className="font-mono text-[10px] text-signal-ink truncate">{step.status}</span>}
+        {/* En cola detrás de otro paso que usa el mismo modelo, o esperando su descarga */}
+        {step.state === 'waiting' && step.status && <span className="font-mono text-[10px] text-neutral-500 truncate">{step.status}</span>}
         {step.error && <span className="text-xs text-red-600 truncate">{step.error}</span>}
         {text && <ChevronDown className={cn('w-3.5 h-3.5 ml-auto text-neutral-500 duration-200', open && 'rotate-180')} />}
       </button>

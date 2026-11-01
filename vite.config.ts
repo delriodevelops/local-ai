@@ -11,7 +11,13 @@ export default defineConfig({
   base: process.env.BASE_PATH || '/',
   appType: 'mpa',
   plugins: [react(), tailwindcss()],
-  resolve: { alias: { '@': page('./src') } },
+  resolve: {
+    alias: {
+      '@': page('./src'),
+      // La copia de Transformers.js que usa kokoro-js (el mismo archivo que importa), para configurar sus hilos
+      'kokoro-transformers': page('./node_modules/kokoro-js/node_modules/@huggingface/transformers/dist/transformers.web.js'),
+    },
+  },
   worker: { format: 'es' },
   build: { rollupOptions: { input: { landing: page('./index.html'), app: page('./app/index.html') } } },
   // En local las cabeceras de aislamiento las pone el propio servidor (en GitHub Pages, public/isolation-sw.js)

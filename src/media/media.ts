@@ -12,10 +12,21 @@ export const VOICES = [
 type Lane = 'gpu' | 'cpu'
 const workers = new Map<Lane, Worker>()
 let nextId = 0
-const pending = new Map<number, { resolve: (v: string) => void; reject: (e: Error) => void; onStatus: (t: string) => void }>()
+const pending = new Map<number, { lane: Lane; resolve: (v: string) => void; reject: (e: Error) => void; onStatus: (t: string) => void }>()
 
 // Kokoro va en el procesador y lo demás en la gráfica: cada uno en su worker para que trabajen a la vez
 const laneOf = (model: MediaModel): Lane => (MEDIA_INFO[model].device === 'CPU' ? 'cpu' : 'gpu')
+const modelsOf = (lane: Lane) => (Object.keys(MEDIA_INFO) as MediaModel[]).filter(m => laneOf(m) === lane)
+
+// Cerrar el worker es la única forma de devolver la RAM de WebAssembly, y de limpiar Transformers.js:
+// tras un fallo de ONNX, sus colas internas rechazan todo lo que venga después. El siguiente trabajo abre uno nuevo
+function close(lane: Lane, error = new Error('The media worker restarted after an error')) {
+  workers.get(lane)?.terminate()
+  workers.delete(lane)
+  for (const [id, job] of pending) if (job.lane === lane) { pending.delete(id); job.reject(error) }
+  const { setMedia } = useResources.getState()
+  modelsOf(lane).forEach(model => setMedia(model, { state: 'off', status: undefined }))
+}
 
 export function modelFor(job: MediaTask): MediaModel {
   switch (job.task) {
@@ -35,8 +46,9 @@ function getWorker(lane: Lane) {
     if (!job) return
     if (data.type === 'status') return job.onStatus(data.text)
     pending.delete(data.id)
-    if (data.type === 'done') job.resolve(data.result)
-    else job.reject(new Error(data.error))
+    if (data.type === 'done') return job.resolve(data.result)
+    job.reject(new Error(data.error))
+    close(lane)
   }
   workers.set(lane, worker)
   return worker
@@ -46,17 +58,33 @@ function send(job: MediaTask, onStatus: (text: string) => void) {
   const model = modelFor(job)
   const id = nextId++
   return new Promise<string>((resolve, reject) => {
-    pending.set(id, { resolve, reject, onStatus })
+    pending.set(id, { lane: laneOf(model), resolve, reject, onStatus })
     const transfer = job.task === 'transcribe' ? [job.audio.buffer] : []
     getWorker(laneOf(model)).postMessage({ id, job }, transfer)
   })
 }
 
+type MediaOptions = {
+  signal?: AbortSignal
+  // Cuando el trabajo consigue el modelo y empieza de verdad, tras la cola
+  onStart?: () => void
+}
+
 // Una tarea de imagen o audio; devuelve texto o una data URL. Cada modelo atiende un trabajo cada vez
-export function media(job: MediaTask, onStatus: (text: string) => void = () => {}) {
+export function media(job: MediaTask, onStatus: (text: string) => void = () => {}, { signal, onStart }: MediaOptions = {}) {
   const model = modelFor(job)
+  const lane = laneOf(model)
   const { setMedia } = useResources.getState()
+  // Mientras hace cola, enseña la descarga que hace otro trabajo del mismo modelo (normalmente la precarga)
+  const downloading = (status?: string) => { if (status?.startsWith('Downloading')) onStatus(status) }
+  downloading(useResources.getState().media[model].status)
+  const follow = useResources.subscribe((s, prev) => {
+    if (s.media[model].status !== prev.media[model].status) downloading(s.media[model].status)
+  })
   return exclusive(model, async () => {
+    follow()
+    if (signal?.aborted) throw new DOMException('Stopped', 'AbortError')
+    onStart?.()
     const was = useResources.getState().media[model].state
     setMedia(model, { state: was === 'off' ? 'loading' : 'busy' })
     try {
@@ -66,9 +94,13 @@ export function media(job: MediaTask, onStatus: (text: string) => void = () => {
         onStatus(text)
       })
       setMedia(model, { state: job.task === 'unload' ? 'off' : 'ready', status: undefined })
+      // Sin modelos cargados ni trabajos en marcha, el worker se cierra para que la memoria vuelva al sistema
+      const idle = modelsOf(lane).every(m => useResources.getState().media[m].state === 'off')
+      if (job.task === 'unload' && idle && ![...pending.values()].some(p => p.lane === lane)) close(lane)
       return result
     } catch (error) {
-      setMedia(model, { state: was === 'busy' ? 'ready' : was, status: undefined })
+      // Si falló en el worker, close() ya lo cerró: el modelo ya no está cargado
+      setMedia(model, { state: 'off', status: undefined })
       throw error
     }
   })

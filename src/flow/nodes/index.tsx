@@ -82,6 +82,7 @@ function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64'
       <div className="p-3 flex flex-col gap-2">
         {children}
         {step?.state === 'running' && step.status && <p className="font-mono text-[10px] text-signal-ink truncate">{step.status}</p>}
+        {step?.state === 'waiting' && step.status && <p className="font-mono text-[10px] text-neutral-500 truncate">{step.status}</p>}
         {step?.state === 'error' && <p className="text-[11px] text-red-700 line-clamp-3">{step.error}</p>}
       </div>
     </div>

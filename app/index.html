@@ -11,17 +11,18 @@
       // Activa el aislamiento entre orígenes (hilos en WebAssembly) con un service worker.
       // El worker vive en la raíz de la web, así que controla también la landing y esta página.
       // Las cabeceras solo cuentan desde la carga siguiente a que el worker controle la página, así que
-      // se espera a que esté activo y se recarga. Como mucho dos veces por pestaña, para no entrar en bucle
-      // si el navegador no admite el aislamiento.
-      if (!self.crossOriginIsolated && window.isSecureContext && 'serviceWorker' in navigator) {
+      // se espera a que esté activo y se recarga una vez. Si el worker ya sirvió esta carga y aun así no hay
+      // aislamiento (Safari e iOS no admiten COEP credentialless), recargar no lo arregla.
+      // La marca de la pestaña evita un bucle si algo se salta el worker (recarga forzada, "Bypass for network")
+      if (self.crossOriginIsolated) sessionStorage.removeItem('isolation-reload')
+      else if (window.isSecureContext && 'serviceWorker' in navigator) {
+        const controlled = !!navigator.serviceWorker.controller
         navigator.serviceWorker.register('%BASE_URL%isolation-sw.js')
           .then(() => navigator.serviceWorker.ready)
           .then(() => {
-            const reloads = Number(sessionStorage.getItem('isolation-reloads') || 0)
-            if (reloads < 2) {
-              sessionStorage.setItem('isolation-reloads', String(reloads + 1))
-              location.reload()
-            }
+            if (controlled || sessionStorage.getItem('isolation-reload')) return
+            sessionStorage.setItem('isolation-reload', '1')
+            location.reload()
           })
       }
     </script>

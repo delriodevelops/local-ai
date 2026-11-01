@@ -13,7 +13,10 @@
     "noEmit": true,
     "types": ["vite/client"],
     "baseUrl": ".",
-    "paths": { "@/*": ["src/*"] }
+    "paths": {
+      "@/*": ["src/*"],
+      "kokoro-transformers": ["node_modules/kokoro-js/node_modules/@huggingface/transformers"]
+    }
   },
   "include": ["src"]
 }
