@@ -384,6 +384,11 @@
           "at": "2026-11-01T20:16:19Z",
           "by": "claude-code",
           "text": "Hecho en la rama feat/mcp (pendiente de revisión y de publicar). Ajustes → MCP servers: añadir por dirección con token opcional (Authorization: Bearer, solo en este navegador) o DeepWiki, Context7, Microsoft Learn y Hugging Face con un clic. Estado, lista de herramientas y errores en palabras (CORS, 401, 403, ruta mala, http desde https, tiempo agotado). Cliente oficial MCP v2 (negocia 2025/2026, cae a SSE), cargado solo al usarlo (91 KB gzip). Probado en el navegador: los cuatro conectan y listan herramientas (3, 2, 3 y 4). OAuth queda fuera por ahora."
+        },
+        {
+          "at": "2026-11-01T21:09:28Z",
+          "by": "claude-code",
+          "text": "Publicado (90f8179) con los arreglos de la revisión: SSE que ya no reintenta cada 3 s si falla, 'Connect again' abre conexión nueva, Parar corta también la conexión, servidores quitados no se reconectan, errores más claros (token rechazado, redirección, SSE). Comprobado en la web: los cuatro sugeridos conectan desde github.io; dirección sin https:// rechazada; puente local apagado y servidor sin CORS dan su mensaje."
         }
       ]
     },
@@ -401,6 +406,11 @@
           "at": "2026-11-01T20:16:20Z",
           "by": "claude-code",
           "text": "Hecho en feat/mcp. Nodo 'MCP tool': eliges servidor y herramienta, los argumentos salen del esquema y {input} es lo que llega al nodo; con una lista llama una vez por elemento; salidas de texto (o lista) e imagen. Probado: DeepWiki ask_wiki_question sobre mlc-ai/web-llm devolvió la documentación real en el chat."
+        },
+        {
+          "at": "2026-11-01T21:09:28Z",
+          "by": "claude-code",
+          "text": "Publicado con los arreglos de la revisión: {input} respeta los $ del texto, tipos opcionales (int | None) bien convertidos, no envía argumentos que la herramienta ya no tiene, Parar a mitad de lista conserva lo terminado, y las imágenes remotas de las respuestas salen como enlace (no se cargan solas)."
         }
       ]
     },
@@ -418,6 +428,11 @@
           "at": "2026-11-01T20:16:20Z",
           "by": "claude-code",
           "text": "Hecho en feat/mcp. Nodo 'Agent': el modelo local elige entre hasta 5 herramientas MCP con el formato nativo <tool_call> de Qwen, y la gramática de WebLLM (structural_tag) obliga a que los argumentos cumplan el esquema; se validan, se recortan los resultados, se rechazan llamadas repetidas y las llamadas se ven en el chat. Probado con Qwen2.5 0.5B: con la petición explícita llamó a microsoft_docs_search y resumió el resultado real; por su cuenta los modelos pequeños contestan de memoria (el nodo avisa: mejor Qwen2.5 3B o mayor)."
+        },
+        {
+          "at": "2026-11-01T21:09:28Z",
+          "by": "claude-code",
+          "text": "Publicado con los arreglos de la revisión: ejecuta todas las llamadas de una respuesta (hasta el límite), no da por buena una respuesta vacía, solo deduplica llamadas que salieron bien, neutraliza tokens de control en los resultados y la espera del modelo entre pasos sale como 'Queued'. Probado en la web con Qwen2.5 1.5B y una pregunta doble: hizo dos llamadas a microsoft_docs_search y respondió a las dos partes (25 s)."
         }
       ]
     },
