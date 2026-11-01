@@ -8,22 +8,89 @@
 	}
 }
 
+@layer base {
+	html {
+		color-scheme: dark;
+	}
+	body {
+		font-feature-settings: "kern" 1, "liga" 1, "ss01" 1;
+	}
+	::selection {
+		background: #c8f560;
+		color: #0b0c09;
+	}
+	:focus-visible {
+		outline: 1px solid #c8f560;
+		outline-offset: 2px;
+	}
+}
+
+/* Grano de película: quita la planitud de pantalla al fondo oscuro */
+body::after {
+	content: '';
+	position: fixed;
+	inset: 0;
+	background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/></filter><rect width='300' height='300' filter='url(%23n)' opacity='1'/></svg>");
+	opacity: 0.035;
+	pointer-events: none;
+	z-index: 9998;
+}
+
 ::-webkit-scrollbar {
-	width: 3px;
-	height: 3px;
+	width: 4px;
+	height: 4px;
 }
 ::-webkit-scrollbar-button {
 	width: 0px;
 	height: 0px;
 }
 ::-webkit-scrollbar-thumb {
-	background: #666;
+	background: #3a3d33;
 	border-radius: 48px;
 }
+::-webkit-scrollbar-track {
+	background: transparent;
+}
 
-code {
+/* Etiqueta de sistema: mayúsculas espaciadas en mono */
+.label {
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: #868a78;
+}
+
+pre {
 	border-radius: 12px;
-	background-color: #111;
-	display: block;
-	padding: 24px;
+	background-color: #0b0c09 !important;
+	border: 1px solid #26281f;
+	padding: 20px !important;
+	overflow-x: auto;
+}
+pre code {
+	font-family: var(--font-mono);
+	font-size: 13px;
+}
+
+/* Malla de la bienvenida: la señal recorre las aristas */
+@keyframes trace {
+	to { stroke-dashoffset: -120; }
+}
+.mesh-trace {
+	stroke-dasharray: 6 114;
+	animation: trace 3.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes node-glow {
+	0%, 100% { opacity: 0.35; }
+	50% { opacity: 1; }
+}
+.mesh-node {
+	animation: node-glow 3.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.mesh-trace, .mesh-node, .animate-rise {
+		animation: none;
+	}
 }

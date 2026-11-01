@@ -57,9 +57,10 @@ const SearchConversationButton = () => {
     return (
       <button
         onClick={() => setIsModalOpen(true)}
-        className="hover:bg-neutral-700 p-2 lg:p-3 flex items-center justify-center rounded-lg lg:rounded-xl cursor-pointer duration-300 ease-in-out mb-2"
+        className="hover:bg-neutral-700 p-2 flex items-center justify-center rounded-lg cursor-pointer duration-300 ease-snap"
+        title="Search chats"
       >
-        <ion-icon name="search" class="text-lg lg:text-xl" />
+        <ion-icon name="search" />
       </button>
     );
   }

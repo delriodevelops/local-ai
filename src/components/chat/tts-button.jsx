@@ -82,7 +82,7 @@ const TTSButton = ({ message, isStreaming }) => {
   return (
     <button
       disabled={!!isStreaming}
-      className='disabled:cursor-not-allowed disabled:hover:bg-neutral-700 disabled:text-neutral-400 text-2xl p-2 hover:bg-neutral-600 rounded-full cursor-pointer flex items-center w-fit h-fit self-start'
+      className='disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:text-neutral-600 text-base p-1.5 hover:bg-neutral-800 hover:text-neutral-100 rounded-md duration-200 cursor-pointer flex items-center w-fit h-fit self-start'
       onClick={handleButtonClick}
     >
       {

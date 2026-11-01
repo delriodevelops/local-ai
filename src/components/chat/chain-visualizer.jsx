@@ -22,13 +22,13 @@ const ChainVisualizer = () => {
         <button
           type="button"
           onClick={() => setIsPanelOpen(o => !o)}
-          className={`flex items-center gap-2 px-4 py-3 rounded-xl duration-300 ${isPanelOpen ? 'bg-neutral-600' : 'bg-neutral-800 hover:bg-neutral-600'}`}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg border duration-300 ease-snap ${isPanelOpen ? 'border-lime-400/50 bg-neutral-800' : 'border-neutral-700 bg-neutral-900 hover:border-neutral-500'}`}
           aria-expanded={isPanelOpen}
         >
           <ion-icon name="git-network-outline" />
-          <span>Chain</span>
-          {!!chain.length && <span className="text-xs bg-neutral-900 rounded-full px-2 py-0.5">{chain.length}</span>}
-          {runningName && <span className="text-xs text-lime-400 truncate max-w-40">· {runningName}</span>}
+          <span className="label text-neutral-300">Chain</span>
+          {!!chain.length && <span className="font-mono text-[11px] bg-signal text-neutral-950 rounded px-1.5">{chain.length}</span>}
+          {runningName && <span className="font-mono text-[11px] text-lime-300 truncate max-w-40">· {runningName}</span>}
           <ion-icon name={isPanelOpen ? 'chevron-up' : 'chevron-down'} />
         </button>
 
@@ -38,7 +38,7 @@ const ChainVisualizer = () => {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="absolute left-0 right-0 top-full z-30 mt-1 rounded-xl bg-neutral-800/95 backdrop-blur-sm shadow-xl border border-neutral-700 overflow-x-auto"
+              className="absolute left-0 right-0 top-full z-30 mt-1 rounded-xl bg-neutral-900/95 backdrop-blur-md shadow-2xl shadow-black/50 border border-neutral-700 overflow-x-auto"
             >
               <ChainFlow onNavigate={() => setIsPanelOpen(false)} />
             </motion.div>
@@ -51,10 +51,10 @@ const ChainVisualizer = () => {
         <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsModalOpen(true)}
-          className="w-full flex items-center gap-3 p-4 rounded-xl bg-neutral-800 hover:bg-neutral-700 transition-colors relative"
+          className="w-full flex items-center gap-3 p-3 rounded-lg border border-neutral-700 bg-neutral-900 hover:bg-neutral-800 transition-colors relative"
         >
           <ion-icon name="git-network-outline" className="text-xl text-neutral-300" />
-          {!!chain.length && <small className="text-neutral-100 absolute -bottom-1 -right-1 bg-neutral-700 rounded-full w-5 aspect-square">{chain.length}</small>}
+          {!!chain.length && <small className="font-mono text-[10px] text-neutral-950 absolute -bottom-1 -right-1 bg-signal rounded w-4 aspect-square flex items-center justify-center">{chain.length}</small>}
         </motion.button>
 
         <AnimatePresence>
@@ -70,11 +70,11 @@ const ChainVisualizer = () => {
                 initial={{ scale: 0.95, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.95, y: 20 }}
-                className="bg-neutral-900 rounded-xl w-full max-w-md max-h-[80vh] flex flex-col"
+                className="bg-neutral-900 border border-neutral-700 rounded-xl w-full max-w-md max-h-[80vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-4 border-b border-neutral-800 flex justify-between items-center">
-                  <h3 className="text-lg font-medium text-neutral-100">Chain</h3>
+                  <h3 className="font-display text-2xl text-neutral-50">Chain</h3>
                   <button
                     onClick={() => setIsModalOpen(false)}
                     className="p-2 rounded-lg hover:bg-neutral-800 text-neutral-400 hover:text-neutral-200"

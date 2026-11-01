@@ -389,13 +389,14 @@ const ChatInput = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full xl:w-3/5 mb-2 bg-neutral-600 rounded-3xl flex justify-end gap-2 items-center p-2 relative overflow-visible"
+      className="w-full xl:w-3/5 mb-1 bg-neutral-900 border border-neutral-700 focus-within:border-lime-400/50 duration-300 ease-snap rounded-2xl flex justify-end gap-2 items-center p-2 relative overflow-visible shadow-[0_-24px_48px_-24px_rgba(0,0,0,0.6)]"
     >
       <TextAreaOptions />
       <textarea
         name="ipt-textarea"
         id="ipt-textarea"
-        className="resize-none overflow-y-auto max-h-56 w-full bg-neutral-600 outline-none h-10 p-2"
+        className="resize-none overflow-y-auto max-h-56 w-full bg-transparent outline-none focus-visible:outline-none h-10 p-2 placeholder:text-neutral-500"
+        placeholder={engine ? (chain.length > 1 ? `Ask the chain · ${chain.length} steps` : "Ask anything") : "Pick a model to start"}
         onKeyDown={handleKeyDown}
         onChange={(e) => setChatInput(e.target.value)}
         value={chatInput}
@@ -411,18 +412,20 @@ const ChatInput = () => {
             <button
               type='button'
               onClick={stopStream}
-              className="text-4xl flex items-center justify-center cursor-pointer self-end"
+              title="Stop"
+              className="w-10 h-10 shrink-0 rounded-xl bg-neutral-100 text-neutral-950 text-lg flex items-center justify-center cursor-pointer self-end hover:bg-white duration-200 ease-snap"
             >
-              <ion-icon name="stop-circle" />
+              <ion-icon name="stop" />
             </button>
           )
           : (
             <button
               type='submit'
               disabled={!engine || isStreaming || isRecording || !chatInput.trim().length}
-              className="text-4xl flex items-center justify-center cursor-pointer disabled:text-neutral-500 disabled:cursor-not-allowed self-end"
+              title="Send"
+              className="w-10 h-10 shrink-0 rounded-xl bg-signal text-neutral-950 text-lg flex items-center justify-center cursor-pointer self-end hover:bg-lime-200 hover:-translate-y-0.5 duration-200 ease-snap disabled:bg-neutral-700 disabled:text-neutral-500 disabled:translate-y-0 disabled:cursor-not-allowed"
             >
-              <ion-icon name="arrow-up-circle" />
+              <ion-icon name="arrow-up" />
             </button>
           )
       }

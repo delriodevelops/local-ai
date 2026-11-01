@@ -21,32 +21,32 @@ const History = () => {
   }
 
   return (
-    <article
-      className="w-full h-full overflow-y-auto overflow-x-hidden"
-    >
-      {
-        !!history?.length
-          ? history.sort((a, b) => b.lastMessage - a.lastMessage).map(el => (
-            <p
-              key={el?.conversationId}
-              onClick={() => { handleSelectConversation(el) }}
-              className="relative group/delete p-4 hover:bg-neutral-700 rounded-xl duration-300 ease-in-out cursor-pointer truncate">
-              <span>
-                {el?.messages?.at(-2)?.content || el?.messages?.at(-1)?.content}
-              </span>
-              <button
-                onClick={(e) => { deleteConversation(e, el) }}
-                className='absolute invisible top-2 w-10 h-10 aspect-square right-2 group-hover/delete:visible text-xl hover:text-red-500 hover:bg-neutral-600 flex justify-center items-center p-1 rounded-full duration-300 ease-in-out bg-neutral-700'>
-                <ion-icon name="trash-outline"></ion-icon>
-              </button>
-            </p>
-          ))
-          : (
-            <p
-              className="p-4 text-neutral-400 rounded-xl"
-            >No chats...</p>
-          )
-      }
+    <article className="w-full h-full overflow-hidden flex flex-col">
+      <h2 className="label px-2 pb-2">History</h2>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col">
+        {
+          !!history?.length
+            ? history.sort((a, b) => b.lastMessage - a.lastMessage).map(el => (
+              <p
+                key={el?.conversationId}
+                onClick={() => { handleSelectConversation(el) }}
+                className={`relative group/delete pl-3 pr-10 py-2 text-sm rounded-md duration-300 ease-snap cursor-pointer truncate border-l ${el?.conversationId === actualConversation ? 'border-signal bg-neutral-800 text-neutral-50' : 'border-transparent text-neutral-300 hover:bg-neutral-800 hover:text-neutral-50'}`}>
+                <span>
+                  {el?.messages?.at(-2)?.content || el?.messages?.at(-1)?.content}
+                </span>
+                <button
+                  onClick={(e) => { deleteConversation(e, el) }}
+                  title="Delete chat"
+                  className='absolute invisible top-1/2 -translate-y-1/2 right-1 group-hover/delete:visible hover:text-red-400 flex justify-center items-center p-1.5 rounded-md duration-200 ease-snap text-neutral-400'>
+                  <ion-icon name="trash-outline"></ion-icon>
+                </button>
+              </p>
+            ))
+            : (
+              <p className="px-2 py-1 text-sm text-neutral-500">Your chats will appear here.</p>
+            )
+        }
+      </div>
     </article>
   )
 }

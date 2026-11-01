@@ -114,7 +114,7 @@
       "title": "Actualizar MeshMind en el portfolio",
       "state": "todo",
       "group": "LN",
-      "deps": ["LN-02", "DS-01"],
+      "deps": ["LN-02", "DS-01", "DS-02"],
       "at": "2026-10-30T16:43:07Z",
       "by": "claude-code",
       "desc": "Capturas nuevas y enlace correcto en la ficha del portfolio.\n\n**Terminado:** la ficha enseña la versión publicada."
@@ -127,7 +127,23 @@
       "deps": ["LN-02"],
       "at": "2026-11-01T15:36:22Z",
       "by": "claude-code",
-      "desc": "La interfaz es funcional pero se ve como una plantilla gris de 2023. Rediseñarla para que luzca en el portfolio: paleta y tipografía propias, cabecera y barra lateral más limpias, burbujas de mensaje, selector de modelo y diagrama de la cadena con más jerarquía, y que se vea bien en móvil. Sin tocar cómo funciona por dentro.\nPara revisar: abrir https://delriodevelops.github.io/meshmind/ en escritorio y móvil y comparar con capturas del antes."
+      "desc": "La interfaz es funcional pero se ve como una plantilla gris de 2023. Rediseñarla para que luzca en el portfolio: paleta y tipografía propias, cabecera y barra lateral más limpias, burbujas de mensaje, selector de modelo y diagrama de la cadena con más jerarquía, y que se vea bien en móvil. Sin tocar cómo funciona por dentro.\nPara revisar: abrir https://delriodevelops.github.io/meshmind/ en escritorio y móvil y comparar con capturas del antes.",
+      "notes": [
+        {
+          "at": "2026-11-01T15:52:45Z",
+          "by": "claude-code",
+          "text": "Hecho (aunque la tarea sigue propuesta: apruébala y márcala si te convence). Nueva identidad: fondo grafito con grano, una sola señal lima, títulos en Instrument Serif, interfaz en Instrument Sans y etiquetas en IBM Plex Mono. Bienvenida con titular grande \"Think in chains.\" y una malla animada por la que viaja la señal. Mensajes del asistente con etiqueta \"STEP 01 · Nombre\" y un hilo vertical que une los pasos; los del usuario, en tarjeta a la derecha. Barra lateral con marca, historial con el chat activo marcado y asistentes con su número de paso. Caja de texto, selector de modelo y diagrama de la cadena rehechos con el mismo lenguaje. Probado en escritorio y móvil con una cadena real de dos pasos."
+        }
+      ]
+    },
+    {
+      "id": "DS-02",
+      "title": "Editor de nodos en lugar de la cadena lineal",
+      "state": "proposed",
+      "group": "DS",
+      "at": "2026-11-01T15:52:45Z",
+      "by": "claude-code",
+      "desc": "Ahora los asistentes solo se pueden poner en fila: cada uno recibe la respuesta del anterior. Propuesta: un lienzo donde arrastras nodos y los conectas, con entradas y salidas de distinto tipo.\nTipos de nodo para una primera versión: Entrada (tu mensaje), Asistente (instrucciones + modelo), Unir (junta varias salidas en un texto), Ramificar (manda lo mismo a varios asistentes en paralelo), Condición (sigue por un camino u otro según la respuesta) y Salida.\nAsí se pueden hacer cosas que hoy no: pedir opinión a tres expertos a la vez y que un cuarto lo resuma, o revisar una respuesta y repetirla si no pasa.\nPor decidir antes de empezar: si el lienzo sustituye al chat o vive a su lado, y si los tipos de dato se limitan a texto o incluyen JSON/listas."
     }
   ]
 }

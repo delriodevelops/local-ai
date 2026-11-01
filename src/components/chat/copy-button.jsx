@@ -15,11 +15,12 @@ const CopyButton = ({ message }) => {
   return (
     <button
       onClick={copyToClipboard}
-      className='relative text-2xl p-2 hover:bg-neutral-600 rounded-full cursor-pointer flex items-center w-fit h-fit self-start'
+      className='relative text-base p-1.5 hover:bg-neutral-800 hover:text-neutral-100 rounded-md cursor-pointer flex items-center w-fit h-fit self-start duration-200'
+      title="Copy"
     >
       {
         !!copiedToClipboard && (
-          <div className='absolute px-3 py-2 bg-neutral-800 -top-10 -left-4 rounded-3xl text-sm'>
+          <div className='absolute px-2 py-1 bg-signal text-neutral-950 font-mono -top-8 -left-3 rounded-md text-[11px]'>
             Copied!
           </div>
         )

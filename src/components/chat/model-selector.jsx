@@ -75,12 +75,13 @@ const ModelSelector = () => {
       <button
         onClick={() => setShowModelModal(true)}
         disabled={isStreaming}
-        className="hidden lg:flex w-full lg:w-96 items-center justify-between p-3 bg-neutral-700 hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50 rounded-xl"
+        className="hidden lg:flex w-full lg:w-96 items-center justify-between gap-3 px-3 py-2 border border-neutral-700 hover:border-neutral-500 bg-neutral-900 duration-300 ease-snap disabled:cursor-not-allowed disabled:opacity-50 rounded-lg"
         title={selectedModel?.model_id || "Select a model"}
       >
         <div className='flex gap-2 items-center'>
           {sourceOptions.find(option => option.value === modelSource).icon}
-          <span className="truncate">{selectedModel?.model_id || "Select a model"}</span>
+          <span className="label">Model</span>
+          <span className={`truncate font-mono text-[13px] ${selectedModel ? 'text-neutral-100' : 'text-neutral-400'}`}>{selectedModel?.model_id || "Select a model"}</span>
         </div>
         <ion-icon name="chevron-down" class="text-neutral-400"></ion-icon>
       </button>
@@ -88,13 +89,13 @@ const ModelSelector = () => {
       <button
         onClick={() => setShowModelModal(true)}
         disabled={isStreaming}
-        className='z-40 lg:hidden bg-neutral-800 p-4 lg:-mt-2 flex rounded-xl items-center aspect-square disabled:cursor-not-allowed disabled:opacity-50'
+        className='z-40 lg:hidden border border-neutral-700 bg-neutral-900 p-3 flex rounded-lg items-center aspect-square disabled:cursor-not-allowed disabled:opacity-50'
       >
         <ion-icon name="server-outline" />
       </button>
 
       {!!progress && (
-        <small className="text-[0.75em] text-neutral-400">
+        <small className="font-mono text-[11px] text-lime-300/80 mt-1 max-w-96 truncate">
           {progress?.progress !== 1 && progress?.text}
         </small>
       )}
@@ -308,7 +309,7 @@ const CustomModelSelector = ({
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsSourceDropdownOpen(!isSourceDropdownOpen)}
-                className="bg-neutral-700 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 flex items-center justify-between w-48"
+                className="bg-neutral-700 rounded-lg p-2 text-sm focus:outline-none focus:ring-2 focus:ring-signal flex items-center justify-between w-48"
               >
                 <span className="flex items-center gap-2">
                   {sourceOptions.find(option => option.value === modelSource).icon}
@@ -354,7 +355,7 @@ const CustomModelSelector = ({
                   onChange={() => setShowAllModels(!showAllModels)}
                   disabled={isStreaming}
                 />
-                <div className="w-11 h-6 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                <div className="w-11 h-6 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-lime-500"></div>
               </label>
             )}
 
@@ -368,7 +369,7 @@ const CustomModelSelector = ({
             {['openai', 'gemini', 'anthropic'].includes(modelSource) && apiKeys[modelSource] && (
               <button
                 onClick={handleChangeApiKey}
-                className="bg-neutral-700 hover:bg-neutral-600 rounded-lg p-2 text flex items-center focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="bg-neutral-700 hover:bg-neutral-600 rounded-lg p-2 text flex items-center focus:outline-none focus:ring-2 focus:ring-signal"
                 title="Cambiar API Key"
               >
                 <ion-icon name="key"></ion-icon>
@@ -387,7 +388,7 @@ const CustomModelSelector = ({
             }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full p-2 bg-neutral-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="w-full p-2 bg-neutral-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-signal"
           />
         </div>
       </div>
@@ -485,7 +486,7 @@ const Modal = ({ message, action, onClose, onSubmit, currentApiKey }) => {
             type="password"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            className="w-full p-2 mb-4 bg-neutral-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="w-full p-2 mb-4 bg-neutral-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-signal"
             placeholder="Ingresa tu API key"
           />
           <div className="flex justify-end gap-2">
@@ -498,7 +499,7 @@ const Modal = ({ message, action, onClose, onSubmit, currentApiKey }) => {
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 bg-signal text-neutral-950 font-medium rounded-lg hover:bg-lime-200 transition-colors"
             >
               {action === 'add' ? 'Guardar' : 'Actualizar'}
             </button>

@@ -28,10 +28,10 @@ function getStatus(index, { isStreaming, activeChainIndex, output, assistantId }
 }
 
 const STATUS = {
-  running: { label: 'Working…', dot: 'bg-lime-400 animate-pulse', card: 'border-lime-500 bg-lime-900/30' },
-  done: { label: 'Done', dot: 'bg-lime-500', card: 'border-neutral-600 bg-neutral-800' },
-  waiting: { label: 'Waiting', dot: 'bg-neutral-500', card: 'border-neutral-700 bg-neutral-800/60 opacity-70' },
-  idle: { label: 'Not run yet', dot: 'bg-neutral-600', card: 'border-neutral-700 bg-neutral-800' },
+  running: { label: 'Working', dot: 'bg-signal animate-pulse', card: 'border-lime-400/60 bg-lime-400/[0.06] shadow-[0_0_24px_-8px_rgba(200,245,96,0.4)]' },
+  done: { label: 'Done', dot: 'bg-lime-400', card: 'border-neutral-700 bg-neutral-900' },
+  waiting: { label: 'Waiting', dot: 'bg-neutral-500', card: 'border-neutral-800 bg-neutral-900/60 opacity-70' },
+  idle: { label: 'Not run yet', dot: 'bg-neutral-600', card: 'border-neutral-800 bg-neutral-900' },
 }
 
 function scrollToMessage(index) {
@@ -50,8 +50,9 @@ function toPlainText(markdown = '') {
 
 function Arrow({ vertical }) {
   return (
-    <div className={`flex items-center justify-center text-neutral-500 shrink-0 ${vertical ? 'h-6' : 'w-8 self-center'}`} aria-hidden="true">
-      <ion-icon name={vertical ? 'arrow-down' : 'arrow-forward'} />
+    <div className={`flex items-center justify-center shrink-0 ${vertical ? 'h-6' : 'w-8 self-center'}`} aria-hidden="true">
+      <span className={`bg-neutral-600 ${vertical ? 'w-px h-full' : 'h-px w-full'}`} />
+      <span className={`w-1.5 h-1.5 rounded-full bg-neutral-500 shrink-0`} />
     </div>
   )
 }
@@ -61,13 +62,13 @@ function StepCard({ assistant, index, status, output, vertical, onRemove, isStre
   const canJump = !!output && status === 'done'
 
   return (
-    <div className={`group rounded-xl border p-3 flex flex-col gap-2 duration-300 ${style.card} ${vertical ? 'w-full' : 'w-56'}`}>
+    <div className={`group rounded-lg border p-3 flex flex-col gap-2 duration-300 ease-snap ${style.card} ${vertical ? 'w-full' : 'w-56'}`}>
       <div className="flex items-center gap-2">
-        <span className="text-xs text-neutral-400 w-4">{index + 1}</span>
-        <span className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-lg ${assistant?.color?.color || 'bg-neutral-600'}`}>
+        <span className="font-mono text-[11px] text-neutral-500 w-5">{String(index + 1).padStart(2, '0')}</span>
+        <span className={`w-7 h-7 shrink-0 rounded-md flex items-center justify-center text-sm text-neutral-950 ${assistant?.color?.color || 'bg-neutral-600'}`}>
           <ion-icon name={assistant?.icon?.icon || 'person'} />
         </span>
-        <span className="font-medium text-neutral-100 truncate flex-1" title={assistant.name}>{assistant.name}</span>
+        <span className="text-sm text-neutral-100 truncate flex-1" title={assistant.name}>{assistant.name}</span>
         {!isStreaming && (
           <button
             type="button"
@@ -81,7 +82,7 @@ function StepCard({ assistant, index, status, output, vertical, onRemove, isStre
         )}
       </div>
 
-      <div className="flex items-center gap-2 text-xs text-neutral-400">
+      <div className="flex items-center gap-2 font-mono text-[10.5px] uppercase tracking-[0.14em] text-neutral-400">
         <span className={`w-2 h-2 rounded-full ${style.dot}`} />
         {style.label}
       </div>
@@ -129,7 +130,7 @@ const ChainFlow = ({ vertical = false, onNavigate = () => { } }) => {
 
   return (
     <div className={`flex ${vertical ? 'flex-col items-stretch' : 'flex-row items-stretch'} p-3`}>
-      <div className={`rounded-xl border border-neutral-700 bg-neutral-900 p-3 flex items-center gap-2 text-sm text-neutral-300 shrink-0 ${vertical ? '' : 'self-center'}`}>
+      <div className={`rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-neutral-300 shrink-0 ${vertical ? '' : 'self-center'}`}>
         <ion-icon name="person" /> You
       </div>
       <Arrow vertical={vertical} />
@@ -168,7 +169,7 @@ const ChainFlow = ({ vertical = false, onNavigate = () => { } }) => {
         disabled={!finalOutput}
         onClick={() => jump(finalOutput.messageIndex)}
         title={finalOutput ? 'Go to the final answer' : 'Run the chain to get a result'}
-        className={`rounded-xl border p-3 flex items-center gap-2 text-sm shrink-0 duration-300 ${vertical ? '' : 'self-center'} ${finalOutput ? 'border-lime-600 bg-lime-900/30 text-lime-200 hover:bg-lime-800/40' : 'border-neutral-700 bg-neutral-900 text-neutral-500 cursor-default'}`}
+        className={`rounded-lg border px-3 py-2 flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] shrink-0 duration-300 ease-snap ${vertical ? '' : 'self-center'} ${finalOutput ? 'border-signal bg-signal text-neutral-950 hover:bg-lime-200' : 'border-neutral-800 bg-neutral-950 text-neutral-500 cursor-default'}`}
       >
         <ion-icon name="flag" /> Result
       </button>

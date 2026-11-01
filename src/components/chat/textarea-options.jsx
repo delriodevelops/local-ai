@@ -163,12 +163,12 @@ const TextAreaOptions = () => {
   }
 
   return (
-    <div className="relative overflow-visible h-full w-12">
+    <div className="relative overflow-visible h-10 w-10 shrink-0 self-end">
       <div
         ref={menuRef}
         onMouseEnter={() => setIsMenuOpen(true)}
         onMouseLeave={() => { if (!activeSlider) setIsMenuOpen(false) }}
-        className={`absolute z-10 -bottom-2 left-0 flex gap-2 flex-col items-center justify-center py-1 duration-300 ease-in-out w-14 ${activeSlider && 'hidden'} ${!isMenuOpen ? "h-14" : "h-fit  bg-neutral-800"} rounded-full `}
+        className={`absolute z-10 bottom-0 left-0 flex gap-1 flex-col items-center justify-center duration-300 ease-snap w-10 ${activeSlider && 'hidden'} ${!isMenuOpen ? "h-10" : "h-fit py-1 bg-neutral-800 border border-neutral-700"} rounded-xl `}
       >
         {
           isMenuOpen && !activeSlider && sliderMenus.map((slider, index) => (
@@ -176,7 +176,7 @@ const TextAreaOptions = () => {
               <button
                 type='button'
                 onClick={() => handleButtonClick(slider)}
-                className="text-3xl hover:scale-125 rounded-full text-neutral-500 hover:text-neutral-100 p-2 flex items-center justify-center cursor-pointer duration-300 ease-in-out">
+                className="text-xl rounded-lg text-neutral-400 hover:text-signal hover:bg-neutral-700 p-2 flex items-center justify-center cursor-pointer duration-300 ease-in-out">
                 <ion-icon name={`${slider.icon}`}></ion-icon>
               </button>
             </Tooltip>
@@ -187,7 +187,7 @@ const TextAreaOptions = () => {
             <button
               type='button'
               onClick={() => setActiveSlider(null)}
-              className="text-3xl hover:scale-125 rounded-full text-neutral-200 hover:text-neutral-100 p-2 flex items-center justify-center cursor-pointer duration-300 ease-in-out">
+              className="text-xl rounded-lg text-neutral-300 hover:text-neutral-50 hover:bg-neutral-800 p-2 flex items-center justify-center cursor-pointer duration-300 ease-in-out">
               <ion-icon name="options"></ion-icon>
             </button>
           )

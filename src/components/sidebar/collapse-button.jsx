@@ -8,7 +8,8 @@ const CollapseButton = () => {
   return (
     <button
       onClick={() => { setIsHistoryCollapsed(true) }}
-      className="self-end hover:bg-neutral-700 p-3 flex items-center justify-center rounded-xl cursor-pointer duration-300 ease-in-out mb-2"
+      className="hover:bg-neutral-700 p-2 flex items-center justify-center rounded-lg cursor-pointer duration-300 ease-snap"
+      title="Close sidebar"
     >
       <ion-icon name="close"></ion-icon>
     </button>
