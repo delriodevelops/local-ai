@@ -3,6 +3,7 @@ import {
   type CallToolResult,
 } from '@modelcontextprotocol/client'
 import { Validator, type Schema } from '@cfworker/json-schema'
+import { useApp } from '@/flow/store'
 import type { JsonSchema, McpOutput, McpServer, McpTool } from './types'
 
 // El SDK de MCP pesa ~90 kB: este módulo solo se descarga al conectar un servidor o ejecutar un nodo MCP
@@ -64,11 +65,12 @@ async function open(server: McpServer) {
 
 // Una conexión abierta por servidor; si cambian la dirección o el token, se abre otra
 const connections = new Map<string, { key: string; client: Promise<Client> }>()
-// Servidores que se quitaron: un flujo que aún esté en marcha no vuelve a conectarse a ellos
-const removed = new Set<string>()
 
 function connect(server: McpServer) {
-  if (removed.has(server.id)) return Promise.reject(new Error(`${server.label} was removed from your MCP servers.`))
+  // Un flujo en marcha guarda la lista de servidores de cuando empezó: si se quitó uno, no se vuelve a abrir
+  if (!useApp.getState().mcpServers.some(s => s.id === server.id)) {
+    return Promise.reject(new Error(`${server.label} was removed from your MCP servers.`))
+  }
   const key = `${server.url}\n${server.token}`
   const current = connections.get(server.id)
   if (current?.key === key) return current.client
@@ -80,14 +82,10 @@ function connect(server: McpServer) {
   return client
 }
 
-// forget: el servidor se quitó de la lista. restore lo vuelve a permitir si se añade otra vez
-export function disconnect(serverId: string, forget = false) {
-  if (forget) removed.add(serverId)
+export function disconnect(serverId: string) {
   connections.get(serverId)?.client.then(c => c.close()).catch(() => {})
   connections.delete(serverId)
 }
-
-export const restore = (serverId: string) => removed.delete(serverId)
 
 // Una sesión de 2025 que el servidor ya olvidó responde 404: se vuelve a conectar una vez y se repite.
 // Solo se cierra la conexión que falló, no otra que otra llamada haya abierto mientras tanto
@@ -180,6 +178,8 @@ export function explain(error: unknown, address: string, hasToken = false): { me
       : { message: 'This server needs a token.', hint: 'Paste an API key or access token in its token field. Servers that only offer a sign-in page are not supported yet.' }
   }
   if (status === 0) return { message: 'The server redirected this address somewhere else.', hint: 'Use the address it redirects to (check the trailing /).' }
+  // EventSource da 200 cuando la página responde, pero con otra cosa (HTML de una web, JSON) en lugar de eventos
+  if (error instanceof SseError && status === 200) return { message: 'This address does not send an MCP event stream.', hint: 'Check the path: it usually ends in /mcp or /sse.' }
   if (status === 403) return { message: 'The server refused this site (HTTP 403).', hint: 'It may only accept some websites, or need a token.' }
   if (status === 404 || status === 405) return { message: `There is no MCP endpoint at this address (HTTP ${status}).`, hint: 'Check the path: it usually ends in /mcp or /sse.' }
   if (status) return { message: `The server answered with HTTP ${status}.` }

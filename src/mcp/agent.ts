@@ -129,8 +129,8 @@ export async function runAgent(o: AgentOptions) {
   let format: ResponseFormat | undefined = toolFormat(o.tools)
   let used = 0
 
+  // Cada generación vuelve a la cola del modelo, también el reintento sin gramática
   const ask = async (constrained: boolean) => {
-    o.onQueued()
     const options = {
       temperature: constrained ? 0 : o.temperature,
       maxTokens: o.maxTokens,
@@ -141,6 +141,7 @@ export async function runAgent(o: AgentOptions) {
     }
     let reply: string | undefined
     if (constrained && format) {
+      o.onQueued()
       try {
         reply = await generate(messages, { ...options, responseFormat: format })
       } catch (error) {
@@ -148,7 +149,10 @@ export async function runAgent(o: AgentOptions) {
         format = undefined
       }
     }
-    reply ??= await generate(messages, options)
+    if (reply === undefined) {
+      o.onQueued()
+      reply = await generate(messages, options)
+    }
     // Parado a mitad: lo escrito no es ni una respuesta ni una llamada completa
     if (o.signal.aborted) throw new DOMException('Stopped', 'AbortError')
     return reply

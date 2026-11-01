@@ -3,12 +3,15 @@ import type { JsonSchema, McpTool } from './types'
 // Lo que llega al nodo se escribe en los argumentos con este marcador
 export const INPUT = '{input}'
 
-// El tipo de un campo sin contar null; en anyOf/oneOf, el de la primera rama que no sea null
+// El tipo de un campo sin contar null, también dentro de anyOf/oneOf. Si admite varios (int | str), no hay uno
+// solo al que convertir: se queda como texto, que el servidor acepta
 function typeOf(schema?: JsonSchema): string | undefined {
-  if (Array.isArray(schema?.type)) return schema.type.find(t => t !== 'null')
-  if (schema?.type) return schema.type
-  const branch = (schema?.anyOf ?? schema?.oneOf)?.find(s => s.type !== 'null')
-  return branch && typeOf(branch)
+  if (!schema) return undefined
+  const options = Array.isArray(schema.type) ? schema.type
+    : schema.type ? [schema.type]
+    : (schema.anyOf ?? schema.oneOf ?? []).map(branch => (branch.type === 'null' ? 'null' : typeOf(branch)))
+  const types = new Set(options.filter(t => t !== 'null'))
+  return types.size === 1 ? [...types][0] : undefined
 }
 
 export const toolFields = (tool?: McpTool) =>

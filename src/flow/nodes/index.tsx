@@ -410,9 +410,13 @@ export const AgentNodeView = memo(({ id, data, selected }: NodeProps<AgentNode>)
   const status = useServerTools(servers)
   const nextColor = COLORS[(COLORS.indexOf(data.color) + 1) % COLORS.length]
   const chosen = (ref: ToolRef) => data.tools.some(t => t.serverId === ref.serverId && t.name === ref.name)
-  // Las herramientas elegidas que siguen existiendo: las de un servidor quitado no se ven ni se pueden desmarcar,
-  // así que no cuentan y se descartan al marcar otra
-  const available = data.tools.filter(t => servers.some(s => s.id === t.serverId && s.tools.some(x => x.name === t.name)))
+  // Las herramientas elegidas que siguen existiendo: las de un servidor quitado, o que su servidor ya no ofrece,
+  // no se ven ni se pueden desmarcar, así que no cuentan y se descartan al marcar otra. Las de un servidor que aún
+  // no ha dado su lista (recién añadido por una plantilla) se conservan
+  const available = data.tools.filter(t => {
+    const server = servers.find(s => s.id === t.serverId)
+    return !!server && (!server.tools.length || server.tools.some(x => x.name === t.name))
+  })
   const toggle = (ref: ToolRef) => updateNode(id, {
     tools: chosen(ref) ? data.tools.filter(t => !(t.serverId === ref.serverId && t.name === ref.name)) : [...available, ref].slice(-MAX_TOOLS),
   })
