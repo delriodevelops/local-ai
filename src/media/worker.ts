@@ -3,7 +3,7 @@ import { KokoroTTS } from 'kokoro-js'
 import { env as kokoroEnv } from 'kokoro-transformers'
 
 // Modelos de imagen y audio, fuera del hilo principal. Cada uno se descarga la primera vez que hace falta.
-// Hay dos copias de este worker: una para la gráfica (Janus, Whisper) y otra para el procesador (Kokoro),
+// Hay dos copias de este worker: una para Janus y Whisper y otra solo para Kokoro,
 // así una no bloquea a la otra y trabajan a la vez
 env.allowLocalModels = false
 // Con aislamiento entre orígenes, la parte que corre en WebAssembly usa varios núcleos (sin él, solo uno).
@@ -17,6 +17,7 @@ const WHISPER = 'onnx-community/whisper-base'
 const KOKORO = 'onnx-community/Kokoro-82M-v1.0-ONNX'
 
 export type MediaModel = 'janus' | 'whisper' | 'kokoro'
+export type MediaBackend = 'webgpu' | 'wasm'
 
 export type MediaTask =
   | { task: 'load'; model: MediaModel }
@@ -30,6 +31,8 @@ export type MediaMessage =
   | { id: number; type: 'status'; text: string }
   | { id: number; type: 'done'; result: string }
   | { id: number; type: 'error'; error: string }
+  // Dónde quedó cargado un modelo: sale de la carga, que puede haberla empezado cualquier trabajo
+  | { type: 'backend'; model: MediaModel; backend: MediaBackend }
 
 type Report = (text: string) => void
 
@@ -74,8 +77,32 @@ const janus = (report: Report) => once('janus', async () => {
 const whisper = (report: Report) => once('whisper', () =>
   pipeline('automatic-speech-recognition', WHISPER, { device: 'webgpu', progress_callback: downloads(report, 'Whisper') }))
 
-const kokoro = (report: Report) => once('kokoro', () =>
-  KokoroTTS.from_pretrained(KOKORO, { dtype: 'q8', device: 'wasm', progress_callback: downloads(report, 'Kokoro') }))
+const hasAdapter = async () => {
+  try {
+    return !!(await (navigator as Navigator & { gpu?: { requestAdapter(): Promise<unknown> } }).gpu?.requestAdapter())
+  } catch {
+    return false
+  }
+}
+
+const loadedOn = (model: MediaModel, backend: MediaBackend) => self.postMessage({ type: 'backend', model, backend } satisfies MediaMessage)
+
+// En la gráfica, Kokoro genera la voz varias veces más rápido que en el procesador. Allí va en fp32 (q8 y q4
+// están pensados para WebAssembly); sin gráfica, o si no carga en ella, vuelve en silencio a q8 en WebAssembly
+const kokoro = (report: Report) => once('kokoro', async () => {
+  if (await hasAdapter()) {
+    try {
+      const tts = await KokoroTTS.from_pretrained(KOKORO, { dtype: 'fp32', device: 'webgpu', progress_callback: downloads(report, 'Kokoro') })
+      loadedOn('kokoro', 'webgpu')
+      return tts
+    } catch {
+      report('Loading Kokoro on the processor…')
+    }
+  }
+  const tts = await KokoroTTS.from_pretrained(KOKORO, { dtype: 'q8', device: 'wasm', progress_callback: downloads(report, 'Kokoro') })
+  loadedOn('kokoro', 'wasm')
+  return tts
+})
 
 const toDataUrl = (blob: Blob) => new Promise<string>((resolve, reject) => {
   const reader = new FileReader()

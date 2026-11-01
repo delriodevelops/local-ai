@@ -1,20 +1,23 @@
 import { create } from 'zustand'
-import type { MediaModel } from '@/media/worker'
+import type { MediaBackend, MediaModel } from '@/media/worker'
 
 export type ModelState = 'off' | 'loading' | 'ready' | 'busy'
 
-export const MEDIA_INFO: Record<MediaModel, { name: string; device: 'GPU' | 'CPU'; sizeGB: number }> = {
+// Kokoro elige al cargar: fp32 en la gráfica o q8 en el procesador, con tamaños distintos
+export const MEDIA_INFO: Record<MediaModel, { name: string; device: 'GPU' | 'CPU' | 'GPU/CPU'; sizeGB: number | Record<MediaBackend, number> }> = {
   janus: { name: 'Janus-Pro 1B', device: 'GPU', sizeGB: 2.4 },
   whisper: { name: 'Whisper base', device: 'GPU', sizeGB: 0.3 },
-  kokoro: { name: 'Kokoro 82M', device: 'CPU', sizeGB: 0.1 },
+  kokoro: { name: 'Kokoro 82M', device: 'GPU/CPU', sizeGB: { webgpu: 0.33, wasm: 0.09 } },
 }
 
+type MediaEntry = { state: ModelState; status?: string; backend?: MediaBackend }
+
 type ResourcesState = {
-  media: Record<MediaModel, { state: ModelState; status?: string }>
+  media: Record<MediaModel, MediaEntry>
   // Velocidad de la última respuesta del modelo de texto
   tokensPerSecond: number | null
   llmBusy: boolean
-  setMedia: (model: MediaModel, patch: { state?: ModelState; status?: string }) => void
+  setMedia: (model: MediaModel, patch: Partial<MediaEntry>) => void
   set: (patch: Partial<Pick<ResourcesState, 'tokensPerSecond' | 'llmBusy'>>) => void
 }
 
