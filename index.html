@@ -9,15 +9,19 @@
     <title>MeshMind</title>
     <script>
       // Activa el aislamiento entre orígenes (hilos en WebAssembly) con un service worker.
-      // La primera visita recarga una vez para que el worker controle la página; el flag evita bucles.
+      // Las cabeceras solo cuentan desde la carga siguiente a que el worker controle la página, así que
+      // se espera a que esté activo y se recarga. Como mucho dos veces por pestaña, para no entrar en bucle
+      // si el navegador no admite el aislamiento.
       if (!self.crossOriginIsolated && window.isSecureContext && 'serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./isolation-sw.js').then(reg => {
-          const reloaded = sessionStorage.getItem('isolation-reload')
-          if (!navigator.serviceWorker.controller && !reloaded) {
-            sessionStorage.setItem('isolation-reload', '1')
-            location.reload()
-          }
-        })
+        navigator.serviceWorker.register('./isolation-sw.js')
+          .then(() => navigator.serviceWorker.ready)
+          .then(() => {
+            const reloads = Number(sessionStorage.getItem('isolation-reloads') || 0)
+            if (reloads < 2) {
+              sessionStorage.setItem('isolation-reloads', String(reloads + 1))
+              location.reload()
+            }
+          })
       }
     </script>
   </head>
