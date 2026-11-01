@@ -30,7 +30,8 @@ export type MediaTask =
 export type MediaMessage =
   | { id: number; type: 'status'; text: string }
   | { id: number; type: 'done'; result: string }
-  | { id: number; type: 'error'; error: string }
+  // webgpu: falló Kokoro en la gráfica; media.ts repite el trabajo en un worker nuevo que solo usa WebAssembly
+  | { id: number; type: 'error'; error: string; webgpu?: true }
   // Dónde quedó cargado un modelo: sale de la carga, que puede haberla empezado cualquier trabajo
   | { type: 'backend'; model: MediaModel; backend: MediaBackend }
 
@@ -87,19 +88,38 @@ const hasAdapter = async () => {
 
 const loadedOn = (model: MediaModel, backend: MediaBackend) => self.postMessage({ type: 'backend', model, backend } satisfies MediaMessage)
 
+// Kokoro falló en la gráfica. No se reintenta aquí: Transformers.js guarda la primera sesión de ONNX, aunque falle,
+// y hace esperar a todas las siguientes, así que q8 en este worker fallaría igual
+class GpuFailure extends Error {}
+const gpuFailure = (error: unknown) => new GpuFailure(error instanceof Error ? error.message : String(error))
+
+// En algunas gráficas (Intel, AMD) Kokoro fp32 en WebGPU no da error pero devuelve ruido (picos de 1e5 en vez
+// de ~0.6) o NaN. Se comprueba cada audio antes de darlo por bueno
+const corrupt = (samples: Float32Array) => samples.some(s => !Number.isFinite(s) || Math.abs(s) > 2)
+
+// El worker de la voz se llama media-voice-wasm cuando la gráfica ya falló en esta sesión (media.ts)
+const wasmOnly = self.name.endsWith('-wasm')
+let kokoroOn: MediaBackend | undefined
+
 // En la gráfica, Kokoro genera la voz varias veces más rápido que en el procesador. Allí va en fp32 (q8 y q4
-// están pensados para WebAssembly); sin gráfica, o si no carga en ella, vuelve en silencio a q8 en WebAssembly
+// están pensados para WebAssembly); sin gráfica va directo a q8 en WebAssembly
 const kokoro = (report: Report) => once('kokoro', async () => {
-  if (await hasAdapter()) {
+  if (!wasmOnly && await hasAdapter()) {
     try {
       const tts = await KokoroTTS.from_pretrained(KOKORO, { dtype: 'fp32', device: 'webgpu', progress_callback: downloads(report, 'Kokoro') })
+      // ONNX compila los shaders en la primera ejecución, y ahí es donde aparecen muchos fallos de la gráfica
+      report('Warming up Kokoro…')
+      const { audio } = await tts.generate('Hello there.', { voice: 'af_heart' })
+      if (corrupt(audio) || !audio.some(s => Math.abs(s) > 1e-3)) throw new Error('Kokoro produced invalid audio on WebGPU')
+      kokoroOn = 'webgpu'
       loadedOn('kokoro', 'webgpu')
       return tts
-    } catch {
-      report('Loading Kokoro on the processor…')
+    } catch (error) {
+      throw gpuFailure(error)
     }
   }
   const tts = await KokoroTTS.from_pretrained(KOKORO, { dtype: 'q8', device: 'wasm', progress_callback: downloads(report, 'Kokoro') })
+  kokoroOn = 'wasm'
   loadedOn('kokoro', 'wasm')
   return tts
 })
@@ -140,6 +160,7 @@ const loaders: Record<MediaModel, (report: Report) => Promise<unknown>> = { janu
 async function unload(model: MediaModel) {
   const pending = loading.get(model)
   loading.delete(model)
+  if (model === 'kokoro') kokoroOn = undefined
   const loaded = await pending?.catch(() => null) as { model?: { dispose(): Promise<unknown> }; dispose?: () => Promise<unknown> } | null
   await (loaded?.model?.dispose() ?? loaded?.dispose?.())
 }
@@ -199,7 +220,11 @@ async function run(job: MediaTask, report: Report): Promise<string> {
       let rate = 24000
       for (const [i, chunk] of chunks.entries()) {
         report(`Speaking · ${i + 1}/${chunks.length}`)
+        // En la gráfica, el ruido depende de la frase y un fallo puede llegar tarde (memoria, dispositivo perdido):
+        // cualquiera de los dos pasa el trabajo entero a WebAssembly
         const audio = await tts.generate(chunk.trim(), { voice: job.voice as never })
+          .catch(error => { throw kokoroOn === 'webgpu' ? gpuFailure(error) : error })
+        if (kokoroOn === 'webgpu' && corrupt(audio.audio)) throw new GpuFailure('Kokoro produced invalid audio on WebGPU')
         parts.push(audio.audio)
         rate = audio.sampling_rate
       }
@@ -216,6 +241,7 @@ self.onmessage = async ({ data }: MessageEvent<{ id: number; job: MediaTask }>) 
     const result = await run(data.job, report)
     self.postMessage({ id: data.id, type: 'done', result } satisfies MediaMessage)
   } catch (error) {
-    self.postMessage({ id: data.id, type: 'error', error: error instanceof Error ? error.message : String(error) } satisfies MediaMessage)
+    const message = error instanceof Error ? error.message : String(error)
+    self.postMessage({ id: data.id, type: 'error', error: message, ...(error instanceof GpuFailure && { webgpu: true as const }) } satisfies MediaMessage)
   }
 }
