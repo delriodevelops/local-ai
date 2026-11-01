@@ -25,6 +25,10 @@
     {
       "id": "RN",
       "name": "Rendimiento"
+    },
+    {
+      "id": "MC",
+      "name": "MCP"
     }
   ],
   "tasks": [
@@ -332,6 +336,55 @@
       "at": "2026-11-01T17:22:29Z",
       "by": "claude-code",
       "desc": "Como el monitor de Strata: un panel que enseña qué modelo corre en la gráfica y cuál en el procesador, velocidad en tokens/s, memoria usada y espacio en caché, con opción de borrar modelos descargados. Hecho cuando se ve en vivo durante una ejecución."
+    },
+    {
+      "id": "MC-01",
+      "title": "Conectar servidores MCP online",
+      "state": "proposed",
+      "group": "MC",
+      "at": "2026-11-01T18:07:07Z",
+      "by": "claude-code",
+      "desc": "En Ajustes se añaden servidores MCP por URL (HTTP), con token u OAuth si lo piden. La app lista sus herramientas y muestra si conecta. Todo lo que va a un servidor MCP sale del ordenador, así que se marca como 'online'. Hecho cuando se conecta un servidor público y aparecen sus herramientas."
+    },
+    {
+      "id": "MC-02",
+      "title": "Nodo Herramienta MCP",
+      "state": "proposed",
+      "group": "MC",
+      "deps": ["MC-01"],
+      "at": "2026-11-01T18:07:07Z",
+      "by": "claude-code",
+      "desc": "Un nodo que llama a una herramienta concreta de un servidor conectado. Sus argumentos se rellenan con lo que le llega (texto, lista) y devuelve texto, imagen o datos según lo que conteste el servidor. Hecho cuando un flujo Mensaje → Herramienta → Asistente → Respuesta funciona con un servidor real."
+    },
+    {
+      "id": "MC-03",
+      "title": "Nodo Agente con herramientas",
+      "state": "proposed",
+      "group": "MC",
+      "deps": ["MC-02"],
+      "at": "2026-11-01T18:07:07Z",
+      "by": "claude-code",
+      "desc": "El modelo de texto local decide qué herramienta usar y con qué argumentos (salida JSON con esquema), mira el resultado y sigue, con un límite de pasos. Cada llamada se ve en el chat. Hecho cuando el agente resuelve una pregunta que necesita una herramienta con un modelo de 1–3 B."
+    },
+    {
+      "id": "MC-04",
+      "title": "Servidores MCP locales con un puente",
+      "state": "proposed",
+      "group": "MC",
+      "deps": ["MC-01"],
+      "at": "2026-11-01T18:07:07Z",
+      "by": "claude-code",
+      "desc": "Opcional. Una web no puede arrancar programas, así que los servidores MCP locales (los que se lanzan con un comando) necesitan un pequeño puente que los exponga por HTTP. Guía y prueba con uno conocido. Hecho cuando un servidor local se usa desde la web siguiendo la guía."
+    },
+    {
+      "id": "MC-05",
+      "title": "Plantillas con MCP",
+      "state": "proposed",
+      "group": "MC",
+      "deps": ["MC-03"],
+      "at": "2026-11-01T18:07:07Z",
+      "by": "claude-code",
+      "desc": "Una o dos plantillas que enseñen el valor: por ejemplo, buscar algo con una herramienta y resumirlo, o un agente que consulta y responde con voz. Hecho cuando están en el menú y funcionan de principio a fin."
     }
   ]
 }
