@@ -6,7 +6,18 @@ import { useDevice } from '@/engine/device'
 import { useEngine } from '@/engine/engine'
 import { MEDIA_INFO, useResources, type ModelState } from '@/engine/resources'
 import { unloadModel } from '@/media/media'
-import type { MediaModel } from '@/media/worker'
+import type { MediaBackend, MediaModel } from '@/media/worker'
+
+const BACKEND_LABEL: Record<MediaBackend, string> = { webgpu: 'GPU', wasm: 'CPU' }
+
+// El tamaño del backend en uso; si el modelo puede ir en los dos y aún no ha cargado, el rango
+function sizeOf(model: MediaModel, backend?: MediaBackend) {
+  const size = MEDIA_INFO[model].sizeGB
+  if (typeof size === 'number') return `${size} GB`
+  if (backend) return `${size[backend]} GB`
+  const [min, max] = [Math.min(...Object.values(size)), Math.max(...Object.values(size))]
+  return `${min.toFixed(1)}–${max.toFixed(1)} GB`
+}
 
 const STATE_STYLE: Record<ModelState, string> = {
   off: 'bg-neutral-600',
@@ -81,9 +92,11 @@ export default function Monitor() {
               <Row
                 key={model}
                 name={MEDIA_INFO[model].name}
-                device={MEDIA_INFO[model].device}
+                device={media[model].backend ? BACKEND_LABEL[media[model].backend] : MEDIA_INFO[model].device}
                 state={media[model].state}
-                detail={media[model].status ?? (media[model].state === 'off' ? `not loaded · ${MEDIA_INFO[model].sizeGB} GB` : media[model].state)}
+                detail={media[model].status ?? (media[model].state === 'off'
+                  ? `not loaded · ${sizeOf(model)}`
+                  : typeof MEDIA_INFO[model].sizeGB === 'number' ? media[model].state : `${media[model].state} · ${sizeOf(model, media[model].backend)}`)}
                 action={media[model].state === 'ready' && (
                   <button type="button" onClick={() => unloadModel(model)} className="rounded-md px-2 py-1 font-mono text-[10px] text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800">
                     free

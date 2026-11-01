@@ -9,13 +9,23 @@ export const VOICES = [
   { id: 'bm_george', label: 'George (UK, male)' },
 ]
 
-type Lane = 'gpu' | 'cpu'
+type Lane = 'main' | 'voice'
 const workers = new Map<Lane, Worker>()
 let nextId = 0
-const pending = new Map<number, { lane: Lane; resolve: (v: string) => void; reject: (e: Error) => void; onStatus: (t: string) => void }>()
+type Pending = { lane: Lane; job: MediaTask; resolve: (v: string) => void; reject: (e: Error) => void; onStatus: (t: string) => void }
+const pending = new Map<number, Pending>()
 
-// Kokoro va en el procesador y lo demás en la gráfica: cada uno en su worker para que trabajen a la vez
-const laneOf = (model: MediaModel): Lane => (MEDIA_INFO[model].device === 'CPU' ? 'cpu' : 'gpu')
+// Si Kokoro falla en la gráfica (error o audio corrupto), el resto de la sesión va en WebAssembly.
+// Se guarda en sessionStorage para que recargar la página no repita el intento fallido
+const KOKORO_WASM = 'meshmind:kokoro-wasm'
+let kokoroWasm = (() => { try { return sessionStorage.getItem(KOKORO_WASM) === '1' } catch { return false } })()
+function preferWasm() {
+  kokoroWasm = true
+  try { sessionStorage.setItem(KOKORO_WASM, '1') } catch { /* sin almacenamiento basta con la variable */ }
+}
+
+// Kokoro tiene su propio worker y lo demás comparte otro, para que una voz larga no bloquee a Janus ni a Whisper
+const laneOf = (model: MediaModel): Lane => (model === 'kokoro' ? 'voice' : 'main')
 const modelsOf = (lane: Lane) => (Object.keys(MEDIA_INFO) as MediaModel[]).filter(m => laneOf(m) === lane)
 
 // Cerrar el worker es la única forma de devolver la RAM de WebAssembly, y de limpiar Transformers.js:
@@ -25,7 +35,7 @@ function close(lane: Lane, error = new Error('The media worker restarted after a
   workers.delete(lane)
   for (const [id, job] of pending) if (job.lane === lane) { pending.delete(id); job.reject(error) }
   const { setMedia } = useResources.getState()
-  modelsOf(lane).forEach(model => setMedia(model, { state: 'off', status: undefined }))
+  modelsOf(lane).forEach(model => setMedia(model, { state: 'off', status: undefined, backend: undefined }))
 }
 
 export function modelFor(job: MediaTask): MediaModel {
@@ -40,13 +50,23 @@ export function modelFor(job: MediaTask): MediaModel {
 function getWorker(lane: Lane) {
   const existing = workers.get(lane)
   if (existing) return existing
-  const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module', name: `media-${lane}` })
+  // El worker lee el sufijo -wasm de su nombre y no prueba WebGPU para Kokoro
+  const name = lane === 'voice' && kokoroWasm ? 'media-voice-wasm' : `media-${lane}`
+  const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module', name })
   worker.onmessage = ({ data }: MessageEvent<MediaMessage>) => {
+    if (data.type === 'backend') return useResources.getState().setMedia(data.model, { backend: data.backend })
     const job = pending.get(data.id)
     if (!job) return
     if (data.type === 'status') return job.onStatus(data.text)
     pending.delete(data.id)
     if (data.type === 'done') return job.resolve(data.result)
+    // Fallo en la gráfica: un worker nuevo, solo con WebAssembly, repite el mismo trabajo una vez
+    if (data.webgpu && !kokoroWasm) {
+      preferWasm()
+      close(lane)
+      job.onStatus('Loading Kokoro on the processor…')
+      return post(data.id, job)
+    }
     job.reject(new Error(data.error))
     close(lane)
   }
@@ -54,14 +74,14 @@ function getWorker(lane: Lane) {
   return worker
 }
 
+function post(id: number, entry: Pending) {
+  pending.set(id, entry)
+  const transfer = entry.job.task === 'transcribe' ? [entry.job.audio.buffer] : []
+  getWorker(entry.lane).postMessage({ id, job: entry.job }, transfer)
+}
+
 function send(job: MediaTask, onStatus: (text: string) => void) {
-  const model = modelFor(job)
-  const id = nextId++
-  return new Promise<string>((resolve, reject) => {
-    pending.set(id, { lane: laneOf(model), resolve, reject, onStatus })
-    const transfer = job.task === 'transcribe' ? [job.audio.buffer] : []
-    getWorker(laneOf(model)).postMessage({ id, job }, transfer)
-  })
+  return new Promise<string>((resolve, reject) => post(nextId++, { lane: laneOf(modelFor(job)), job, resolve, reject, onStatus }))
 }
 
 type MediaOptions = {
@@ -93,14 +113,14 @@ export function media(job: MediaTask, onStatus: (text: string) => void = () => {
         else setMedia(model, { state: job.task === 'load' ? 'loading' : 'busy', status: text })
         onStatus(text)
       })
-      setMedia(model, { state: job.task === 'unload' ? 'off' : 'ready', status: undefined })
+      setMedia(model, job.task === 'unload' ? { state: 'off', status: undefined, backend: undefined } : { state: 'ready', status: undefined })
       // Sin modelos cargados ni trabajos en marcha, el worker se cierra para que la memoria vuelva al sistema
       const idle = modelsOf(lane).every(m => useResources.getState().media[m].state === 'off')
       if (job.task === 'unload' && idle && ![...pending.values()].some(p => p.lane === lane)) close(lane)
       return result
     } catch (error) {
       // Si falló en el worker, close() ya lo cerró: el modelo ya no está cargado
-      setMedia(model, { state: 'off', status: undefined })
+      setMedia(model, { state: 'off', status: undefined, backend: undefined })
       throw error
     }
   })
