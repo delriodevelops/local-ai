@@ -27,7 +27,7 @@ export const useSession = create<SessionState>((set, get) => ({
   error: null,
 
   async send(input, attachments = {}) {
-    const { nodes, edges, temperature, maxTokens, falKey } = useApp.getState()
+    const { nodes, edges, temperature, maxTokens, falKey, mcpServers } = useApp.getState()
     const problem = validateFlow(nodes, edges)
     if (problem) return set({ error: problem })
     // Un flujo solo de imagen o audio no necesita el modelo de texto
@@ -51,7 +51,7 @@ export const useSession = create<SessionState>((set, get) => ({
     let status: Turn['status'] = 'done'
     try {
       const steps = await runFlow({
-        input, attachments, nodes, edges, temperature, maxTokens, falKey,
+        input, attachments, nodes, edges, temperature, maxTokens, falKey, mcpServers,
         signal: controller.signal,
         onUpdate: steps => update({ steps }),
       })

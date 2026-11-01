@@ -2,6 +2,8 @@ import { generate } from '@/engine/engine'
 import { decodeAudio, media, preload } from '@/media/media'
 import type { MediaModel, MediaTask } from '@/media/worker'
 import { generateVideo } from '@/media/video'
+import { toolArguments } from '@/mcp/args'
+import type { McpServer } from '@/mcp/types'
 import { OUTPUTS, topologicalOrder } from './graph'
 import type { Attachments, FlowEdge, FlowNode, StepResult, Value } from './types'
 
@@ -13,6 +15,7 @@ type RunOptions = {
   temperature: number
   maxTokens: number
   falKey: string
+  mcpServers: McpServer[]
   signal: AbortSignal
   onUpdate: (steps: StepResult[]) => void
 }
@@ -33,11 +36,11 @@ export function splitItems(text: string, max: number) {
 
 // Ejecuta el flujo. Cada nodo arranca en cuanto terminan los que le alimentan: las ramas que usan modelos
 // distintos (gráfica y procesador) trabajan a la vez, y las que comparten modelo hacen cola en él
-export async function runFlow({ input, attachments, nodes, edges, temperature, maxTokens, falKey, signal, onUpdate }: RunOptions) {
+export async function runFlow({ input, attachments, nodes, edges, temperature, maxTokens, falKey, mcpServers, signal, onUpdate }: RunOptions) {
   const order = topologicalOrder(nodes, edges)
   const steps: StepResult[] = order
     .filter(n => n.type !== 'input')
-    .map(n => ({ nodeId: n.id, kind: n.type, label: n.data.label, color: n.type === 'assistant' ? n.data.color : undefined, state: 'waiting' }))
+    .map(n => ({ nodeId: n.id, kind: n.type, label: n.data.label, color: n.type === 'assistant' || n.type === 'agent' ? n.data.color : undefined, state: 'waiting' }))
   // Salida de cada nodo por conector; null = esa rama no se tomó
   const results = new Map<string, Value | null>()
 
@@ -97,7 +100,7 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
     let since: number | null = null
     const start = () => { since = performance.now(); current.state = 'running'; current.status = undefined; flush() }
     const pause = () => { if (since !== null) active += performance.now() - since; since = null }
-    if (node.type === 'assistant' || MEDIA_MODEL[node.type]) {
+    if (node.type === 'assistant' || node.type === 'agent' || MEDIA_MODEL[node.type]) {
       current.status = 'Queued'
       flush()
     } else start()
@@ -193,6 +196,70 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
         case 'video': {
           if (!falKey) throw new Error('Add your fal.ai key in Settings to generate video.')
           current.value = { type: 'video', url: await generateVideo({ prompt: text(), model: node.data.model, key: falKey, signal, onStatus }) }
+          results.set(`${node.id}:out`, current.value)
+          break
+        }
+        case 'tool': {
+          const server = mcpServers.find(s => s.id === node.data.serverId)
+          if (!server) throw new Error('Pick an MCP server for this node.')
+          if (!node.data.tool) throw new Error('Pick a tool for this node.')
+          const tool = server.tools.find(t => t.name === node.data.tool)
+          const mcp = await import('@/mcp/client')
+          const call = async (value: string) => {
+            const args = toolArguments(tool, node.data.args, value)
+            const problem = mcp.checkArguments(tool?.inputSchema, args)
+            if (problem) throw new Error(problem)
+            return mcp.callTool(server, node.data.tool, args, { signal, onProgress: onStatus })
+          }
+          // Con una lista, una llamada por elemento, una detrás de otra
+          const items = live.flatMap(i => (i.value.type === 'list' ? i.value.items : []))
+          let image: string | undefined
+          if (items.length) {
+            const answers: string[] = []
+            for (const [index, item] of items.entries()) {
+              if (signal.aborted) break
+              current.progress = { index, total: items.length }
+              flush()
+              const output = await call(item)
+              answers.push(output.text)
+              image ??= output.images[0]
+            }
+            current.value = { type: 'list', items: answers }
+          } else {
+            onStatus(`Calling ${node.data.tool}…`)
+            const output = await call(text())
+            current.value = output.text || !output.images.length ? { type: 'text', text: output.text } : { type: 'image', url: output.images[0] }
+            image = output.images[0]
+          }
+          results.set(`${node.id}:out`, current.value.type === 'image' ? null : current.value)
+          results.set(`${node.id}:image`, image ? { type: 'image', url: image } : null)
+          break
+        }
+        case 'agent': {
+          const { runAgent } = await import('@/mcp/agent')
+          const tools = node.data.tools.flatMap(ref => {
+            const server = mcpServers.find(s => s.id === ref.serverId)
+            const tool = server?.tools.find(t => t.name === ref.name)
+            return server && tool ? [{ server, tool }] : []
+          })
+          if (!tools.length) throw new Error('Choose at least one tool for this agent (connect its server in MCP settings).')
+          const names = tools.map(t => t.tool.name)
+          let started = false
+          const answer = await runAgent({
+            instructions: node.data.instructions,
+            input: text(),
+            // Si dos servidores tienen una herramienta con el mismo nombre, el modelo las ve con el servidor delante
+            tools: tools.map(t => ({ ...t, name: names.filter(n => n === t.tool.name).length > 1 ? `${t.server.id}_${t.tool.name}` : t.tool.name })),
+            maxSteps: node.data.maxSteps,
+            temperature,
+            maxTokens,
+            signal,
+            onStart: () => { if (!started) start(); started = true },
+            onText: partial => { current.value = { type: 'text', text: partial }; flush() },
+            onStatus: status => { current.status = status; flush() },
+            onCalls: calls => { current.calls = calls; flush() },
+          }).finally(pause)
+          current.value = { type: 'text', text: answer }
           results.set(`${node.id}:out`, current.value)
           break
         }

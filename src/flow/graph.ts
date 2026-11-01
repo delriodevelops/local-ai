@@ -14,6 +14,8 @@ export const ACCEPTS: Record<NodeKind, PortType[]> = {
   transcribe: ['audio'],
   speak: ['text'],
   video: ['text'],
+  tool: ['text', 'list'],
+  agent: ['text'],
 }
 
 // Salidas de cada tipo de nodo y lo que llevan. 'dynamic': depende de lo que entra
@@ -29,6 +31,9 @@ export const OUTPUTS: Record<NodeKind, Record<string, PortType | 'dynamic'>> = {
   transcribe: { out: 'text' },
   speak: { out: 'audio' },
   video: { out: 'video' },
+  // Con una lista, la herramienta se llama una vez por elemento
+  tool: { out: 'dynamic', image: 'image' },
+  agent: { out: 'text' },
 }
 
 // Un color por tipo, distinguibles sobre papel y en oscuro: tinta, azul, rojo, ámbar y violeta.
@@ -106,4 +111,4 @@ export function validateFlow(nodes: FlowNode[], edges: FlowEdge[]): string | nul
 }
 
 // Nodos que necesitan el modelo de texto (WebLLM)
-export const usesLLM = (nodes: FlowNode[]) => nodes.some(n => n.type === 'assistant')
+export const usesLLM = (nodes: FlowNode[]) => nodes.some(n => n.type === 'assistant' || n.type === 'agent')

@@ -1,17 +1,20 @@
-import { memo, useContext, type ReactNode } from 'react'
+import { memo, useContext, useEffect, type ReactNode } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
-import { AudioLines, Check, Clapperboard, Eye, GitBranch, ImagePlus, LogIn, LogOut, Merge, Mic, Split, Sparkles, X, LoaderCircle } from 'lucide-react'
+import { AudioLines, Bot, Check, Clapperboard, Eye, GitBranch, ImagePlus, LogIn, LogOut, Merge, Mic, Split, Sparkles, Wrench, X, LoaderCircle } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useApp } from '../store'
 import { outputType, PORT_COLOR, portText } from '../graph'
 import { Vertical } from '../orientation'
 import { COLORS } from '../presets'
 import { useSession } from '@/chat/session'
+import { defaultArgs, firstLine, INPUT, toolFields } from '@/mcp/args'
+import { refreshServer, useMcp } from '@/mcp/store'
+import type { McpServer, ToolRef } from '@/mcp/types'
 import { VOICES } from '@/media/media'
 import MediaView from '@/chat/MediaView'
 import type {
-  AssistantNode, ConditionNode, DescribeNode, ImagineNode, InputNode, JoinNode, OutputNode, PortType,
-  SpeakNode, SplitNode, StepResult, TranscribeNode, VideoNode,
+  AgentNode, AssistantNode, ConditionNode, DescribeNode, ImagineNode, InputNode, JoinNode, OutputNode, PortType,
+  SpeakNode, SplitNode, StepResult, ToolNode, TranscribeNode, VideoNode,
 } from '../types'
 
 // Estado del nodo en la última ejecución
@@ -324,6 +327,156 @@ export const VideoNodeView = memo(({ id, data, selected }: NodeProps<VideoNode>)
   )
 })
 
+// Un servidor sin herramientas guardadas (recién añadido por una plantilla) se consulta una vez al pintarse
+function useServerTools(servers: (McpServer | undefined)[]) {
+  const status = useMcp(s => s.status)
+  useEffect(() => {
+    servers.forEach(server => { if (server && !server.tools.length && !status[server.id]) refreshServer(server) })
+  }, [servers, status])
+  return status
+}
+
+const selectClass = 'nodrag rounded-md bg-neutral-950 border border-neutral-800 px-2 py-1.5 text-xs text-neutral-200 outline-none focus:border-signal'
+
+export const ToolNodeView = memo(({ id, data, selected }: NodeProps<ToolNode>) => {
+  const updateNode = useApp(s => s.updateNode)
+  const servers = useApp(s => s.mcpServers)
+  const step = useStep(id)
+  const out = useOutType(id)
+  const server = servers.find(s => s.id === data.serverId)
+  const status = useServerTools([server])[data.serverId]
+  const tool = server?.tools.find(t => t.name === data.tool)
+  // Hasta tener el esquema, los campos son los argumentos que ya trae el nodo
+  const fields = tool
+    ? toolFields(tool).map(f => ({ ...f, hint: firstLine(f.schema.description, 60) }))
+    : Object.keys(data.args).map(name => ({ name, type: 'string', required: false, hint: '' }))
+  return (
+    <Shell id={id} kind="MCP tool" icon={<Wrench className="w-3 h-3" />} selected={selected} step={step} width="w-72" local={false} labels>
+      <Title id={id} value={data.label} />
+      {servers.length ? (
+        <div className="grid grid-cols-2 gap-2">
+          <select aria-label="Server" value={data.serverId} onChange={e => updateNode(id, { serverId: e.target.value, tool: '', args: {} })} className={selectClass}>
+            <option value="">Server…</option>
+            {servers.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+          </select>
+          <select
+            aria-label="Tool" value={data.tool} disabled={!server}
+            onChange={e => {
+              const picked = server?.tools.find(t => t.name === e.target.value)
+              updateNode(id, { tool: e.target.value, args: picked ? defaultArgs(picked) : {} })
+            }}
+            className={selectClass}
+          >
+            <option value="">Tool…</option>
+            {/* La herramienta guardada sigue en la lista aunque el servidor aún no haya contestado */}
+            {data.tool && !tool && <option value={data.tool}>{data.tool}</option>}
+            {server?.tools.map(t => <option key={t.name} value={t.name}>{t.title ?? t.name}</option>)}
+          </select>
+        </div>
+      ) : (
+        <p className="text-xs text-amber-800">Add an MCP server in Settings → MCP servers.</p>
+      )}
+      {status?.state === 'connecting' && <p className="font-mono text-[10px] text-neutral-500">Connecting to {server?.label}…</p>}
+      {status?.state === 'error' && <p className="text-[11px] text-red-700 line-clamp-2">{status.message}</p>}
+      {tool?.description && <p className="text-[11px] leading-relaxed text-neutral-400 line-clamp-2">{firstLine(tool.description, 200)}</p>}
+      {fields.map(f => (
+        <label key={f.name} className="flex flex-col gap-1 text-xs text-neutral-400">
+          <span>{f.name}{f.required && <span className="text-signal-ink"> *</span>} <span className="font-mono text-[10px] text-neutral-600">{f.type}</span></span>
+          <input
+            value={data.args[f.name] ?? ''}
+            onChange={e => updateNode(id, { args: { ...data.args, [f.name]: e.target.value } })}
+            placeholder={f.hint}
+            className={cn(selectClass, 'font-mono')}
+          />
+        </label>
+      ))}
+      {!!fields.length && <p className="font-mono text-[10px] text-neutral-500">{INPUT} = what reaches this node</p>}
+      <Preview step={step} />
+      <TypeTag type={out} />
+      <Port type="target" id="in" kind="any" />
+      <Port type="source" id="out" kind={out} top="45%" left="35%" label={out} />
+      <Port type="source" id="image" kind="image" top="70%" left="65%" label="image" />
+    </Shell>
+  )
+})
+
+// Más herramientas confunden a los modelos pequeños y no caben en su contexto
+const MAX_TOOLS = 5
+
+export const AgentNodeView = memo(({ id, data, selected }: NodeProps<AgentNode>) => {
+  const updateNode = useApp(s => s.updateNode)
+  const servers = useApp(s => s.mcpServers)
+  const step = useStep(id)
+  const status = useServerTools(servers)
+  const nextColor = COLORS[(COLORS.indexOf(data.color) + 1) % COLORS.length]
+  const chosen = (ref: ToolRef) => data.tools.some(t => t.serverId === ref.serverId && t.name === ref.name)
+  const toggle = (ref: ToolRef) => updateNode(id, {
+    tools: chosen(ref) ? data.tools.filter(t => !(t.serverId === ref.serverId && t.name === ref.name)) : [...data.tools, ref].slice(-MAX_TOOLS),
+  })
+  return (
+    <Shell id={id} kind="Agent" icon={<Bot className="w-3 h-3" />} color={data.color} selected={selected} step={step} width="w-80" local={false}>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => updateNode(id, { color: nextColor })}
+          className="nodrag w-3 h-3 rounded-full shrink-0 ring-2 ring-neutral-900 hover:scale-125 duration-200"
+          style={{ background: data.color }}
+          title="Change colour"
+        />
+        <Title id={id} value={data.label} />
+      </div>
+      <textarea
+        value={data.instructions}
+        onChange={e => updateNode(id, { instructions: e.target.value })}
+        rows={3}
+        placeholder="What should this agent do? It decides when to use its tools."
+        className="nodrag nowheel resize-none rounded-md bg-neutral-950 border border-neutral-800 focus:border-signal px-2 py-1.5 text-xs leading-relaxed text-neutral-300 outline-none"
+      />
+      <div className="flex items-center justify-between text-xs text-neutral-400">
+        <span>Tools · {data.tools.length} of {MAX_TOOLS}</span>
+        <label className="flex items-center gap-1.5">
+          up to
+          <input
+            type="number" min={1} max={4} value={data.maxSteps}
+            onChange={e => updateNode(id, { maxSteps: Math.max(1, Math.min(4, Number(e.target.value) || 1)) })}
+            className="nodrag w-11 rounded-md bg-neutral-950 border border-neutral-800 px-1.5 py-0.5 text-right font-mono text-neutral-100 outline-none"
+          />
+          calls
+        </label>
+      </div>
+      {servers.length ? (
+        <div className="nodrag nowheel max-h-40 overflow-y-auto rounded-md border border-neutral-800 bg-neutral-950 p-1.5 flex flex-col gap-1.5">
+          {servers.map(server => {
+            const state = status[server.id]
+            return (
+              <div key={server.id}>
+                <p className="label px-1">{server.label}{state?.state === 'connecting' && ' · connecting…'}</p>
+                {state?.state === 'error' && <p className="px-1 text-[11px] text-red-700">{state.message}</p>}
+                {server.tools.map(tool => {
+                  const ref = { serverId: server.id, name: tool.name }
+                  return (
+                    <label key={tool.name} className="flex items-start gap-2 rounded px-1 py-0.5 hover:bg-neutral-800 cursor-pointer" title={tool.description}>
+                      <input type="checkbox" checked={chosen(ref)} onChange={() => toggle(ref)} className="mt-0.5 accent-[var(--color-signal)]" />
+                      <span className="font-mono text-[11px] text-neutral-200 break-all">{tool.name}</span>
+                    </label>
+                  )
+                })}
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <p className="text-xs text-amber-800">Add an MCP server in Settings → MCP servers to give it tools.</p>
+      )}
+      <p className="text-[11px] text-neutral-500">Small models tend to answer from memory. Qwen2.5 3B or larger decides better when to use a tool.</p>
+      <Preview step={step} />
+      <TypeTag type="text" />
+      <Port type="target" id="in" kind="text" />
+      <Port type="source" id="out" kind="text" />
+    </Shell>
+  )
+})
+
 export const OutputNodeView = memo(({ id, data, selected }: NodeProps<OutputNode>) => {
   const step = useStep(id)
   return (
@@ -347,4 +500,6 @@ export const nodeTypes = {
   transcribe: TranscribeNodeView,
   speak: SpeakNodeView,
   video: VideoNodeView,
+  tool: ToolNodeView,
+  agent: AgentNodeView,
 }
