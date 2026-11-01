@@ -21,13 +21,17 @@
     {
       "id": "ML",
       "name": "Multimodal"
+    },
+    {
+      "id": "RN",
+      "name": "Rendimiento"
     }
   ],
   "tasks": [
     {
       "id": "CN-01",
       "title": "Confirmar que local-ai es MeshMind",
-      "state": "review",
+      "state": "done",
       "group": "CN",
       "at": "2026-10-30T16:43:07Z",
       "by": "claude-code",
@@ -126,9 +130,10 @@
     {
       "id": "DS-01",
       "title": "Rediseño visual de MeshMind",
-      "state": "proposed",
+      "state": "todo",
       "group": "DS",
       "deps": ["LN-02"],
+      "yolo": true,
       "at": "2026-11-01T15:36:22Z",
       "by": "claude-code",
       "desc": "La interfaz es funcional pero se ve como una plantilla gris de 2023. Rediseñarla para que luzca en el portfolio: paleta y tipografía propias, cabecera y barra lateral más limpias, burbujas de mensaje, selector de modelo y diagrama de la cadena con más jerarquía, y que se vea bien en móvil. Sin tocar cómo funciona por dentro.\nPara revisar: abrir https://delriodevelops.github.io/meshmind/ en escritorio y móvil y comparar con capturas del antes.",
@@ -143,7 +148,7 @@
     {
       "id": "DS-02",
       "title": "Editor de nodos en lugar de la cadena lineal",
-      "state": "proposed",
+      "state": "todo",
       "group": "DS",
       "at": "2026-11-01T15:52:45Z",
       "by": "claude-code",
@@ -164,7 +169,7 @@
     {
       "id": "ML-01",
       "title": "Imágenes y audio como tipos de conexión",
-      "state": "proposed",
+      "state": "doing",
       "group": "ML",
       "at": "2026-11-01T16:44:11Z",
       "by": "claude-code",
@@ -180,7 +185,7 @@
     {
       "id": "ML-02",
       "title": "Nodo Describir imagen (visión)",
-      "state": "proposed",
+      "state": "todo",
       "group": "ML",
       "deps": ["ML-01"],
       "at": "2026-11-01T16:44:11Z",
@@ -197,7 +202,7 @@
     {
       "id": "ML-03",
       "title": "Nodo Generar imagen",
-      "state": "proposed",
+      "state": "todo",
       "group": "ML",
       "deps": ["ML-01"],
       "at": "2026-11-01T16:44:11Z",
@@ -214,7 +219,7 @@
     {
       "id": "ML-04",
       "title": "Nodo Transcribir (voz a texto)",
-      "state": "proposed",
+      "state": "todo",
       "group": "ML",
       "deps": ["ML-01"],
       "at": "2026-11-01T16:44:11Z",
@@ -231,7 +236,7 @@
     {
       "id": "ML-05",
       "title": "Nodo Hablar (texto a voz)",
-      "state": "proposed",
+      "state": "todo",
       "group": "ML",
       "deps": ["ML-01"],
       "at": "2026-11-01T16:44:11Z",
@@ -248,9 +253,10 @@
     {
       "id": "ML-06",
       "title": "Plantillas multimodales",
-      "state": "proposed",
+      "state": "todo",
       "group": "ML",
       "deps": ["ML-02", "ML-03", "ML-04", "ML-05"],
+      "yolo": true,
       "at": "2026-11-01T16:44:11Z",
       "by": "claude-code",
       "desc": "Dos o tres plantillas que luzcan en el portfolio, p. ej. 'Foto → idea → imagen nueva' y 'Nota de voz → asistente → respuesta hablada'. Hecho cuando aparecen en el menú de plantillas y funcionan de principio a fin.",
@@ -265,9 +271,10 @@
     {
       "id": "ML-07",
       "title": "Nodo Generar vídeo con servicio externo (opcional)",
-      "state": "proposed",
+      "state": "todo",
       "group": "ML",
       "deps": ["ML-01"],
+      "yolo": true,
       "at": "2026-11-01T16:44:11Z",
       "by": "claude-code",
       "desc": "Los modelos de vídeo no caben en un navegador. Opción: un nodo que llama a un servicio (fal o Replicate) con tu propia clave, marcado claramente como 'sale de tu ordenador'. Decidir antes si merece la pena romper la idea de 'todo en local'.",
@@ -278,6 +285,53 @@
           "text": "Done but NOT tested: there is no fal.ai key. 'Create video' node marked 'online'; the key goes in Settings and stays in the browser. It uses fal's queue API (submit → status → response), checked against their documentation. Default model fal-ai/ltx-video."
         }
       ]
+    },
+    {
+      "id": "RN-01",
+      "title": "Usar todos los núcleos del procesador",
+      "state": "proposed",
+      "group": "RN",
+      "at": "2026-11-01T17:22:29Z",
+      "by": "claude-code",
+      "desc": "Ahora el procesador trabaja con 1 solo núcleo (en tu PC hay 24) porque GitHub Pages no permite las cabeceras que activan los hilos en el navegador. Se arregla con un service worker (coi-serviceworker) que las añade. Hecho cuando la web pública reporta crossOriginIsolated = true y la voz (Kokoro) genera varias veces más rápido."
+    },
+    {
+      "id": "RN-02",
+      "title": "Perfil del dispositivo y modelos que caben",
+      "state": "proposed",
+      "group": "RN",
+      "at": "2026-11-01T17:22:29Z",
+      "by": "claude-code",
+      "desc": "Como el 'qué modelo cabe en tu ordenador' de Strata: detectar la gráfica, si admite fp16, sus límites de memoria, la RAM, los núcleos y el espacio libre del navegador. El selector marca qué modelos caben, cuáles irán justos y cuáles no, y siempre se pide la gráfica dedicada en portátiles con dos. Hecho cuando el selector muestra esa valoración en tu PC."
+    },
+    {
+      "id": "RN-03",
+      "title": "Gráfica y procesador trabajando a la vez",
+      "state": "proposed",
+      "group": "RN",
+      "deps": ["RN-01"],
+      "at": "2026-11-01T17:22:29Z",
+      "by": "claude-code",
+      "desc": "La idea central de Strata: repartir el trabajo para que nada espere. Las ramas paralelas de un flujo dejan de ir por turnos: la gráfica ejecuta un modelo mientras el procesador ejecuta otro (voz, transcripción o un LLM pequeño con wllama en varios hilos). Hecho cuando la plantilla 'Illustrate & narrate' genera voz e imagen a la vez y tarda claramente menos."
+    },
+    {
+      "id": "RN-04",
+      "title": "Precarga y gestión de memoria de modelos",
+      "state": "proposed",
+      "group": "RN",
+      "at": "2026-11-01T17:22:29Z",
+      "by": "claude-code",
+      "desc": "Como Strata, que carga la siguiente capa mientras calcula la actual: al lanzar un flujo se cargan en segundo plano los modelos de los nodos siguientes. Y se descargan de memoria los que no se usan cuando la gráfica va justa. Hecho cuando el nodo de imagen empieza a pintar nada más llegarle el texto, sin esperar a cargar Janus."
+    },
+    {
+      "id": "RN-05",
+      "title": "Monitor de recursos en la interfaz",
+      "state": "proposed",
+      "group": "RN",
+      "deps": ["RN-02"],
+      "at": "2026-11-01T17:22:29Z",
+      "by": "claude-code",
+      "desc": "Como el monitor de Strata: un panel que enseña qué modelo corre en la gráfica y cuál en el procesador, velocidad en tokens/s, memoria usada y espacio en caché, con opción de borrar modelos descargados. Hecho cuando se ve en vivo durante una ejecución."
     }
   ]
 }
