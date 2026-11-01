@@ -1,7 +1,14 @@
 import * as Popover from '@radix-ui/react-popover'
 import * as Slider from '@radix-ui/react-slider'
-import { SlidersHorizontal } from 'lucide-react'
-import { useApp } from '@/flow/store'
+import { Monitor, Moon, SlidersHorizontal, Sun } from 'lucide-react'
+import { cn } from '@/lib/cn'
+import { useApp, type Theme } from '@/flow/store'
+
+const THEMES: { id: Theme; label: string; icon: typeof Sun }[] = [
+  { id: 'system', label: 'System', icon: Monitor },
+  { id: 'light', label: 'Light', icon: Sun },
+  { id: 'dark', label: 'Dark', icon: Moon },
+]
 
 function Range({ label, hint, value, min, max, step, onChange, format }: {
   label: string; hint: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void; format: (v: number) => string
@@ -24,7 +31,7 @@ function Range({ label, hint, value, min, max, step, onChange, format }: {
 }
 
 export default function Settings() {
-  const { temperature, maxTokens, falKey, set } = useApp()
+  const { temperature, maxTokens, falKey, theme, set } = useApp()
   return (
     <Popover.Root>
       <Popover.Trigger className="p-2.5 rounded-lg border border-ink bg-neutral-900 hover:bg-ink hover:text-paper text-neutral-300 duration-200" title="Settings">
@@ -51,6 +58,22 @@ export default function Settings() {
             />
             <span className="text-xs text-neutral-500">Stays in this browser. Video prompts are sent to fal.ai and billed to this key.</span>
           </label>
+          <div className="flex flex-col gap-2 border-t border-neutral-800 pt-4">
+            <span id="theme-label" className="text-sm text-neutral-100">Theme</span>
+            <div role="group" aria-labelledby="theme-label" className="grid grid-cols-3 rounded-lg border border-neutral-700 bg-neutral-950 p-0.5">
+              {THEMES.map(t => (
+                <button
+                  key={t.id} type="button" aria-pressed={theme === t.id}
+                  onClick={() => set({ theme: t.id })}
+                  className={cn('flex items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs duration-200 ease-snap', theme === t.id ? 'bg-ink text-paper' : 'text-neutral-400 hover:text-neutral-100')}
+                >
+                  <t.icon className="w-3.5 h-3.5" aria-hidden="true" />
+                  {t.label}
+                </button>
+              ))}
+            </div>
+            <span className="text-xs text-neutral-500">System follows your device's light or dark setting.</span>
+          </div>
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>

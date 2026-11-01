@@ -8,6 +8,17 @@
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
     <title>MeshMind</title>
     <script>
+      // Aplica el tema guardado antes del primer pintado, para que el modo oscuro no destelle en claro.
+      // Lee lo mismo que src/ui/theme.ts: el ajuste 'theme' del estado persistido de zustand
+      try {
+        const theme = JSON.parse(localStorage.getItem('meshmind'))?.state?.theme
+        const dark = theme === 'dark' || (theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.classList.toggle('dark', dark)
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+        if (dark) document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#0f0f0e')
+      } catch {}
+    </script>
+    <script>
       // Activa el aislamiento entre orígenes (hilos en WebAssembly) con un service worker.
       // El worker vive en la raíz de la web, así que controla también la landing y esta página.
       // Las cabeceras solo cuentan desde la carga siguiente a que el worker controle la página, así que
