@@ -8,32 +8,50 @@ export const ACCEPTS: Record<NodeKind, PortType[]> = {
   join: ['text', 'list'],
   split: ['text'],
   condition: ['text'],
-  output: ['text', 'list'],
+  output: ['text', 'list', 'image', 'audio', 'video'],
+  describe: ['image'],
+  imagine: ['text'],
+  transcribe: ['audio'],
+  speak: ['text'],
+  video: ['text'],
 }
 
-export const OUTPUTS: Record<NodeKind, string[]> = {
-  input: ['out'],
-  assistant: ['out'],
-  join: ['out'],
-  split: ['out'],
-  condition: ['yes', 'no'],
-  output: [],
+// Salidas de cada tipo de nodo y lo que llevan. 'dynamic': depende de lo que entra
+export const OUTPUTS: Record<NodeKind, Record<string, PortType | 'dynamic'>> = {
+  input: { out: 'text', image: 'image', audio: 'audio' },
+  assistant: { out: 'dynamic' },
+  join: { out: 'text' },
+  split: { out: 'list' },
+  condition: { yes: 'text', no: 'text' },
+  output: {},
+  describe: { out: 'text' },
+  imagine: { out: 'image' },
+  transcribe: { out: 'text' },
+  speak: { out: 'audio' },
+  video: { out: 'video' },
 }
 
-// Tipo de lo que sale de un nodo. Un asistente que recibe una lista responde a cada elemento y devuelve otra lista
-export function outputType(nodeId: string, nodes: FlowNode[], edges: FlowEdge[], seen = new Set<string>()): PortType {
+export const PORT_COLOR: Record<PortType, string> = {
+  text: '#c8f560',
+  list: '#60a5fa',
+  image: '#f472b6',
+  audio: '#fb923c',
+  video: '#a78bfa',
+}
+
+// Tipo de lo que sale por un conector. Un asistente que recibe una lista responde a cada elemento y devuelve otra lista
+export function outputType(nodeId: string, nodes: FlowNode[], edges: FlowEdge[], handle = 'out', seen = new Set<string>()): PortType {
   const node = nodes.find(n => n.id === nodeId)
   if (!node || seen.has(nodeId)) return 'text'
+  const type = OUTPUTS[node.type][handle] ?? 'text'
+  if (type !== 'dynamic') return type
   seen.add(nodeId)
-  switch (node.type) {
-    case 'split':
-      return 'list'
-    case 'assistant':
-      return edges.some(e => e.target === nodeId && outputType(e.source, nodes, edges, seen) === 'list') ? 'list' : 'text'
-    default:
-      return 'text'
-  }
+  const getsList = edges.some(e => e.target === nodeId && outputType(e.source, nodes, edges, e.sourceHandle ?? 'out', seen) === 'list')
+  return getsList ? 'list' : 'text'
 }
+
+export const edgeType = (edge: FlowEdge, nodes: FlowNode[], edges: FlowEdge[]) =>
+  outputType(edge.source, nodes, edges, edge.sourceHandle ?? 'out')
 
 function reaches(from: string, to: string, edges: FlowEdge[], seen = new Set<string>()): boolean {
   if (from === to) return true
@@ -49,9 +67,9 @@ export function checkConnection(connection: Connection | Edge, nodes: FlowNode[]
   const target = nodes.find(n => n.id === connection.target)
   if (!source || !target || source.id === target.id) return { ok: false, reason: 'Invalid connection' }
   if (reaches(target.id, source.id, edges)) return { ok: false, reason: 'That would create a loop' }
-  const type = outputType(source.id, nodes, edges)
+  const type = outputType(source.id, nodes, edges, connection.sourceHandle ?? 'out')
   if (!ACCEPTS[target.type].includes(type)) {
-    return { ok: false, reason: `${target.data.label} takes text, not a list` }
+    return { ok: false, reason: `${target.data.label} doesn't take ${type}` }
   }
   return { ok: true }
 }
@@ -81,3 +99,6 @@ export function validateFlow(nodes: FlowNode[], edges: FlowEdge[]): string | nul
   if (!outputsFed) return 'Connect something to the Answer node.'
   return null
 }
+
+// Nodos que necesitan el modelo de texto (WebLLM)
+export const usesLLM = (nodes: FlowNode[]) => nodes.some(n => n.type === 'assistant')

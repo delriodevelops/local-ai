@@ -1,11 +1,14 @@
 import type { Edge, Node } from '@xyflow/react'
 
-// Lo que viaja por una conexión: un texto o una lista de textos
-export type PortType = 'text' | 'list'
+// Lo que viaja por una conexión
+export type PortType = 'text' | 'list' | 'image' | 'audio' | 'video'
 
 export type Value =
   | { type: 'text'; text: string }
   | { type: 'list'; items: string[] }
+  | { type: 'image'; url: string }
+  | { type: 'audio'; url: string }
+  | { type: 'video'; url: string }
 
 export type InputData = { label: string }
 export type AssistantData = { label: string; instructions: string; color: string }
@@ -13,6 +16,11 @@ export type JoinData = { label: string; separator: string }
 export type SplitData = { label: string; max: number }
 export type ConditionData = { label: string; match: string }
 export type OutputData = { label: string }
+export type DescribeData = { label: string; prompt: string }
+export type ImagineData = { label: string; style: string }
+export type TranscribeData = { label: string }
+export type SpeakData = { label: string; voice: string }
+export type VideoData = { label: string; model: string }
 
 export type InputNode = Node<InputData, 'input'>
 export type AssistantNode = Node<AssistantData, 'assistant'>
@@ -20,8 +28,15 @@ export type JoinNode = Node<JoinData, 'join'>
 export type SplitNode = Node<SplitData, 'split'>
 export type ConditionNode = Node<ConditionData, 'condition'>
 export type OutputNode = Node<OutputData, 'output'>
+export type DescribeNode = Node<DescribeData, 'describe'>
+export type ImagineNode = Node<ImagineData, 'imagine'>
+export type TranscribeNode = Node<TranscribeData, 'transcribe'>
+export type SpeakNode = Node<SpeakData, 'speak'>
+export type VideoNode = Node<VideoData, 'video'>
 
-export type FlowNode = InputNode | AssistantNode | JoinNode | SplitNode | ConditionNode | OutputNode
+export type FlowNode =
+  | InputNode | AssistantNode | JoinNode | SplitNode | ConditionNode | OutputNode
+  | DescribeNode | ImagineNode | TranscribeNode | SpeakNode | VideoNode
 export type FlowEdge = Edge
 export type NodeKind = FlowNode['type']
 
@@ -36,14 +51,20 @@ export type StepResult = {
   value?: Value
   // Mientras un asistente recorre una lista: por qué elemento va
   progress?: { index: number; total: number }
+  // Descarga del modelo o fase de la generación
+  status?: string
   // Por qué salida siguió una condición
   branch?: 'yes' | 'no'
   error?: string
 }
 
+// Lo que el usuario adjunta al mensaje, como data URL para que se guarde en el historial
+export type Attachments = { image?: string; audio?: string }
+
 export type Turn = {
   id: string
   input: string
+  attachments?: Attachments
   steps: StepResult[]
   status: 'running' | 'done' | 'stopped' | 'error'
   startedAt: number

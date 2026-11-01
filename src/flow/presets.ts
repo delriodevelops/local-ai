@@ -89,4 +89,54 @@ export const TEMPLATES: { id: string; name: string; description: string; build: 
       edges: [edge('in', 'g'), edge('g', 'sp'), edge('sp', 'j'), edge('j', 'jn'), edge('jn', 'rk'), edge('rk', 'out')],
     }),
   },
+  {
+    id: 'story',
+    name: 'Illustrate & narrate',
+    description: 'A tiny story from your idea, with a picture and a voice reading it.',
+    build: () => ({
+      nodes: [
+        { id: 'in', type: 'input', position: { x: 0, y: 160 }, data: { label: 'Your idea' } },
+        assistant('wr', 300, 140, { label: 'Storyteller', color: '#facc15', instructions: 'Write a very short story (3 sentences) based on the idea. Vivid and visual. No title.' }),
+        assistant('pr', 680, 0, { label: 'Art director', color: '#f472b6', instructions: 'Describe the key scene of this story as one image prompt: subject, setting, light, mood. One sentence, no names.' }),
+        { id: 'img', type: 'imagine', position: { x: 1060, y: 0 }, data: { label: 'Illustration', style: 'storybook illustration, soft light, rich colour' } },
+        { id: 'tts', type: 'speak', position: { x: 680, y: 320 }, data: { label: 'Narrator', voice: 'bf_emma' } },
+        { id: 'o1', type: 'output', position: { x: 1400, y: 20 }, data: { label: 'Picture' } },
+        { id: 'o2', type: 'output', position: { x: 1060, y: 340 }, data: { label: 'Narration' } },
+        { id: 'o3', type: 'output', position: { x: 1060, y: 560 }, data: { label: 'Story' } },
+      ],
+      edges: [edge('in', 'wr'), edge('wr', 'pr'), edge('pr', 'img'), edge('img', 'o1'), edge('wr', 'tts'), edge('tts', 'o2'), edge('wr', 'o3')],
+    }),
+  },
+  {
+    id: 'remix',
+    name: 'Photo remix',
+    description: 'Attach a photo: it is described, reimagined in the style you ask for and painted again.',
+    build: () => ({
+      nodes: [
+        { id: 'in', type: 'input', position: { x: 0, y: 160 }, data: { label: 'Photo + style' } },
+        { id: 'see', type: 'describe', position: { x: 320, y: 220 }, data: { label: 'What is in it', prompt: 'Describe the main subject, setting, colours and composition of this image.' } },
+        assistant('dir', 680, 120, { label: 'Remixer', color: '#f472b6', instructions: 'You get a description of a photo and a requested style. Write one image prompt that keeps the subject and composition but applies the style. One sentence.' }),
+        { id: 'img', type: 'imagine', position: { x: 1060, y: 140 }, data: { label: 'Remix', style: '' } },
+        { id: 'o1', type: 'output', position: { x: 1400, y: 160 }, data: { label: 'New image' } },
+        { id: 'o2', type: 'output', position: { x: 680, y: 440 }, data: { label: 'Description' } },
+      ],
+      edges: [edge('in', 'see', 'image'), edge('in', 'dir'), edge('see', 'dir'), edge('dir', 'img'), edge('img', 'o1'), edge('see', 'o2')],
+    }),
+  },
+  {
+    id: 'voice',
+    name: 'Voice assistant',
+    description: 'Record a voice note: it is transcribed, answered and read back to you.',
+    build: () => ({
+      nodes: [
+        { id: 'in', type: 'input', position: { x: 0, y: 160 }, data: { label: 'Voice note' } },
+        { id: 'stt', type: 'transcribe', position: { x: 320, y: 220 }, data: { label: 'What you said' } },
+        assistant('a', 660, 160, { label: 'Assistant', color: '#c8f560', instructions: 'Answer in 2–3 short spoken-style sentences. No lists, no markdown.' }),
+        { id: 'tts', type: 'speak', position: { x: 1020, y: 120 }, data: { label: 'Reply', voice: 'af_heart' } },
+        { id: 'o1', type: 'output', position: { x: 1340, y: 140 }, data: { label: 'Spoken answer' } },
+        { id: 'o2', type: 'output', position: { x: 1020, y: 380 }, data: { label: 'Text answer' } },
+      ],
+      edges: [edge('in', 'stt', 'audio'), edge('stt', 'a'), edge('a', 'tts'), edge('tts', 'o1'), edge('a', 'o2')],
+    }),
+  },
 ]

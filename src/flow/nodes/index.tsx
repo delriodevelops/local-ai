@@ -1,14 +1,17 @@
 import { memo, type ReactNode } from 'react'
 import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react'
-import { Check, GitBranch, LogIn, LogOut, Merge, Split, Sparkles, X, LoaderCircle } from 'lucide-react'
+import { AudioLines, Check, Clapperboard, Eye, GitBranch, ImagePlus, LogIn, LogOut, Merge, Mic, Split, Sparkles, X, LoaderCircle } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useApp } from '../store'
-import { outputType } from '../graph'
+import { outputType, PORT_COLOR } from '../graph'
 import { COLORS } from '../presets'
 import { useSession } from '@/chat/session'
-import type { AssistantNode, ConditionNode, InputNode, JoinNode, OutputNode, PortType, SplitNode, StepResult } from '../types'
-
-const PORT_COLOR: Record<PortType, string> = { text: '#c8f560', list: '#60a5fa' }
+import { VOICES } from '@/media/media'
+import MediaView from '@/chat/MediaView'
+import type {
+  AssistantNode, ConditionNode, DescribeNode, ImagineNode, InputNode, JoinNode, OutputNode, PortType,
+  SpeakNode, SplitNode, StepResult, TranscribeNode, VideoNode,
+} from '../types'
 
 // Estado del nodo en la última ejecución
 function useStep(id: string): StepResult | undefined {
@@ -45,8 +48,8 @@ const STATE_RING: Record<string, string> = {
   error: 'border-red-400/70',
 }
 
-function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64' }: {
-  id: string; kind: string; icon: ReactNode; color?: string; selected?: boolean; step?: StepResult; children: ReactNode; width?: string
+function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64', local = true }: {
+  id: string; kind: string; icon: ReactNode; color?: string; selected?: boolean; step?: StepResult; children: ReactNode; width?: string; local?: boolean
 }) {
   const { deleteElements } = useReactFlow()
   return (
@@ -57,10 +60,11 @@ function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64'
       selected && 'ring-1 ring-lime-300/60',
     )}>
       <div className="flex items-center gap-2 px-3 pt-2.5 pb-2 border-b border-neutral-800">
-        <span className="w-5 h-5 rounded-md flex items-center justify-center text-neutral-950" style={{ background: color ?? '#3a3d33', color: color ? '#0b0c09' : '#cdd0c0' }}>
+        <span className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: color ?? '#3a3d33', color: color ? '#0b0c09' : '#cdd0c0' }}>
           {icon}
         </span>
         <span className="label flex-1">{kind}</span>
+        {!local && <span className="font-mono text-[9px] uppercase tracking-widest text-amber-300" title="Sends data to an online service">online</span>}
         {step?.state === 'running' && <LoaderCircle className="w-3.5 h-3.5 text-lime-300 animate-spin" />}
         {step?.state === 'done' && <Check className="w-3.5 h-3.5 text-lime-300" />}
         {step?.progress && step.state === 'running' && (
@@ -75,7 +79,11 @@ function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64'
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
-      <div className="p-3 flex flex-col gap-2">{children}</div>
+      <div className="p-3 flex flex-col gap-2">
+        {children}
+        {step?.state === 'running' && step.status && <p className="font-mono text-[10px] text-lime-300/80 truncate">{step.status}</p>}
+        {step?.state === 'error' && <p className="text-[11px] text-red-300 line-clamp-3">{step.error}</p>}
+      </div>
     </div>
   )
 }
@@ -92,9 +100,24 @@ function Title({ id, value }: { id: string; value: string }) {
   )
 }
 
+function Field({ id, label, value, field, multiline = false, mono = false }: { id: string; label: string; value: string; field: string; multiline?: boolean; mono?: boolean }) {
+  const updateNode = useApp(s => s.updateNode)
+  const className = cn('nodrag nowheel rounded-md bg-neutral-950 border border-neutral-800 focus:border-lime-300/50 px-2 py-1.5 text-xs text-neutral-200 outline-none', mono && 'font-mono')
+  return (
+    <label className="flex flex-col gap-1 text-xs text-neutral-400">
+      {label}
+      {multiline
+        ? <textarea rows={2} value={value} onChange={e => updateNode(id, { [field]: e.target.value })} className={cn(className, 'resize-none leading-relaxed')} />
+        : <input value={value} onChange={e => updateNode(id, { [field]: e.target.value })} className={className} />}
+    </label>
+  )
+}
+
 function Preview({ step }: { step?: StepResult }) {
   if (!step?.value || step.state === 'skipped') return null
-  const text = step.value.type === 'text' ? step.value.text : step.value.items.map((t, i) => `${i + 1}. ${t}`).join('\n')
+  const value = step.value
+  if (value.type === 'image' || value.type === 'audio' || value.type === 'video') return <MediaView value={value} compact />
+  const text = value.type === 'text' ? value.text : value.items.map((t, i) => `${i + 1}. ${t}`).join('\n')
   return (
     <p className="line-clamp-3 whitespace-pre-wrap rounded-md bg-neutral-950 border border-neutral-800 px-2 py-1.5 text-[11.5px] leading-relaxed text-neutral-300">
       {text || '…'}
@@ -107,11 +130,12 @@ const TypeTag = ({ type }: { type: PortType }) => (
 )
 
 export const InputNodeView = memo(({ id, data, selected }: NodeProps<InputNode>) => (
-  <Shell id={id} kind="Message" icon={<LogIn className="w-3 h-3" />} selected={selected} width="w-52">
+  <Shell id={id} kind="Message" icon={<LogIn className="w-3 h-3" />} selected={selected} width="w-56">
     <Title id={id} value={data.label} />
-    <p className="text-xs text-neutral-400">What you type in the chat starts here.</p>
-    <TypeTag type="text" />
-    <Port type="source" id="out" kind="text" />
+    <p className="text-xs text-neutral-400 pr-10">What you type, the photo you attach and your voice note start here.</p>
+    <Port type="source" id="out" kind="text" top="38%" label="text" />
+    <Port type="source" id="image" kind="image" top="58%" label="image" />
+    <Port type="source" id="audio" kind="audio" top="78%" label="audio" />
   </Shell>
 ))
 
@@ -185,25 +209,98 @@ export const SplitNodeView = memo(({ id, data, selected }: NodeProps<SplitNode>)
 })
 
 export const ConditionNodeView = memo(({ id, data, selected }: NodeProps<ConditionNode>) => {
-  const updateNode = useApp(s => s.updateNode)
   const step = useStep(id)
   return (
     <Shell id={id} kind="Condition" icon={<GitBranch className="w-3 h-3" />} selected={selected} step={step} width="w-60">
       <Title id={id} value={data.label} />
-      <label className="flex flex-col gap-1 text-xs text-neutral-400">
-        If the text contains
-        <input
-          value={data.match}
-          onChange={e => updateNode(id, { match: e.target.value })}
-          className="nodrag rounded-md bg-neutral-950 border border-neutral-800 focus:border-lime-300/50 px-2 py-1 font-mono text-neutral-100 outline-none"
-        />
-      </label>
+      <Field id={id} label="If the text contains" value={data.match} field="match" mono />
       {step?.branch && (
         <p className="font-mono text-[10px] uppercase tracking-widest text-lime-300">Went → {step.branch}</p>
       )}
       <Port type="target" id="in" kind="text" />
       <Port type="source" id="yes" kind="text" top="40%" label="yes" />
       <Port type="source" id="no" kind="text" top="75%" label="no" />
+    </Shell>
+  )
+})
+
+export const DescribeNodeView = memo(({ id, data, selected }: NodeProps<DescribeNode>) => {
+  const step = useStep(id)
+  return (
+    <Shell id={id} kind="See image" icon={<Eye className="w-3 h-3" />} color={PORT_COLOR.image} selected={selected} step={step} width="w-64">
+      <Title id={id} value={data.label} />
+      <Field id={id} label="What to look for" value={data.prompt} field="prompt" multiline />
+      <Preview step={step} />
+      <TypeTag type="text" />
+      <Port type="target" id="in" kind="image" />
+      <Port type="source" id="out" kind="text" />
+    </Shell>
+  )
+})
+
+export const ImagineNodeView = memo(({ id, data, selected }: NodeProps<ImagineNode>) => {
+  const step = useStep(id)
+  return (
+    <Shell id={id} kind="Create image" icon={<ImagePlus className="w-3 h-3" />} color={PORT_COLOR.image} selected={selected} step={step} width="w-64">
+      <Title id={id} value={data.label} />
+      <Field id={id} label="Style added to the prompt" value={data.style} field="style" />
+      <Preview step={step} />
+      <TypeTag type="image" />
+      <Port type="target" id="in" kind="text" />
+      <Port type="source" id="out" kind="image" />
+    </Shell>
+  )
+})
+
+export const TranscribeNodeView = memo(({ id, data, selected }: NodeProps<TranscribeNode>) => {
+  const step = useStep(id)
+  return (
+    <Shell id={id} kind="Transcribe" icon={<Mic className="w-3 h-3" />} color={PORT_COLOR.audio} selected={selected} step={step} width="w-60">
+      <Title id={id} value={data.label} />
+      <p className="text-xs text-neutral-400">Turns speech into text with Whisper.</p>
+      <Preview step={step} />
+      <TypeTag type="text" />
+      <Port type="target" id="in" kind="audio" />
+      <Port type="source" id="out" kind="text" />
+    </Shell>
+  )
+})
+
+export const SpeakNodeView = memo(({ id, data, selected }: NodeProps<SpeakNode>) => {
+  const updateNode = useApp(s => s.updateNode)
+  const step = useStep(id)
+  return (
+    <Shell id={id} kind="Speak" icon={<AudioLines className="w-3 h-3" />} color={PORT_COLOR.audio} selected={selected} step={step} width="w-60">
+      <Title id={id} value={data.label} />
+      <label className="flex flex-col gap-1 text-xs text-neutral-400">
+        Voice
+        <select
+          value={data.voice}
+          onChange={e => updateNode(id, { voice: e.target.value })}
+          className="nodrag rounded-md bg-neutral-950 border border-neutral-800 px-2 py-1.5 text-xs text-neutral-200 outline-none"
+        >
+          {VOICES.map(v => <option key={v.id} value={v.id}>{v.label}</option>)}
+        </select>
+      </label>
+      <Preview step={step} />
+      <TypeTag type="audio" />
+      <Port type="target" id="in" kind="text" />
+      <Port type="source" id="out" kind="audio" />
+    </Shell>
+  )
+})
+
+export const VideoNodeView = memo(({ id, data, selected }: NodeProps<VideoNode>) => {
+  const step = useStep(id)
+  return (
+    <Shell id={id} kind="Create video" icon={<Clapperboard className="w-3 h-3" />} color={PORT_COLOR.video} selected={selected} step={step} width="w-64" local={false}>
+      <Title id={id} value={data.label} />
+      <Field id={id} label="fal.ai model" value={data.model} field="model" mono />
+      <p className="text-[11px] text-amber-200/80">Video models don't fit in a browser: this one runs on fal.ai with your key.</p>
+      <Preview step={step} />
+      <TypeTag type="video" />
+      <Port type="target" id="in" kind="text" />
+      <Port type="source" id="out" kind="video" />
     </Shell>
   )
 })
@@ -226,4 +323,9 @@ export const nodeTypes = {
   split: SplitNodeView,
   condition: ConditionNodeView,
   output: OutputNodeView,
+  describe: DescribeNodeView,
+  imagine: ImagineNodeView,
+  transcribe: TranscribeNodeView,
+  speak: SpeakNodeView,
+  video: VideoNodeView,
 }

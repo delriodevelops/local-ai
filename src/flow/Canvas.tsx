@@ -4,10 +4,10 @@ import {
   type Connection, type Edge,
 } from '@xyflow/react'
 import * as Popover from '@radix-ui/react-popover'
-import { GitBranch, LayoutTemplate, LogIn, LogOut, Merge, Plus, Sparkles, Split } from 'lucide-react'
+import { AudioLines, Clapperboard, Eye, GitBranch, ImagePlus, LayoutTemplate, LogIn, LogOut, Merge, Mic, Plus, Sparkles, Split } from 'lucide-react'
 import '@xyflow/react/dist/style.css'
 import { useApp } from './store'
-import { checkConnection, outputType } from './graph'
+import { checkConnection, edgeType, PORT_COLOR } from './graph'
 import { nodeTypes } from './nodes'
 import { ASSISTANTS, TEMPLATES, newId } from './presets'
 import { useSession } from '@/chat/session'
@@ -67,7 +67,7 @@ function Flow() {
 
   // Las conexiones toman el color de lo que transportan y se animan mientras pasa la señal
   const styledEdges = useMemo<Edge[]>(() => edges.map(edge => {
-    const type = outputType(edge.source, nodes, edges)
+    const type = edgeType(edge, nodes, edges)
     const source = steps?.find(s => s.nodeId === edge.source)
     const target = steps?.find(s => s.nodeId === edge.target)
     const active = running && target?.state === 'running' && (source?.state === 'done' || !source)
@@ -75,7 +75,7 @@ function Flow() {
     return {
       ...edge,
       animated: active,
-      style: { stroke: type === 'list' ? '#60a5fa' : '#c8f560', strokeWidth: active ? 2.5 : 1.5, opacity: dead ? 0.15 : active ? 1 : 0.55 },
+      style: { stroke: PORT_COLOR[type], strokeWidth: active ? 2.5 : 1.5, opacity: dead ? 0.15 : active ? 1 : 0.55 },
     }
   }), [edges, nodes, steps, running])
 
@@ -124,6 +124,13 @@ function Flow() {
             <MenuItem icon={<Split className="w-4 h-4" />} title="Split" text="Text → list, one item per line." onSelect={() => add({ type: 'split', data: { label: 'Split', max: 6 } })} />
             <MenuItem icon={<Merge className="w-4 h-4" />} title="Join" text="Many inputs or a list → one text." onSelect={() => add({ type: 'join', data: { label: 'Join', separator: '\n\n' } })} />
             <MenuItem icon={<GitBranch className="w-4 h-4" />} title="Condition" text="Route by whether the text contains a word." onSelect={() => add({ type: 'condition', data: { label: 'Condition', match: 'yes' } })} />
+            <p className="label px-2.5 pt-3 pb-1">Image &amp; sound · local</p>
+            <MenuItem icon={<Eye className="w-4 h-4" />} title="See image" text="Image → text: describes or reads a picture." onSelect={() => add({ type: 'describe', data: { label: 'See image', prompt: 'Describe this image in detail.' } })} />
+            <MenuItem icon={<ImagePlus className="w-4 h-4" />} title="Create image" text="Text → image, generated on your GPU." onSelect={() => add({ type: 'imagine', data: { label: 'Create image', style: '' } })} />
+            <MenuItem icon={<Mic className="w-4 h-4" />} title="Transcribe" text="Audio → text with Whisper." onSelect={() => add({ type: 'transcribe', data: { label: 'Transcribe' } })} />
+            <MenuItem icon={<AudioLines className="w-4 h-4" />} title="Speak" text="Text → natural voice." onSelect={() => add({ type: 'speak', data: { label: 'Speak', voice: 'af_heart' } })} />
+            <p className="label px-2.5 pt-3 pb-1">Online · your key</p>
+            <MenuItem icon={<Clapperboard className="w-4 h-4" />} title="Create video" text="Text → video on fal.ai. Needs a fal key in Settings." onSelect={() => add({ type: 'video', data: { label: 'Create video', model: 'fal-ai/ltx-video' } })} />
             <p className="label px-2.5 pt-3 pb-1">Ends</p>
             <MenuItem icon={<LogIn className="w-4 h-4" />} title="Message" text="Where your chat message enters." onSelect={() => add({ type: 'input', data: { label: 'Your message' } })} />
             <MenuItem icon={<LogOut className="w-4 h-4" />} title="Answer" text="What reaches it is shown in the chat." onSelect={() => add({ type: 'output', data: { label: 'Answer' } })} />
@@ -140,8 +147,9 @@ function Flow() {
           </Menu>
         </Panel>
         <Panel position="bottom-right" className="hidden 2xl:flex gap-4 !mb-3 !mr-[220px] font-mono text-[10px] uppercase tracking-widest text-neutral-500">
-          <span><i className="inline-block w-2 h-2 rounded-full bg-[#c8f560] mr-1.5" />text</span>
-          <span><i className="inline-block w-2 h-2 rounded-full bg-[#60a5fa] mr-1.5" />list</span>
+          {Object.entries(PORT_COLOR).map(([type, color]) => (
+            <span key={type}><i className="inline-block w-2 h-2 rounded-full mr-1.5" style={{ background: color }} />{type}</span>
+          ))}
           <span>drag from a dot to connect · backspace deletes</span>
         </Panel>
       </ReactFlow>

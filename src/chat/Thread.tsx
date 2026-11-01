@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { Check, ChevronDown, Copy, GitBranch, LoaderCircle, Merge, Split } from 'lucide-react'
+import { AudioLines, Check, ChevronDown, Clapperboard, Copy, Eye, GitBranch, ImagePlus, LoaderCircle, Merge, Mic, Split } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { Markdown } from './Markdown'
 import { useSession } from './session'
 import Welcome from './Welcome'
+import MediaView from './MediaView'
 import type { StepResult, Turn, Value } from '@/flow/types'
 
-const asText = (value?: Value) => !value ? '' : value.type === 'text' ? value.text : value.items.map((t, i) => `**${i + 1}.** ${t}`).join('\n\n')
+const asText = (value?: Value) =>
+  !value ? '' : value.type === 'text' ? value.text : value.type === 'list' ? value.items.map((t, i) => `**${i + 1}.** ${t}`).join('\n\n') : ''
+const isMedia = (value?: Value) => !!value && ['image', 'audio', 'video'].includes(value.type)
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false)
@@ -22,7 +25,7 @@ function CopyButton({ text }: { text: string }) {
   )
 }
 
-const KIND_ICON = { join: Merge, split: Split, condition: GitBranch } as const
+const KIND_ICON = { join: Merge, split: Split, condition: GitBranch, describe: Eye, imagine: ImagePlus, transcribe: Mic, speak: AudioLines, video: Clapperboard } as const
 
 function StepRow({ step, index, last }: { step: StepResult; index: number; last: boolean }) {
   const [open, setOpen] = useState(false)
@@ -38,15 +41,17 @@ function StepRow({ step, index, last }: { step: StepResult; index: number; last:
       >
         {Icon ? <Icon className="w-3 h-3" /> : String(index + 1).padStart(2, '0')}
       </span>
-      <button type="button" onClick={() => setOpen(o => !o)} className="w-full flex items-center gap-2 text-left pb-2" disabled={!text}>
+      <button type="button" onClick={() => setOpen(o => !o)} className="w-full flex items-center gap-2 text-left pb-2" disabled={!text && !isMedia(step.value)}>
         <span className="label text-neutral-300">{step.label}</span>
         {step.state === 'running' && <LoaderCircle className="w-3.5 h-3.5 text-lime-300 animate-spin" />}
         {step.progress && step.state === 'running' && <span className="font-mono text-[10px] text-neutral-500">{step.progress.index + 1}/{step.progress.total}</span>}
         {step.branch && <span className="font-mono text-[10px] text-lime-300">→ {step.branch}</span>}
         {step.state === 'skipped' && <span className="font-mono text-[10px] text-neutral-500">skipped</span>}
+        {step.state === 'running' && step.status && <span className="font-mono text-[10px] text-lime-300/80 truncate">{step.status}</span>}
         {step.error && <span className="text-xs text-red-400 truncate">{step.error}</span>}
         {text && <ChevronDown className={cn('w-3.5 h-3.5 ml-auto text-neutral-500 duration-200', open && 'rotate-180')} />}
       </button>
+      {isMedia(step.value) && <div className="pb-4"><MediaView value={step.value!} compact={!open} /></div>}
       {text && (
         <div className={cn('pb-4 text-sm', !open && step.state !== 'running' && 'line-clamp-2 text-neutral-400')}>
           {open || step.state === 'running' ? <Markdown text={text} /> : text.replace(/[#*_`>]/g, '')}
@@ -67,6 +72,8 @@ function TurnView({ turn }: { turn: Turn }) {
     <div className="flex flex-col gap-5 animate-rise">
       <div className="flex justify-end">
         <div className="max-w-[85%] bg-neutral-800 border border-neutral-700 rounded-2xl rounded-tr-md px-4 py-3 whitespace-pre-wrap break-words text-[15px] text-neutral-50">
+          {turn.attachments?.image && <img src={turn.attachments.image} alt="" className="mb-2 max-h-48 rounded-lg" />}
+          {turn.attachments?.audio && <audio controls src={turn.attachments.audio} className="mb-2 w-64 max-w-full" />}
           {turn.input}
         </div>
       </div>
@@ -89,9 +96,9 @@ function TurnView({ turn }: { turn: Turn }) {
         <div key={answer.nodeId} className="border-l-2 border-signal pl-5">
           <div className="flex items-center gap-2 mb-2">
             <span className="label text-lime-300">{answer.label}</span>
-            <CopyButton text={asText(answer.value)} />
+            {!isMedia(answer.value) && <CopyButton text={asText(answer.value)} />}
           </div>
-          <Markdown text={asText(answer.value)} />
+          {isMedia(answer.value) ? <MediaView value={answer.value!} /> : <Markdown text={asText(answer.value)} />}
         </div>
       ))}
 

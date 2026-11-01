@@ -24,7 +24,7 @@ function Range({ label, hint, value, min, max, step, onChange, format }: {
 }
 
 export default function Settings() {
-  const { temperature, maxTokens, set } = useApp()
+  const { temperature, maxTokens, falKey, set } = useApp()
   return (
     <Popover.Root>
       <Popover.Trigger className="p-2.5 rounded-lg border border-neutral-700 bg-neutral-900 hover:border-neutral-500 text-neutral-300 duration-200" title="Settings">
@@ -42,6 +42,15 @@ export default function Settings() {
             value={maxTokens} min={128} max={2048} step={64} format={v => `${v} tokens`}
             onChange={v => set({ maxTokens: v })}
           />
+          <label className="flex flex-col gap-2 border-t border-neutral-800 pt-4">
+            <span className="text-sm text-neutral-100">fal.ai key <span className="text-neutral-500">· only for video</span></span>
+            <input
+              type="password" value={falKey} onChange={e => set({ falKey: e.target.value.trim() })}
+              placeholder="Not set" autoComplete="off"
+              className="rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 font-mono text-xs outline-none focus:border-lime-300/50"
+            />
+            <span className="text-xs text-neutral-500">Stays in this browser. Video prompts are sent to fal.ai and billed to this key.</span>
+          </label>
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>

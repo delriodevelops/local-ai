@@ -12,6 +12,8 @@ type AppState = {
   temperature: number
   maxTokens: number
   modelId: string | null
+  // Clave de fal.ai para el nodo de vídeo; solo se guarda en este navegador
+  falKey: string
   view: View
   // Sube cada vez que se carga una plantilla, para reencuadrar el lienzo
   templateKey: number
@@ -21,7 +23,7 @@ type AppState = {
   addNode: (node: FlowNode) => void
   updateNode: (id: string, data: Partial<FlowNode['data']>) => void
   loadTemplate: (id: string) => void
-  set: (patch: Partial<Pick<AppState, 'temperature' | 'maxTokens' | 'modelId' | 'view'>>) => void
+  set: (patch: Partial<Pick<AppState, 'temperature' | 'maxTokens' | 'modelId' | 'view' | 'falKey'>>) => void
 }
 
 const initial = TEMPLATES[1].build()
@@ -35,6 +37,7 @@ export const useApp = create<AppState>()(
       temperature: 0.7,
       maxTokens: 512,
       modelId: null,
+      falKey: '',
       view: 'split',
       templateKey: 0,
       onNodesChange: changes => set(s => ({ nodes: applyNodeChanges(changes, s.nodes) })),
@@ -53,8 +56,8 @@ export const useApp = create<AppState>()(
     {
       name: 'meshmind',
       version: 1,
-      partialize: ({ nodes, edges, temperature, maxTokens, modelId, view }) =>
-        ({ nodes: nodes.map(({ selected: _, ...n }) => n) as FlowNode[], edges, temperature, maxTokens, modelId, view }),
+      partialize: ({ nodes, edges, temperature, maxTokens, modelId, falKey, view }) =>
+        ({ nodes: nodes.map(({ selected: _, ...n }) => n) as FlowNode[], edges, temperature, maxTokens, modelId, falKey, view }),
     },
   ),
 )
