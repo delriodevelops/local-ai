@@ -1,0 +1,20 @@
+{
+  "name": "meshmind-motion",
+  "private": true,
+  "description": "MeshMind motion graphics, made with Remotion. Separate from the app: it has its own dependencies.",
+  "scripts": {
+    "studio": "remotion studio",
+    "stems": "node tools/py.mjs tools/stems.py",
+    "render": "remotion render MeshMind out/meshmind.mp4 --codec=h264 --crf=16 && remotion render MeshMind out/meshmind.wav --codec=wav && node tools/py.mjs tools/master.py out/meshmind.mp4 out/meshmind.wav out/MeshMind-motion.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.533",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "remotion": "4.0.533"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "typescript": "~5.9.0"
+  }
+}
