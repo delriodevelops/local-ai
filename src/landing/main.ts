@@ -7,6 +7,8 @@ import 'lenis/dist/lenis.css'
 import '@fontsource-variable/archivo/wdth.css'
 import './landing.css'
 import { startFilm } from './film'
+import { getFlow } from './flow'
+import { startScenes } from './scenes'
 
 const root = document.documentElement
 const KEY = 'mm-motion'
@@ -46,11 +48,18 @@ function smooth(on: boolean) {
   }
 }
 
-// La película necesita el contenedor alto y el escenario fijo (clase film) antes de medir
+// La película necesita el contenedor alto y el escenario fijo (clase film) antes de medir.
+// El hero y las escenas de después van juntos: con el movimiento apagado, toda la página queda quieta
 function film(on: boolean) {
   root.classList.toggle('film', on)
-  if (on && !stopFilm) stopFilm = startFilm()
-  else if (!on && stopFilm) {
+  if (on && !stopFilm) {
+    const stopHero = startFilm()
+    const stopScenes = startScenes()
+    stopFilm = () => {
+      stopScenes()
+      stopHero()
+    }
+  } else if (!on && stopFilm) {
     stopFilm()
     stopFilm = null
   }
@@ -87,6 +96,8 @@ document.querySelector('.disc-play')?.addEventListener('click', () => {
   lenis?.scrollTo(0, { immediate: true })
 })
 systemReduced.addEventListener('change', apply)
+// Los cables del flujo de 01 se dibujan siempre; la película solo los anima
+getFlow()
 apply()
 
 // La app incrustada (05) solo se descarga en pantallas anchas con ratón: en móviles (también apaisados) y tabletas

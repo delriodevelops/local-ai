@@ -13,7 +13,6 @@ a{color:#111111}a:hover{color:#ff3a1f}
 @keyframes drift{0%,100%{translate:0 0}50%{translate:-3vw 2vw}}
 @keyframes widths{0%,100%{font-variation-settings:"wdth" 70}50%{font-variation-settings:"wdth" 125}}
 @keyframes cue{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
-@keyframes pulse{0%,14%,100%{background:#f2f2ef;color:#111111}4%,9%{background:#ff3a1f;color:#111111}}
 @keyframes ticker{to{transform:translateX(-50%)}}
 @keyframes fade{from{opacity:0}}
 @keyframes note-in{from{opacity:0;translate:0 16px}}
@@ -87,9 +86,6 @@ a{color:#111111}a:hover{color:#ff3a1f}
 @keyframes mask{from{clip-path:inset(0 0 100% 0);translate:0 40px}to{clip-path:inset(0 0 0 0);translate:0 0}}
 @keyframes up{from{opacity:0;translate:0 48px}}
 @keyframes ghost{from{translate:0 18%}to{translate:0 -18%}}
-@keyframes cam{from{transform:perspective(1400px) rotateX(32deg) scale(.82);opacity:.15}to{transform:perspective(1400px) rotateX(0) scale(1);opacity:1}}
-@keyframes wire-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
-@keyframes pop{from{opacity:0;scale:.82}}
 @keyframes row-in{from{opacity:0;translate:-56px 0}}
 @keyframes band{0%,100%{background-color:transparent}35%,65%{background-color:#ff3a1f}}
 @keyframes verb{0%,100%{font-variation-settings:"wdth" 75;translate:0 0}35%,65%{font-variation-settings:"wdth" 125;translate:14px 0}}
@@ -113,9 +109,6 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .mask{animation:mask linear both;animation-timeline:view();animation-range:entry 10% entry 90%}
 .ghost{position:absolute;z-index:-1;right:-3vw;top:-6vw;font-weight:800;font-size:38vw;line-height:.8;letter-spacing:-0.06em;color:transparent;-webkit-text-stroke:1.5px rgba(17,17,17,.12);font-stretch:62%;pointer-events:none;user-select:none;animation:ghost linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
 .ghost.on-dark{-webkit-text-stroke-color:rgba(242,242,239,.14)}
-.cam{transform-origin:50% 100%;animation:cam linear both;animation-timeline:view();animation-range:entry 0% cover 40%}
-.wire{stroke-dasharray:1;stroke-dashoffset:0;animation:wire-draw linear both;animation-timeline:view();animation-range:entry 30% cover 50%}
-.node{animation:pulse 3.6s linear infinite,pop linear both;animation-timeline:auto,view();animation-range:normal,entry 10% entry 70%;transition:translate .45s cubic-bezier(.16,1,.3,1)}
 .row{animation:row-in linear both,band linear both;animation-timeline:view(),view();animation-range:entry 0% entry 75%,cover 35% cover 65%;transition:background-color .45s cubic-bezier(.16,1,.3,1)}
 .row .verb{display:inline-block;font-variation-settings:"wdth" 75;animation:verb linear both;animation-timeline:view();animation-range:cover 35% cover 65%}
 .curtain{animation:curtain linear both;animation-timeline:view();animation-range:entry 0% entry 90%}
@@ -131,6 +124,62 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .cta-disc{animation:disc-par linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
 .ch{display:inline-block;animation:ch-in linear both;animation-timeline:view();animation-range:entry calc(5% + var(--k) * 3%) entry calc(55% + var(--k) * 3%)}
 .wm .ch{animation-range:entry calc(var(--k) * 4%) entry calc(60% + var(--k) * 4%)}
+
+/* ---------- El resto de la página también es película (landing/scenes): cada sección es una escena que el scroll
+   avanza y rebobina. Sin la clase film (movimiento reducido o sin JavaScript) todo queda en su estado final ---------- */
+.film .num,.film .mask,.film .reveal,.film .ghost{animation:none}
+
+/* Manifiesto: la frase se enciende palabra a palabra */
+.manifesto{position:relative;z-index:1}
+.manifesto-stage{max-width:1440px;margin:0 auto;padding:140px 40px 0;box-sizing:border-box;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;row-gap:48px;align-content:center}
+.manifesto-lead{grid-column:1 / span 10;margin:0;font-weight:700;font-size:clamp(40px,6.2vw,108px);line-height:.98;letter-spacing:-0.035em}
+.manifesto-lead .key{color:#ff3a1f}
+.manifesto-body{grid-column:8 / span 5;margin:0;font-size:18px;line-height:1.6;color:#444444}
+.meta-grid{max-width:1440px;margin:72px auto 0;padding:0 40px;box-sizing:border-box;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
+.film .manifesto-stage{min-height:100vh;padding-top:40px}
+
+/* 01: el flujo corre con el scroll. Los cables los dibuja landing/flow.ts a partir de dónde quedan los nodos */
+.flow{position:relative;margin-top:80px;display:flex;align-items:center;justify-content:center}
+.flow-cam{position:relative;width:100%;aspect-ratio:2.4;transform-origin:0 0}
+.flow-wires{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.flow-wire{fill:none;stroke:#111111;stroke-width:2}
+.flow-dot{fill:#ff3a1f}
+.flow-node{position:absolute;left:var(--x);top:var(--y);width:15%;height:20%;box-sizing:border-box;border:2px solid #111111;background:#f2f2ef;padding:12px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transition:background-color .35s cubic-bezier(.16,1,.3,1),color .35s}
+.flow-node:hover{background:#ff3a1f}
+.flow-kind{font-size:11px;text-transform:uppercase;letter-spacing:.12em}
+.flow-name{font-weight:700;font-size:clamp(15px,1.55vw,22px);line-height:1.05}
+.flow-text{font-weight:700;font-size:clamp(13px,1.25vw,18px);line-height:1.1}
+.flow-node.is-answer{background:#111111;color:#f2f2ef;border-color:#111111}
+.flow-node.is-answer:hover{background:#ff3a1f;color:#111111}
+.flow-bar{position:absolute;left:0;right:0;bottom:0;height:5px;background:#ff3a1f;transform:scaleX(0);transform-origin:left}
+[data-node=message]{--x:1.5%;--y:40%}
+[data-node=researcher]{--x:28.5%;--y:8%}
+[data-node=designer]{--x:28.5%;--y:40%}
+[data-node=critic]{--x:28.5%;--y:72%}
+[data-node=summarizer]{--x:56.5%;--y:40%}
+[data-node=answer]{--x:83.5%;--y:40%}
+.film .flow{height:100vh;margin-top:0;padding:32px 0;box-sizing:border-box}
+.film .flow-cam{width:min(100%,calc((100vh - 64px) * 2.4))}
+
+/* Final: el rojo vuelve en doce columnas, como se fue en el hero, y la frase se monta letra a letra */
+.finale .cta-disc{z-index:1}
+.finale > div:last-child{z-index:2}
+.finale-shutter{display:none}
+.film .finale{background:transparent !important;animation:none}
+.film .finale-shutter{position:absolute;inset:0;z-index:0;display:flex}
+.finale-shutter span{flex:1 0 0;margin-right:-1px;background:#ff3a1f}
+.film .finale .cta-word,.film .finale .ch,.film .finale .cta-disc,.film .wm .ch{animation:none}
+.film .finale .cta-word{overflow:visible}
+/* Las letras van sueltas para poder moverlas, pero cada palabra se parte entera, nunca por dentro */
+.cw{display:inline-block;white-space:nowrap}
+
+/* El contador de fotogramas sigue en toda la página, donde lo deja el del hero */
+.film-hud{display:none}
+.film .film-hud{position:fixed;z-index:40;right:max(40px,calc(50vw - 680px));bottom:36px;display:flex;gap:20px;align-items:baseline;font-size:12px;line-height:1;letter-spacing:.12em;text-transform:uppercase;color:#111111;pointer-events:none;opacity:0;transition:opacity .4s cubic-bezier(.16,1,.3,1),color .4s}
+.film .film-hud.is-on{opacity:1}
+.film .film-hud.is-hidden{opacity:0}
+.film-hud.on-dark{color:#f2f2ef}
+.film-hud b{font-weight:800;font-size:28px;letter-spacing:-0.02em;font-variation-settings:"wdth" 70;font-variant-numeric:tabular-nums}
 
 /* ---------- 05: la app real en un marco que se endereza al entrar ---------- */
 .demo{transform-origin:50% 100%;border:1.5px solid #111111;background:#f2f2ef;animation:demo-in linear both;animation-timeline:view();animation-range:entry 0% cover 45%}
@@ -172,7 +221,6 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .ticker-band:hover .ticker{animation-play-state:paused}
 .ticker span{transition:color .25s}
 .ticker span:hover{color:#ff3a1f}
-.node:hover{background:#ff3a1f !important;translate:0 -8px}
 .row:hover{background:#ff3a1f !important}
 .row:hover .verb{font-variation-settings:"wdth" 125 !important}
 .row .meta{transition:translate .5s cubic-bezier(.16,1,.3,1)}
@@ -197,6 +245,20 @@ a{color:#111111}a:hover{color:#ff3a1f}
   .cue-wrap,.hud{grid-column:auto}
   .motion-note{right:40px}
   .film .hero-pin{height:320vh}
+  .manifesto-lead,.manifesto-body{grid-column:1 / -1}
+  .flow-cam{aspect-ratio:.62;max-width:420px}
+  .film .flow-cam{width:min(100%,calc((100vh - 64px) * .62))}
+  .flow-node{width:30%;height:12%;padding:8px}
+  .flow-kind{font-size:9px}
+  .flow-name{font-size:13px}
+  .flow-text{font-size:12px}
+  [data-node=message]{--x:35%;--y:2%}
+  [data-node=researcher]{--x:2%;--y:30%}
+  [data-node=designer]{--x:35%;--y:30%}
+  [data-node=critic]{--x:68%;--y:30%}
+  [data-node=summarizer]{--x:35%;--y:58%}
+  [data-node=answer]{--x:35%;--y:86%}
+  .film .film-hud{bottom:24px}
 }
 /* En móviles (también apaisados) y tabletas táctiles la app no se carga: landing/main.ts usa esta misma consulta */
 @media (max-width:760px),(pointer:coarse){
@@ -212,10 +274,10 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .reduce-motion .row .verb,.reduce-motion .demo-bar .live{animation:none}
 .reduce-motion .gridline::before,.reduce-motion .ltr-in,.reduce-motion .hero-foot > *,.reduce-motion .motion-note,
 .reduce-motion .mask,.reduce-motion .reveal,.reduce-motion .tpl,.reduce-motion .num,
-.reduce-motion .curtain,.reduce-motion .iris,.reduce-motion .cam,.reduce-motion .demo,.reduce-motion .demo-bar{animation-name:fade}
+.reduce-motion .curtain,.reduce-motion .iris,.reduce-motion .demo,.reduce-motion .demo-bar{animation-name:fade}
 .reduce-motion .ltr-in{transition:none}
 .reduce-motion .ltr-in:hover{font-variation-settings:inherit}
 .reduce-motion .row{animation-name:fade,none}
-.reduce-motion .node{animation-name:pulse,fade}
+
 .reduce-motion .skew{transform:none}
 .reduce-motion .btn:hover,.reduce-motion .node:hover,.reduce-motion .meta-cell:hover{transform:none;translate:none}

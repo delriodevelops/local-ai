@@ -80,12 +80,12 @@
     </section>
   </div>
 
-  <section style="position: relative; z-index: 1; max-width: 1440px; margin: 0 auto; padding: 120px 40px 0">
-    <div style="display: flex; flex-wrap: wrap; gap: 32px 24px; align-items: end">
-      <p class="reveal" style="flex: 1 1 380px; margin: 0; font-size: clamp(24px, 2.4vw, 34px); line-height: 1.15; font-weight: 600; letter-spacing: -0.015em">( 01 ) Wire AI models into flows that think, see, listen and speak.</p>
-      <p class="reveal" style="flex: 1 1 320px; margin: 0; font-size: 17px; line-height: 1.6; color: #444444">Every model runs on your own graphics card and processor, inside a browser tab. No server, no account, no API key. The models download once and stay with you.</p>
+  <section class="manifesto" data-scene="Manifesto">
+    <div class="manifesto-stage">
+      <p class="manifesto-lead"><span class="mw">Wire</span> <span class="mw">AI</span> <span class="mw">models</span> <span class="mw">into</span> <span class="mw">flows</span> <span class="mw">that</span> <span class="mw key">think,</span> <span class="mw key">see,</span> <span class="mw key">listen</span> <span class="mw">and</span> <span class="mw key">speak.</span></p>
+      <p class="manifesto-body">Every model runs on your own graphics card and processor, inside a browser tab. No server, no account, no API key. The models download once and stay with you.</p>
     </div>
-    <div style="margin-top: 72px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px">
+    <div class="meta-grid">
       <div class="reveal">
         <div class="meta-cell" style="border-top: 2px solid #111111; padding-top: 14px">
           <div style="font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: #555555">Text</div>
@@ -124,9 +124,9 @@
     </div>
   </div>
 
-  <section id="canvas" style="position: relative; isolation: isolate; max-width: 1440px; margin: 0 auto; padding: 160px 40px 120px">
+  <section id="canvas" data-scene="01 The canvas" style="position: relative; isolation: isolate; max-width: 1440px; margin: 0 auto; padding: 160px 40px 120px">
     <span class="ghost" aria-hidden="true">01</span>
-    <div style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end">
+    <div class="scene-head" style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end">
       <span style="display: inline-block; overflow: hidden"><span class="num" style="font-weight: 800; font-size: clamp(120px, 15vw, 220px); line-height: .78; letter-spacing: -0.05em; color: #ff3a1f; font-stretch: 62%">01</span></span>
       <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 18px">
         <h2 class="mask" style="margin: 0; font-weight: 800; font-size: clamp(44px, 5.6vw, 84px); line-height: .92; letter-spacing: -0.035em; text-transform: uppercase">The canvas</h2>
@@ -134,53 +134,22 @@
       </div>
     </div>
 
-    <div style="margin-top: 80px; overflow-x: auto">
-      <div class="cam" style="position: relative; min-width: 900px; aspect-ratio: 2.4">
-        <svg viewBox="0 0 1200 500" style="position: absolute; inset: 0; width: 100%; height: 100%" aria-hidden="true">
-          <g fill="none" stroke="#111111" stroke-width="2">
-            <path class="wire" pathLength="1" d="M198 250 C 270 250, 270 90, 342 90"/>
-            <path class="wire" pathLength="1" d="M198 250 L 342 250"/>
-            <path class="wire" pathLength="1" d="M198 250 C 270 250, 270 410, 342 410"/>
-            <path class="wire" pathLength="1" d="M522 90 C 600 90, 600 250, 678 250" style="animation-range: entry 45% cover 60%"/>
-            <path class="wire" pathLength="1" d="M522 250 L 678 250" style="animation-range: entry 45% cover 60%"/>
-            <path class="wire" pathLength="1" d="M522 410 C 600 410, 600 250, 678 250" style="animation-range: entry 45% cover 60%"/>
-            <path class="wire" pathLength="1" d="M858 250 L 1002 250" style="animation-range: entry 60% cover 70%"/>
-          </g>
-          <circle r="9" fill="#ff3a1f"><animateMotion dur="3.6s" repeatCount="indefinite" path="M198 250 C 270 250, 270 90, 342 90 L 522 90 C 600 90, 600 250, 678 250 L 858 250 L 1002 250"/></circle>
-          <circle r="9" fill="#ff3a1f"><animateMotion dur="3.6s" begin="0.15s" repeatCount="indefinite" path="M198 250 L 522 250 L 858 250 L 1002 250"/></circle>
-          <circle r="9" fill="#ff3a1f"><animateMotion dur="3.6s" begin="0.3s" repeatCount="indefinite" path="M198 250 C 270 250, 270 410, 342 410 L 522 410 C 600 410, 600 250, 678 250 L 858 250 L 1002 250"/></circle>
-        </svg>
-        <div class="node" style="position: absolute; left: 1.5%; top: 40%; width: 15%; height: 20%; box-sizing: border-box; border: 2px solid #111111; padding: 12px; display: flex; flex-direction: column; justify-content: space-between">
-          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em">Message</span>
-          <span style="font-weight: 700; font-size: 18px; line-height: 1.1">A bakery run by a fox</span>
-        </div>
-        <div class="node" style="position: absolute; left: 28.5%; top: 8%; width: 15%; height: 20%; box-sizing: border-box; border: 2px solid #111111; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; animation-delay: .9s">
-          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em">Assistant</span>
-          <span style="font-weight: 700; font-size: 22px">Researcher</span>
-        </div>
-        <div class="node" style="position: absolute; left: 28.5%; top: 40%; width: 15%; height: 20%; box-sizing: border-box; border: 2px solid #111111; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; animation-delay: .9s">
-          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em">Assistant</span>
-          <span style="font-weight: 700; font-size: 22px">Designer</span>
-        </div>
-        <div class="node" style="position: absolute; left: 28.5%; top: 72%; width: 15%; height: 20%; box-sizing: border-box; border: 2px solid #111111; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; animation-delay: .9s">
-          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em">Assistant</span>
-          <span style="font-weight: 700; font-size: 22px">Critic</span>
-        </div>
-        <div class="node" style="position: absolute; left: 56.5%; top: 40%; width: 15%; height: 20%; box-sizing: border-box; border: 2px solid #111111; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; animation-delay: 1.9s">
-          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em">Assistant</span>
-          <span style="font-weight: 700; font-size: 22px">Summarizer</span>
-        </div>
-        <div style="position: absolute; left: 83.5%; top: 40%; width: 15%; height: 20%; box-sizing: border-box; background: #111111; color: #f2f2ef; padding: 12px; display: flex; flex-direction: column; justify-content: space-between">
-          <span style="font-size: 11px; text-transform: uppercase; letter-spacing: .12em">Answer</span>
-          <span style="font-weight: 700; font-size: 22px">One clear reply</span>
-        </div>
+    <div class="flow" role="img" aria-label="A flow: a message goes to three assistants at once, and a fourth merges their answers into one reply">
+      <div class="flow-cam">
+        <svg class="flow-wires" aria-hidden="true"></svg>
+        <div class="flow-node" data-node="message"><span class="flow-kind">Message</span><span class="flow-text">A bakery run by a fox</span></div>
+        <div class="flow-node" data-node="researcher"><span class="flow-kind">Assistant</span><span class="flow-name">Researcher</span><span class="flow-bar"></span></div>
+        <div class="flow-node" data-node="designer"><span class="flow-kind">Assistant</span><span class="flow-name">Designer</span><span class="flow-bar"></span></div>
+        <div class="flow-node" data-node="critic"><span class="flow-kind">Assistant</span><span class="flow-name">Critic</span><span class="flow-bar"></span></div>
+        <div class="flow-node" data-node="summarizer"><span class="flow-kind">Assistant</span><span class="flow-name">Summarizer</span><span class="flow-bar"></span></div>
+        <div class="flow-node is-answer" data-node="answer"><span class="flow-kind">Answer</span><span class="flow-text">One clear reply</span></div>
       </div>
     </div>
   </section>
 
-  <section id="senses" style="position: relative; isolation: isolate; max-width: 1440px; margin: 0 auto; padding: 80px 40px 140px">
+  <section id="senses" data-scene="02 Every sense" style="position: relative; isolation: isolate; max-width: 1440px; margin: 0 auto; padding: 80px 40px 140px">
     <span class="ghost" aria-hidden="true">02</span>
-    <div style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end; margin-bottom: 64px">
+    <div class="scene-head" style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end; margin-bottom: 64px">
       <span style="display: inline-block; overflow: hidden"><span class="num" style="font-weight: 800; font-size: clamp(120px, 15vw, 220px); line-height: .78; letter-spacing: -0.05em; color: #ff3a1f; font-stretch: 62%">02</span></span>
       <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 18px">
         <h2 class="mask" style="margin: 0; font-weight: 800; font-size: clamp(44px, 5.6vw, 84px); line-height: .92; letter-spacing: -0.035em; text-transform: uppercase">Every sense</h2>
@@ -239,7 +208,7 @@
     </div>
   </section>
 
-  <section id="machine" class="curtain" style="position: relative; isolation: isolate; overflow: hidden; background: #111111; color: #f2f2ef">
+  <section id="machine" class="curtain" data-scene="03 Your whole machine" data-tone="dark" style="position: relative; isolation: isolate; overflow: hidden; background: #111111; color: #f2f2ef">
     <span class="ghost on-dark" aria-hidden="true">03</span>
     <div style="max-width: 1440px; margin: 0 auto; padding: 140px 40px; display: flex; flex-wrap: wrap; gap: 72px 64px">
       <div style="flex: 1 1 460px; display: flex; flex-direction: column; gap: 24px">
@@ -286,9 +255,9 @@
     </div>
   </section>
 
-  <section id="start" style="position: relative; isolation: isolate; max-width: 1440px; margin: 0 auto; padding: 160px 40px 140px">
+  <section id="start" data-scene="04 Start from a template" style="position: relative; isolation: isolate; max-width: 1440px; margin: 0 auto; padding: 160px 40px 140px">
     <span class="ghost" aria-hidden="true">04</span>
-    <div style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end; margin-bottom: 56px">
+    <div class="scene-head" style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end; margin-bottom: 56px">
       <span style="display: inline-block; overflow: hidden"><span class="num" style="font-weight: 800; font-size: clamp(120px, 15vw, 220px); line-height: .78; letter-spacing: -0.05em; color: #ff3a1f; font-stretch: 62%">04</span></span>
       <h2 class="mask" style="flex: 1 1 420px; margin: 0; font-weight: 800; font-size: clamp(44px, 5.6vw, 84px); line-height: .92; letter-spacing: -0.035em; text-transform: uppercase">Start from a template</h2>
     </div>
@@ -331,9 +300,9 @@
     </div>
   </section>
 
-  <section id="try" style="position: relative; isolation: isolate; max-width: 1440px; margin: 0 auto; padding: 80px 40px 160px">
+  <section id="try" data-scene="05 Try it here" style="position: relative; isolation: isolate; max-width: 1440px; margin: 0 auto; padding: 80px 40px 160px">
     <span class="ghost" aria-hidden="true">05</span>
-    <div style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end; margin-bottom: 64px">
+    <div class="scene-head" style="display: flex; flex-wrap: wrap; gap: 24px 64px; align-items: end; margin-bottom: 64px">
       <span style="display: inline-block; overflow: hidden"><span class="num" style="font-weight: 800; font-size: clamp(120px, 15vw, 220px); line-height: .78; letter-spacing: -0.05em; color: #ff3a1f; font-stretch: 62%">05</span></span>
       <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 18px">
         <h2 class="mask" style="margin: 0; font-weight: 800; font-size: clamp(44px, 5.6vw, 84px); line-height: .92; letter-spacing: -0.035em; text-transform: uppercase">Try it here</h2>
@@ -359,12 +328,13 @@
     </div>
   </section>
 
-  <section class="iris" style="position: relative; background: #ff3a1f; overflow: hidden">
+  <section class="iris finale" data-scene="Your turn" data-tone="red" style="position: relative; background: #ff3a1f; overflow: hidden">
+    <div class="finale-shutter" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
     <div aria-hidden="true" class="cta-disc" style="position: absolute; right: -8vw; top: -12vw; width: 46vw; aspect-ratio: 1; border-radius: 50%; background: #f2f2ef"></div>
     <div style="position: relative; max-width: 1440px; margin: 0 auto; padding: 140px 40px; display: flex; flex-direction: column; gap: 48px">
       <h2 aria-label="Draw your first mesh." style="margin: 0; font-weight: 800; font-size: clamp(72px, 12vw, 200px); line-height: .8; letter-spacing: -0.05em; text-transform: uppercase">
         <span class="cta-word" aria-hidden="true" style="font-stretch: 125%"><span class="ch" style="--k: 0">D</span><span class="ch" style="--k: 1">r</span><span class="ch" style="--k: 2">a</span><span class="ch" style="--k: 3">w</span></span>
-        <span class="cta-word alt" aria-hidden="true" style="font-stretch: 62%; margin-left: 12vw"><span class="ch" style="--k: 2">y</span><span class="ch" style="--k: 3">o</span><span class="ch" style="--k: 4">u</span><span class="ch" style="--k: 5">r</span><span class="ch" style="--k: 6; width: .3em">&#160;</span><span class="ch" style="--k: 6">f</span><span class="ch" style="--k: 7">i</span><span class="ch" style="--k: 8">r</span><span class="ch" style="--k: 9">s</span><span class="ch" style="--k: 10">t</span></span>
+        <span class="cta-word alt" aria-hidden="true" style="font-stretch: 62%; margin-left: 12vw"><span class="cw"><span class="ch" style="--k: 2">y</span><span class="ch" style="--k: 3">o</span><span class="ch" style="--k: 4">u</span><span class="ch" style="--k: 5">r</span></span><span class="ch" style="--k: 6; width: .3em">&#160;</span><span class="cw"><span class="ch" style="--k: 6">f</span><span class="ch" style="--k: 7">i</span><span class="ch" style="--k: 8">r</span><span class="ch" style="--k: 9">s</span><span class="ch" style="--k: 10">t</span></span></span>
         <span class="cta-word" aria-hidden="true" style="font-stretch: 100%"><span class="ch" style="--k: 4">m</span><span class="ch" style="--k: 5">e</span><span class="ch" style="--k: 6">s</span><span class="ch" style="--k: 7">h</span><span class="ch" style="--k: 8">.</span></span>
       </h2>
       <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center">
@@ -374,7 +344,7 @@
     </div>
   </section>
 
-  <footer style="max-width: 1440px; margin: 0 auto; padding: 48px 40px 32px">
+  <footer data-scene="End" style="max-width: 1440px; margin: 0 auto; padding: 48px 40px 32px">
     <div aria-label="MeshMind" style="overflow: hidden">
       <div class="breathe wm skew" aria-hidden="true" style="font-weight: 800; font-size: 16.5vw; line-height: .8; letter-spacing: -0.05em; text-transform: uppercase; white-space: nowrap; padding-bottom: .04em"><span class="ch" style="--k: 0">M</span><span class="ch" style="--k: 1">e</span><span class="ch" style="--k: 2">s</span><span class="ch" style="--k: 3">h</span><span class="ch" style="--k: 4">M</span><span class="ch" style="--k: 5">i</span><span class="ch" style="--k: 6">n</span><span class="ch" style="--k: 7">d</span></div>
     </div>
@@ -385,6 +355,8 @@
       <a href="https://github.com/delriodevelops" style="text-decoration: none">Made by delriodevelops</a>
     </div>
   </footer>
+
+  <div class="film-hud" aria-hidden="true"><span class="film-hud-scene"></span><span class="film-hud-frame">Frame <b>0000</b></span></div>
 </main>
 </body>
 </html>
