@@ -194,6 +194,31 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .film .sched-head{display:block;position:absolute;top:-10px;bottom:20px;left:126px;width:2px;background:#ff3a1f;pointer-events:none}
 .film .curtain,.film .count,.film .countdown{animation:none}
 
+/* 04: pantalla partida. A la izquierda, fijo, el flujo de la plantilla que pasa por el centro de la lista;
+   se transforma de una a otra. Solo en pantallas anchas y con movimiento; si no, queda la lista */
+.tpl-diagram{display:none}
+.film .tpl-list .tpl{animation:none;opacity:.32;transition:opacity .45s cubic-bezier(.16,1,.3,1),color .3s cubic-bezier(.16,1,.3,1)}
+.film .tpl-list .tpl.is-active{opacity:1}
+@media (min-width:1024px){.film .tpl-list .tpl{padding-top:36px !important;padding-bottom:36px !important}}
+.film .tpl-list .tpl.is-active > span:first-child{color:#ff3a1f}
+@media (min-width:1024px){
+  .film .tpl-stage{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);column-gap:64px;align-items:start}
+  .film .tpl-list{grid-template-columns:minmax(0,1fr) !important}
+  .film .tpl-diagram{display:block;position:sticky;top:max(12vh,calc(50vh - 260px))}
+}
+.tpl-board{position:relative;aspect-ratio:4 / 3;border:2px solid #111111;background-image:linear-gradient(rgba(17,17,17,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(17,17,17,.08) 1px,transparent 1px);background-size:calc(100% / 12) calc(100% / 9)}
+.tpl-wires{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.tpl-wire{fill:none;stroke:#111111;stroke-width:2;vector-effect:non-scaling-stroke}
+.tpl-wire.is-back{stroke:#ff3a1f;stroke-dasharray:6 6}
+.tpl-node{position:absolute;width:18%;height:14%;box-sizing:border-box;border:2px solid #111111;background:#f2f2ef;display:flex;align-items:center;justify-content:center;padding:0 4px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center;line-height:1.05;opacity:0}
+.tpl-node.is-out{background:#111111;color:#f2f2ef}
+.tpl-caption{margin:16px 0 0;display:flex;gap:16px;align-items:baseline;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.tpl-caption-n{font-size:28px;font-weight:800;letter-spacing:-0.02em;color:#ff3a1f;font-variation-settings:"wdth" 70}
+
+/* 05: la app en vivo se abre como una ventana al entrar */
+.film .demo,.film .demo-bar{animation:none}
+.demo:fullscreen{transform:none !important;clip-path:none !important}
+
 /* Final: el rojo vuelve en doce columnas, como se fue en el hero, y la frase se monta letra a letra */
 .finale .cta-disc{z-index:1}
 .finale > div:last-child{z-index:2}
