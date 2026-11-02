@@ -12,7 +12,7 @@ import type { McpServer } from '@/mcp/types'
 // Guía para usar servidores locales (stdio) a través de un puente
 const BRIDGE_GUIDE = 'https://github.com/delriodevelops/meshmind/blob/main/docs/mcp-local-bridge.md'
 
-const field = 'rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm outline-none focus:border-signal'
+const field = 'border border-line bg-transparent px-3 py-2 text-sm outline-none focus:border-signal placeholder:text-neutral-500'
 
 function ServerRow({ server }: { server: McpServer }) {
   const status = useMcp(s => s.status[server.id])
@@ -22,14 +22,15 @@ function ServerRow({ server }: { server: McpServer }) {
   return (
     <li className="py-3">
       <div className="flex items-center gap-3">
-        <span className={cn('w-2 h-2 shrink-0 rounded-full', {
-          'bg-amber-300 animate-pulse': busy,
-          'bg-ink': status?.state === 'ready' || (!status && server.tools.length),
-          'bg-red-500': status?.state === 'error',
-          'bg-neutral-600': !status && !server.tools.length,
+        {/* Como los estados del monitor: rayado mientras conecta, tinta si responde, rojo si falla, hueco sin conectar */}
+        <span className={cn('w-2.5 h-2.5 shrink-0', {
+          'hatch': busy,
+          'bg-ink': !busy && (status?.state === 'ready' || (!status && server.tools.length)),
+          'bg-signal': status?.state === 'error',
+          'border border-neutral-600': !busy && !status && !server.tools.length,
         })} />
         <button type="button" onClick={() => setOpen(o => !o)} className="flex-1 min-w-0 text-left">
-          <span className="flex items-center gap-1.5 text-sm text-neutral-100">
+          <span className="flex items-center gap-1.5 text-sm font-medium text-neutral-100">
             {server.label}
             <ChevronDown className={cn('w-3.5 h-3.5 text-neutral-500 duration-200', open && 'rotate-180')} />
           </span>
@@ -38,15 +39,15 @@ function ServerRow({ server }: { server: McpServer }) {
           </span>
         </button>
         {/* Conexión nueva, no la guardada: si el servidor reinició, la sesión anterior ya no le vale */}
-        <button type="button" title="Connect again" disabled={busy} onClick={() => refreshServer(useApp.getState().mcpServers.find(s => s.id === server.id) ?? server, true)} className="p-1.5 rounded-md text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800 disabled:opacity-40">
+        <button type="button" title="Connect again" disabled={busy} onClick={() => refreshServer(useApp.getState().mcpServers.find(s => s.id === server.id) ?? server, true)} className="p-1.5 text-neutral-400 hover:bg-ink hover:text-paper duration-200 disabled:opacity-40">
           {busy ? <LoaderCircle className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
         </button>
-        <button type="button" title="Remove" onClick={() => forgetServer(server.id)} className="p-1.5 rounded-md text-neutral-400 hover:text-red-600 hover:bg-neutral-800">
+        <button type="button" title="Remove" onClick={() => forgetServer(server.id)} className="p-1.5 text-neutral-400 hover:text-signal-ink duration-200">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
       {status?.state === 'error' && (
-        <p className="mt-2 ml-5 text-xs text-red-700">{status.message}{status.hint && <span className="text-neutral-400"> {status.hint}</span>}</p>
+        <p className="mt-2 ml-5 text-xs text-signal-ink">{status.message}{status.hint && <span className="text-neutral-400"> {status.hint}</span>}</p>
       )}
       {open && (
         <div className="mt-3 ml-5 flex flex-col gap-3">
@@ -108,22 +109,22 @@ export default function McpServers() {
     <Dialog.Root open={open} onOpenChange={value => useMcp.setState({ open: value })}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-ink/40" />
-        <Dialog.Content className="fixed z-50 inset-x-0 bottom-0 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[34rem] max-h-[85dvh] flex flex-col border-[1.5px] border-ink bg-neutral-900 animate-rise">
-          <div className="flex items-center justify-between px-5 pt-5 pb-3">
-            <Dialog.Title className="display text-3xl">MCP servers</Dialog.Title>
-            <Dialog.Close className="p-1.5 rounded-md text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800"><X className="w-4 h-4" /></Dialog.Close>
+        <Dialog.Content className="fixed z-50 inset-x-0 bottom-0 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[34rem] max-h-[85dvh] flex flex-col border-2 border-ink bg-paper animate-rise">
+          <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4">
+            <Dialog.Title className="display text-[40px] text-neutral-50">MCP servers</Dialog.Title>
+            <Dialog.Close className="w-9 h-9 shrink-0 flex items-center justify-center text-neutral-400 hover:bg-ink hover:text-paper duration-200"><X className="w-4 h-4" /></Dialog.Close>
           </div>
-          <Dialog.Description className="px-5 text-sm text-neutral-400">
+          <Dialog.Description className="px-6 text-[15px] leading-relaxed text-neutral-300">
             Give your flows tools from MCP servers on the web. The models still run on your machine; a tool call sends its arguments to that server.
           </Dialog.Description>
 
-          <div className="flex-1 overflow-y-auto px-5 pb-5">
+          <div className="flex-1 overflow-y-auto px-6 pb-6">
             {servers.length ? (
-              <ul className="mt-3 divide-y divide-neutral-800 border-y border-neutral-800">
+              <ul className="mt-5 divide-y divide-line border-t-2 border-ink border-b border-b-line">
                 {servers.map(server => <ServerRow key={server.id} server={server} />)}
               </ul>
             ) : (
-              <p className="mt-4 label">No servers yet</p>
+              <p className="mt-5 pt-3 border-t-2 border-ink label">No servers yet</p>
             )}
 
             {!!suggestions.length && (
@@ -133,7 +134,7 @@ export default function McpServers() {
                   {suggestions.map(s => (
                     <button
                       key={s.id} type="button" onClick={() => add({ ...s, token: '', tools: [] })}
-                      className="flex items-center gap-1.5 border-[1.5px] border-ink px-2.5 py-1.5 text-xs font-medium hover:bg-ink hover:text-paper duration-200 ease-snap"
+                      className="flex items-center gap-1.5 border-[1.5px] border-ink px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.12em] hover:bg-ink hover:text-paper duration-200 ease-snap"
                     >
                       <Plus className="w-3.5 h-3.5" /> {s.label}
                     </button>
@@ -150,12 +151,12 @@ export default function McpServers() {
                   type="password" value={token} onChange={e => setToken(e.target.value)} autoComplete="off"
                   placeholder="Token, if it needs one" aria-label="Token" className={cn(field, 'flex-1 min-w-0 font-mono text-xs')}
                 />
-                <button type="submit" disabled={!url.trim()} className="shrink-0 bg-ink text-paper px-4 text-sm font-medium hover:bg-signal hover:text-ink duration-200 disabled:bg-neutral-700 disabled:text-neutral-500">
+                <button type="submit" disabled={!url.trim()} className="btn-ink shrink-0 px-5 text-[11px] font-semibold uppercase tracking-[0.12em]">
                   Add
                 </button>
               </div>
-              {error && <p className="text-xs text-red-700">{error}</p>}
-              <p className="text-xs text-neutral-500">
+              {error && <p className="text-xs text-signal-ink">{error}</p>}
+              <p className="text-xs leading-relaxed text-neutral-500">
                 The server has to accept connections from websites (CORS). Tokens stay in this browser. Servers that run on your computer need a{' '}
                 <a href={BRIDGE_GUIDE} target="_blank" rel="noreferrer" className="underline decoration-signal underline-offset-2 hover:text-neutral-100">local bridge</a>.
               </p>

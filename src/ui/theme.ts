@@ -4,7 +4,7 @@ import { useApp, type Theme } from '@/flow/store'
 export type Scheme = 'light' | 'dark'
 
 // Color de la barra del navegador en cada tema: el del fondo
-const BACKGROUND: Record<Scheme, string> = { light: '#f2f2ef', dark: '#0f0f0e' }
+const BACKGROUND: Record<Scheme, string> = { light: '#f2f2ef', dark: '#111111' }
 
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
 const listeners = new Set<() => void>()

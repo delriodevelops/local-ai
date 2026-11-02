@@ -18,7 +18,7 @@ function CopyButton({ text }: { text: string }) {
       type="button"
       title="Copy"
       onClick={() => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 1200) }}
-      className="p-1.5 rounded-md text-neutral-500 hover:text-neutral-100 hover:bg-neutral-800 duration-200"
+      className="p-1.5 text-neutral-500 hover:bg-ink hover:text-paper duration-200"
     >
       {copied ? <Check className="w-4 h-4 text-signal-ink" /> : <Copy className="w-4 h-4" />}
     </button>
@@ -27,22 +27,31 @@ function CopyButton({ text }: { text: string }) {
 
 const KIND_ICON = { join: Merge, split: Split, condition: GitBranch, describe: Eye, imagine: ImagePlus, transcribe: Mic, speak: AudioLines, video: Clapperboard, tool: Wrench } as const
 
+// La marca de cada paso según cómo va: tinta si terminó, rojo mientras trabaja, hueca si aún espera
+const MARKER: Record<StepResult['state'], string> = {
+  idle: 'border-[1.5px] border-ink text-neutral-50',
+  waiting: 'border-[1.5px] border-ink text-neutral-50',
+  running: 'bg-signal text-[#111111]',
+  done: 'bg-ink text-paper',
+  skipped: 'border border-line text-neutral-500',
+  error: 'border-[1.5px] border-signal text-signal-ink',
+}
+
 function StepRow({ step, index, last }: { step: StepResult; index: number; last: boolean }) {
   const [open, setOpen] = useState(false)
   const text = asText(step.value)
   const Icon = step.kind in KIND_ICON ? KIND_ICON[step.kind as keyof typeof KIND_ICON] : null
   return (
-    <li className={cn('relative pl-8', step.state === 'skipped' && 'opacity-40')}>
+    <li className={cn('relative pl-9', step.state === 'skipped' && 'opacity-40')}>
       {/* El cable que une los pasos */}
-      {!last && <span className="absolute left-[11px] top-6 bottom-0 w-px bg-neutral-800" />}
-      <span
-        className="absolute left-0 top-0.5 w-[23px] h-[23px] rounded-md flex items-center justify-center text-neutral-950 font-mono text-[10px]"
-        style={{ background: step.color ?? 'var(--color-ink)', color: step.color ? '#111111' : 'var(--color-paper)' }}
-      >
+      {!last && <span className="absolute left-[11px] top-7 bottom-1 w-px bg-line" />}
+      <span className={cn('absolute left-0 top-0 w-6 h-6 flex items-center justify-center font-mono text-[10px] duration-300', MARKER[step.state])}>
         {Icon ? <Icon className="w-3 h-3" /> : String(index + 1).padStart(2, '0')}
       </span>
-      <button type="button" onClick={() => setOpen(o => !o)} className="w-full flex items-center gap-2 text-left pb-2" disabled={!text && !isMedia(step.value)}>
-        <span className="label text-neutral-300">{step.label}</span>
+      <button type="button" onClick={() => setOpen(o => !o)} className="w-full min-h-6 flex items-center gap-2 text-left pb-2" disabled={!text && !isMedia(step.value)}>
+        {/* El color del asistente, como la muestra de su nodo en el lienzo */}
+        {step.color && <span className="w-2 h-2 shrink-0" style={{ background: step.color }} aria-hidden="true" />}
+        <span className="label text-neutral-200">{step.label}</span>
         {step.state === 'running' && <LoaderCircle className="w-3.5 h-3.5 text-signal-ink animate-spin" />}
         {step.progress && step.state === 'running' && <span className="font-mono text-[10px] text-neutral-500">{step.progress.index + 1}/{step.progress.total}</span>}
         {step.branch && <span className="font-mono text-[10px] text-signal-ink">→ {step.branch}</span>}
@@ -51,7 +60,7 @@ function StepRow({ step, index, last }: { step: StepResult; index: number; last:
         {step.state === 'running' && step.status && <span className="font-mono text-[10px] text-signal-ink truncate">{step.status}</span>}
         {/* En cola detrás de otro paso que usa el mismo modelo, o esperando su descarga */}
         {step.state === 'waiting' && step.status && <span className="font-mono text-[10px] text-neutral-500 truncate">{step.status}</span>}
-        {step.error && <span className="text-xs text-red-600 truncate">{step.error}</span>}
+        {step.error && <span className="text-xs text-signal-ink truncate">{step.error}</span>}
         {text && <ChevronDown className={cn('w-3.5 h-3.5 ml-auto text-neutral-500 duration-200', open && 'rotate-180')} />}
       </button>
       {/* Las herramientas que llamó un agente, con sus argumentos */}
@@ -59,8 +68,8 @@ function StepRow({ step, index, last }: { step: StepResult; index: number; last:
         <ul className="pb-2 flex flex-col gap-1">
           {step.calls.map((call, i) => (
             <li key={i} className="font-mono text-[10.5px] text-neutral-500 truncate" title={call.error ?? call.result}>
-              <span className={call.error ? 'text-red-600' : 'text-signal-ink'}>→</span> {call.tool} <span className="text-neutral-600">{call.args}</span>
-              {call.error && <span className="text-red-600"> · {call.error}</span>}
+              <span className="text-signal-ink">→</span> {call.tool} <span className="text-neutral-600">{call.args}</span>
+              {call.error && <span className="text-signal-ink"> · {call.error}</span>}
             </li>
           ))}
         </ul>
@@ -75,27 +84,31 @@ function StepRow({ step, index, last }: { step: StepResult; index: number; last:
   )
 }
 
-function TurnView({ turn }: { turn: Turn }) {
+function TurnView({ turn, index }: { turn: Turn; index: number }) {
   const running = turn.status === 'running'
   const [showTrace, setShowTrace] = useState(false)
   const trace = turn.steps.filter(s => s.kind !== 'output')
   const answers = turn.steps.filter(s => s.kind === 'output' && s.state === 'done' && s.value)
   const doneCount = trace.filter(s => s.state === 'done').length
 
+  // Cada turno es una escena, como las de la landing: su número en rojo y tu mensaje como titular, sin burbuja
   return (
-    <div className="flex flex-col gap-5 animate-rise">
-      <div className="flex justify-end">
-        <div className="max-w-[85%] bg-neutral-800 border border-neutral-700 rounded-2xl rounded-tr-md px-4 py-3 whitespace-pre-wrap break-words text-[15px] text-neutral-50">
-          {turn.attachments?.image && <img src={turn.attachments.image} alt="" className="mb-2 max-h-48 rounded-lg" />}
-          {turn.attachments?.audio && <audio controls src={turn.attachments.audio} className="mb-2 w-64 max-w-full" />}
-          {turn.input}
+    <article className="flex flex-col gap-6 border-t-2 border-ink pt-4 animate-rise">
+      <header className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4">
+        <span className="numeral text-[44px] text-signal" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+        <div className="min-w-0">
+          <span className="label">Message</span>
+          {turn.attachments?.image && <img src={turn.attachments.image} alt="" className="mt-2 max-h-48 border border-line" />}
+          {turn.attachments?.audio && <audio controls src={turn.attachments.audio} className="mt-2 w-64 max-w-full" />}
+          <p className="mt-1 whitespace-pre-wrap break-words text-[19px] font-semibold leading-snug tracking-[-0.01em] text-neutral-50">{turn.input}</p>
         </div>
-      </div>
+      </header>
 
       {!!trace.length && (
         <div>
           <button type="button" onClick={() => setShowTrace(s => !s)} className="flex items-center gap-2 mb-3 group">
-            <span className="label">{running ? 'Running flow' : 'Flow'} · {doneCount}/{trace.length} steps</span>
+            {running && <span className="w-2 h-2 rounded-full bg-signal animate-live" aria-hidden="true" />}
+            <span className="label group-hover:text-neutral-50 duration-200">{running ? 'Running flow' : 'Flow'} · {doneCount}/{trace.length} steps</span>
             <ChevronDown className={cn('w-3.5 h-3.5 text-neutral-500 duration-200', (showTrace || running) && 'rotate-180')} />
           </button>
           {(showTrace || running) && (
@@ -116,11 +129,11 @@ function TurnView({ turn }: { turn: Turn }) {
         </div>
       ))}
 
-      {turn.status === 'stopped' && <p className="font-mono text-xs text-neutral-500">Stopped.</p>}
+      {turn.status === 'stopped' && <p className="label">Stopped</p>}
       {!running && turn.status !== 'stopped' && !answers.length && (
         <p className="text-sm text-neutral-400">No step reached the Answer node. Check the connections in the flow.</p>
       )}
-    </div>
+    </article>
   )
 }
 
@@ -140,8 +153,8 @@ export default function Thread() {
     <div ref={box} className="@container flex-1 min-h-0 overflow-y-auto">
       <div className="mx-auto w-full max-w-3xl px-4 py-8 flex flex-col gap-10">
         {!turns.length && <Welcome />}
-        {turns.map(turn => <TurnView key={turn.id} turn={turn} />)}
-        {error && <p className="rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-700">{error}</p>}
+        {turns.map((turn, i) => <TurnView key={turn.id} turn={turn} index={i} />)}
+        {error && <p className="border-l-2 border-signal pl-4 py-1 text-sm text-signal-ink">{error}</p>}
       </div>
     </div>
   )

@@ -19,19 +19,21 @@ function sizeOf(model: MediaModel, backend?: MediaBackend) {
   return `${min.toFixed(1)}–${max.toFixed(1)} GB`
 }
 
+// Los estados como los bloques del planificador de la landing: hueco si está apagado, rayado mientras carga,
+// tinta si está listo y rojo, latiendo, mientras trabaja
 const STATE_STYLE: Record<ModelState, string> = {
-  off: 'bg-neutral-600',
-  loading: 'bg-amber-300 animate-pulse',
+  off: 'border border-neutral-600',
+  loading: 'hatch',
   ready: 'bg-ink',
-  busy: 'bg-signal animate-pulse',
+  busy: 'bg-signal animate-live',
 }
 
 function Row({ name, device, state, detail, action }: { name: string; device: string; state: ModelState; detail?: string; action?: React.ReactNode }) {
   return (
-    <li className="flex items-center gap-3 py-2">
-      <span className={cn('w-2 h-2 shrink-0 rounded-full', STATE_STYLE[state])} />
+    <li className="flex items-center gap-3 py-2.5">
+      <span className={cn('w-2.5 h-2.5 shrink-0', STATE_STYLE[state])} />
       <span className="flex-1 min-w-0">
-        <span className="block truncate text-sm text-neutral-100">{name}</span>
+        <span className="block truncate text-sm font-medium text-neutral-100">{name}</span>
         <span className="block truncate font-mono text-[10.5px] text-neutral-500">{device} · {detail ?? state}</span>
       </span>
       {action}
@@ -62,18 +64,26 @@ export default function Monitor() {
 
   return (
     <Popover.Root onOpenChange={open => open && refresh()}>
-      <Popover.Trigger className="relative p-2.5 rounded-lg border border-ink bg-neutral-900 hover:bg-ink hover:text-paper text-neutral-300 duration-200" title="Resources">
+      <Popover.Trigger className="relative w-10 h-10 flex items-center justify-center border-[1.5px] border-ink hover:bg-ink hover:text-paper data-[state=open]:bg-ink data-[state=open]:text-paper duration-200" title="Resources">
         <Activity className="w-4 h-4" />
-        {anyBusy && <span className="absolute -right-0.5 -top-0.5 w-2 h-2 rounded-full bg-signal animate-pulse" />}
+        {anyBusy && <span className="absolute -right-1 -top-1 w-2.5 h-2.5 rounded-full bg-signal animate-live" />}
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content align="end" sideOffset={6} className="z-50 w-80 border-[1.5px] border-ink bg-neutral-900 p-4 animate-rise">
-          <p className="label">This device</p>
+        <Popover.Content align="end" sideOffset={10} className="z-50 w-80 max-h-[calc(100dvh-88px)] overflow-y-auto border-2 border-ink bg-paper p-5 animate-rise">
+          <p className="display text-[28px] text-neutral-50">Resources</p>
+          {/* La velocidad del modelo de texto, en grande y estrecha como las cifras de la landing */}
+          {llmState !== 'off' && !!tokensPerSecond && (
+            <p className="mt-4 flex items-baseline gap-2 border-t-2 border-ink pt-3">
+              <span className="numeral text-[56px] text-neutral-50">{tokensPerSecond.toFixed(0)}</span>
+              <span className="label">tokens/s</span>
+            </p>
+          )}
+          <p className="label mt-5 pb-2 border-b-2 border-ink">This device</p>
           {profile && (
-            <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 font-mono text-[11px]">
+            <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 font-mono text-[11px]">
               <dt className="text-neutral-500">GPU</dt><dd className="truncate text-neutral-200">{profile.gpu}{profile.fp16 ? ' · fp16' : ''}</dd>
               <dt className="text-neutral-500">CPU</dt>
-              <dd className={profile.isolated ? 'text-neutral-200' : 'text-amber-800'}>
+              <dd className={profile.isolated ? 'text-neutral-200' : 'text-signal-ink'}>
                 {profile.cores} threads · {profile.isolated ? 'multi-threaded' : 'single thread (reload the page)'}
               </dd>
               {profile.ramGB && <><dt className="text-neutral-500">RAM</dt><dd className="text-neutral-200">~{profile.ramGB} GB</dd></>}
@@ -82,8 +92,8 @@ export default function Monitor() {
             </dl>
           )}
 
-          <p className="label mt-5">Models</p>
-          <ul className="mt-1 divide-y divide-neutral-800">
+          <p className="label mt-6 pb-2 border-b-2 border-ink">Models</p>
+          <ul className="divide-y divide-line">
             <Row
               name={modelId ?? 'Text model'} device="GPU" state={llmState}
               detail={llmState === 'off' ? 'not loaded' : tokensPerSecond ? `${llmState} · ${tokensPerSecond.toFixed(0)} tokens/s` : llmState}
@@ -98,7 +108,7 @@ export default function Monitor() {
                   ? `not loaded · ${sizeOf(model)}`
                   : typeof MEDIA_INFO[model].sizeGB === 'number' ? media[model].state : `${media[model].state} · ${sizeOf(model, media[model].backend)}`)}
                 action={media[model].state === 'ready' && (
-                  <button type="button" onClick={() => unloadModel(model)} className="rounded-md px-2 py-1 font-mono text-[10px] text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800">
+                  <button type="button" onClick={() => unloadModel(model)} className="border border-line px-2 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-neutral-400 hover:border-ink hover:bg-ink hover:text-paper duration-200">
                     free
                   </button>
                 )}
@@ -108,7 +118,7 @@ export default function Monitor() {
 
           <button
             type="button" onClick={clearCache}
-            className="mt-4 w-full flex items-center justify-center gap-2 rounded-lg border border-neutral-700 px-3 py-2 text-xs text-neutral-300 hover:border-red-400/50 hover:text-red-700 duration-200"
+            className="mt-5 w-full flex items-center justify-center gap-2 border-[1.5px] border-line px-3 py-2.5 text-[11px] font-medium uppercase tracking-[0.12em] text-neutral-300 hover:border-signal hover:text-signal-ink duration-200"
           >
             <Trash2 className="w-3.5 h-3.5" /> Delete downloaded models
           </button>
