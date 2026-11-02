@@ -24,7 +24,8 @@ export function finale() {
       autoAlpha: 0,
     })
     gsap.set('.cta-disc', { xPercent: 90, rotation: 140, scale: 0.4 })
-    if (actions) gsap.set(actions, { autoAlpha: 0, y: 40 })
+    // Solo opacidad: con visibility el botón dejaría de recibir el foco y el lector de pantalla no lo encontraría
+    if (actions) gsap.set(actions, { opacity: 0, y: 40 })
 
     // Mientras la sección sube, caen las columnas; ya fija, se monta la frase
     gsap.to(strips, {
@@ -33,11 +34,11 @@ export function finale() {
     })
     const tl = gsap.timeline({
       defaults: { ease: 'none' },
-      scrollTrigger: { trigger: section, start: 'top top', end: '+=130%', pin: true, scrub: 0.8, invalidateOnRefresh: true },
+      scrollTrigger: { trigger: section, start: 'top top', end: '+=130%', pin: true, anticipatePin: 1, scrub: 0.8, invalidateOnRefresh: true },
     })
     tl.to(chars, { x: 0, y: 0, rotation: 0, scale: 1, autoAlpha: 1, duration: 1.6, stagger: 0.05, ease: 'power3.out' }, 0)
     tl.to('.cta-disc', { xPercent: 0, rotation: 0, scale: 1, duration: 2, ease: 'power3.out' }, 0.4)
-    if (actions) tl.to(actions, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power2.out' }, 2)
+    if (actions) tl.to(actions, { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' }, 2)
     tl.to({}, { duration: 0.5 })
   }, section)
   return () => ctx.revert()

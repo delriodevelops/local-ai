@@ -72,8 +72,10 @@ function apply() {
   root.classList.toggle('reduce-motion', reduce)
   smooth(!reduce)
   film(!reduce)
+  // El botón Motion empieza oculto: sin JavaScript no podría hacer nada
   const button = document.querySelector<HTMLButtonElement>('.motion')
   if (button) {
+    button.hidden = false
     button.setAttribute('aria-pressed', String(!reduce))
     button.querySelector('.state')!.textContent = reduce ? 'Off' : 'On'
     button.title = systemReduced.matches && !reduce
@@ -100,6 +102,14 @@ systemReduced.addEventListener('change', apply)
 const scrollbar = () => root.style.setProperty('--sbw', `${window.innerWidth - root.clientWidth}px`)
 window.addEventListener('resize', scrollbar)
 scrollbar()
+// La barra roja de arriba: cuánto se ha leído. Va en JavaScript porque Firefox no tiene animaciones ligadas al scroll
+const progress = () => {
+  const room = root.scrollHeight - window.innerHeight
+  root.style.setProperty('--p', room > 0 ? (window.scrollY / room).toFixed(4) : '0')
+}
+window.addEventListener('scroll', progress, { passive: true })
+window.addEventListener('resize', progress)
+progress()
 // Los cables del flujo de 01 se dibujan siempre; la película solo los anima
 getFlow()
 apply()

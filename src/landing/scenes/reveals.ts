@@ -15,10 +15,11 @@ export function reveals() {
         { clipPath: 'inset(0% 0% 100% 0%)', y: 40 },
         { clipPath: 'inset(0% 0% 0% 0%)', y: 0, ease: 'none', scrollTrigger: scrub(title, 'top 95%', 'top 60%') })
     })
+    // Solo opacidad: con visibility el lector de pantalla no leería el texto hasta llegar a él
     gsap.utils.toArray<HTMLElement>('.reveal').forEach(block => {
       gsap.fromTo(block,
-        { autoAlpha: 0, y: 48 },
-        { autoAlpha: 1, y: 0, ease: 'none', scrollTrigger: scrub(block, 'top bottom', 'top 75%') })
+        { opacity: 0, y: 48 },
+        { opacity: 1, y: 0, ease: 'none', scrollTrigger: scrub(block, 'top bottom', 'top 75%') })
     })
     gsap.utils.toArray<HTMLElement>('.ghost').forEach(ghost => {
       gsap.fromTo(ghost,

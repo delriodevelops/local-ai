@@ -1,6 +1,7 @@
 body{margin:0;background:#f2f2ef}
 a{color:#111111}a:hover{color:#ff3a1f}
 :focus-visible{outline:2px solid #ff3a1f;outline-offset:3px}
+.finale :focus-visible{outline-color:#111111}
 @property --n{syntax:'<integer>';inherits:false;initial-value:0}
 :root{--v:0}
 
@@ -13,18 +14,18 @@ a{color:#111111}a:hover{color:#ff3a1f}
 @keyframes drift{0%,100%{translate:0 0}50%{translate:-3vw 2vw}}
 @keyframes widths{0%,100%{font-variation-settings:"wdth" 70}50%{font-variation-settings:"wdth" 125}}
 @keyframes cue{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
-@keyframes ticker{to{transform:translateX(-50%)}}
+@keyframes ticker{to{transform:translateX(calc(-100% / 3))}}
 @keyframes fade{from{opacity:0}}
 @keyframes note-in{from{opacity:0;translate:0 16px}}
 .disc{animation:drop 1.6s cubic-bezier(.87,0,.13,1) both .2s, drift 14s cubic-bezier(.45,0,.55,1) 1.8s infinite}
 .breathe{animation:widths 9s cubic-bezier(.65,0,.35,1) infinite}
 .cue{animation:cue 2.4s cubic-bezier(.65,0,.35,1) infinite}
-.ticker{animation:ticker 40s linear infinite}
+.ticker{padding-right:56px;animation:ticker 60s linear infinite}
 
 /* ---------- Hero: un cartel suizo. Con movimiento, el scroll lo convierte en película (landing/film.ts) ---------- */
 /* La cabecera va encima del cartel: el hero ocupa la pantalla entera desde el primer momento */
 .top{position:absolute;top:0;left:0;right:0;z-index:5}
-.hero-stage{position:relative;isolation:isolate;height:100vh;min-height:560px;box-sizing:border-box;overflow:hidden}
+.hero-stage{position:relative;isolation:isolate;height:100vh;height:100svh;min-height:560px;box-sizing:border-box;overflow:hidden}
 .hero-frame{position:relative;max-width:1440px;height:100%;margin:0 auto;padding:110px 40px 170px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center}
 .grid{position:absolute;inset:0 40px;z-index:0;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;pointer-events:none}
 .gridline{position:relative}
@@ -33,7 +34,7 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .hero-title-wrap{position:relative;z-index:2}
 .disc-wrap{position:absolute;z-index:0;right:4vw;top:8%;width:clamp(150px,25vw,380px);aspect-ratio:1}
 .disc{width:100%;height:100%;border-radius:50%;background:#ff3a1f}
-.hero-title{position:relative;z-index:1;margin:0;font-weight:800;font-size:clamp(84px,19vw,300px);line-height:.8;letter-spacing:-0.045em;text-transform:uppercase}
+.hero-title{position:relative;z-index:1;margin:0;font-weight:800;font-size:clamp(84px,19vw,300px);font-size:max(48px,min(19vw,300px,calc((100svh - 300px) / 1.7)));line-height:.8;letter-spacing:-0.045em;text-transform:uppercase}
 .line-l,.line-r{display:block;white-space:nowrap;padding-bottom:.04em}
 .line-r{margin-left:18vw}
 /* Cada letra sube desde su propia máscara: cuando el scroll las saca de cuadro, la máscara viaja con ellas */
@@ -64,7 +65,10 @@ a{color:#111111}a:hover{color:#ff3a1f}
 
 /* La película: el contenedor alto da el recorrido y el escenario se queda fijo mientras dura.
    La apertura es el disco rojo que se abre hasta llenar la pantalla; dentro, la malla y las doce columnas que se van al final */
-.aperture,.say{display:none}
+.aperture{display:none}
+.say{margin:0;padding:24px max(40px,calc(50% - 680px)) 120px;font-weight:800;font-size:clamp(48px,8vw,140px);line-height:.85;letter-spacing:-0.045em;text-transform:uppercase;color:#111111}
+:root:not(.film) .hero-stage{height:auto;overflow:visible}
+:root:not(.film) .hero-frame{min-height:100vh;min-height:100svh}
 .film .hero-pin{height:400vh}
 .film .hero-stage{position:sticky;top:0;min-height:0}
 .film .hud{visibility:visible}
@@ -98,9 +102,10 @@ a{color:#111111}a:hover{color:#ff3a1f}
 @keyframes demo-bar{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 @keyframes live{0%,100%{opacity:1}50%{opacity:.25}}
 
-.progress{position:fixed;left:0;top:0;right:0;height:4px;background:#ff3a1f;transform-origin:left;transform:scaleX(0);z-index:50;animation:grow linear both;animation-timeline:scroll(root)}
+.progress{position:fixed;left:0;top:0;right:0;height:4px;background:#ff3a1f;transform-origin:left;transform:scaleX(var(--p,0));z-index:50}
 .reveal{animation:up linear both;animation-timeline:view();animation-range:entry 0% entry 80%}
-.scrub{animation:scrub linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
+/* Sin animaciones ligadas al scroll (Firefox) se quedaría en su último fotograma, desplazada: mejor quieta */
+@supports (animation-timeline: view()){.scrub{animation:scrub linear both;animation-timeline:view();animation-range:cover 0% cover 100%}}
 .num{display:inline-block;animation:num linear both;animation-timeline:view();animation-range:entry 0% cover 45%}
 .mask{animation:mask linear both;animation-timeline:view();animation-range:entry 10% entry 90%}
 .ghost{position:absolute;z-index:-1;right:-3vw;top:-6vw;font-weight:800;font-size:38vw;line-height:.8;letter-spacing:-0.06em;color:transparent;-webkit-text-stroke:1.5px rgba(17,17,17,.12);font-stretch:62%;pointer-events:none;user-select:none;animation:ghost linear both;animation-timeline:view();animation-range:cover 0% cover 100%}
@@ -129,7 +134,7 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .manifesto-lead .key{color:#ff3a1f}
 .manifesto-body{grid-column:8 / span 5;margin:0;font-size:18px;line-height:1.6;color:#444444}
 .meta-grid{max-width:1440px;margin:72px auto 0;padding:0 40px;box-sizing:border-box;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
-.film .manifesto-stage{min-height:100vh;padding-top:40px}
+.film .manifesto-stage{min-height:100vh;min-height:100svh;padding-top:40px}
 
 /* 01: el flujo corre con el scroll. Los cables los dibuja landing/flow.ts a partir de dónde quedan los nodos */
 .flow{position:relative;margin-top:80px;display:flex;align-items:center;justify-content:center}
@@ -137,6 +142,7 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .flow-wires{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .flow-wire{fill:none;stroke:#111111;stroke-width:2}
 .flow-dot{fill:#ff3a1f}
+.flow-fallback{display:none}
 .flow-node{position:absolute;left:var(--x);top:var(--y);width:15%;height:20%;box-sizing:border-box;border:2px solid #111111;background:#f2f2ef;padding:12px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;transition:background-color .35s cubic-bezier(.16,1,.3,1),color .35s}
 .flow-node:hover{background:#ff3a1f}
 .flow-kind{font-size:11px;text-transform:uppercase;letter-spacing:.12em}
@@ -151,8 +157,8 @@ a{color:#111111}a:hover{color:#ff3a1f}
 [data-node=critic]{--x:28.5%;--y:72%}
 [data-node=summarizer]{--x:56.5%;--y:40%}
 [data-node=answer]{--x:83.5%;--y:40%}
-.film .flow{height:100vh;margin-top:0;padding:32px 0;box-sizing:border-box}
-.film .flow-cam{width:min(100%,calc((100vh - 64px) * 2.4))}
+.film .flow{height:100vh;height:100svh;margin-top:0;padding:32px 0;box-sizing:border-box}
+.film .flow-cam{width:min(100%,calc((100vh - 64px) * 2.4));width:min(100%,calc((100svh - 64px) * 2.4))}
 
 /* 02: los sentidos. Sin movimiento son filas; con él, una tira horizontal que el scroll hace pasar,
    con el verbo que se ensancha al llegar al centro y un pictograma que se anima en cada panel */
@@ -172,13 +178,13 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .sense:hover .verb{font-variation-settings:"wdth" 125}
 .sense:hover .sense-meta{translate:-8px 0}
 /* A sangre: de borde a borde de la ventana, sin contar la barra de scroll (--sbw lo pone landing/main.ts) */
-.film .senses{width:calc(100vw - var(--sbw,0px));height:100vh;margin-left:calc(50% - 50vw + var(--sbw,0px) / 2);overflow:hidden;box-sizing:border-box;border-bottom:2px solid #111111}
+.film .senses{width:calc(100vw - var(--sbw,0px));height:100vh;height:100svh;margin-left:calc(50% - 50vw + var(--sbw,0px) / 2);overflow:hidden;box-sizing:border-box;border-bottom:2px solid #111111}
 .film .senses-track{display:flex;width:max-content;height:100%;will-change:transform}
 .film .sense{position:relative;width:min(62vw,880px);height:100%;box-sizing:border-box;padding:40px;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr) auto auto;grid-template-areas:"n device" "glyph glyph" "verb verb" "meta meta";align-items:start;gap:0 24px;border-bottom:0;border-right:1px solid #111111}
 .film .sense-n{font-size:13px;letter-spacing:.12em}
 .film .sense-of{display:inline;color:#555555}
 .film .sense-glyph{display:block;align-self:center;justify-self:end;width:clamp(110px,14vw,210px);height:auto}
-.film .sense .verb{font-size:clamp(84px,13vw,220px);line-height:.82;letter-spacing:-0.045em;font-variation-settings:"wdth" 62;transition:none}
+.film .sense .verb{font-size:min(13vw,220px,calc((min(62vw,880px) - 80px) / 4.5));line-height:.82;letter-spacing:-0.045em;font-variation-settings:"wdth" 62;transition:none}
 .film .sense-meta{margin-top:24px;max-width:440px;font-size:17px}
 
 /* 03: el planificador. La cabeza lectora roja avanza con el scroll y los trabajos aparecen a su paso */
@@ -186,30 +192,34 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .sched-lane{display:grid;grid-template-columns:110px minmax(0,1fr);gap:16px;align-items:center}
 .sched-label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:#bdbdb8}
 .sched-track{position:relative;height:30px;border-bottom:1px solid #3a3a3a}
-.job{position:absolute;top:0;bottom:5px;left:calc(var(--a) * 100%);width:calc((var(--b) - var(--a)) * 100%);box-sizing:border-box;display:flex;align-items:center;padding:0 8px;overflow:hidden;white-space:nowrap;background:#f2f2ef;color:#111111;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.job{position:absolute;top:0;bottom:5px;text-overflow:ellipsis;left:calc(var(--a) * 100%);width:calc((var(--b) - var(--a)) * 100%);box-sizing:border-box;display:flex;align-items:center;padding:0 8px;overflow:hidden;white-space:nowrap;background:#f2f2ef;color:#111111;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .job.is-red{background:#ff3a1f}
 .job.is-next{background:repeating-linear-gradient(135deg,rgba(242,242,239,.22) 0 6px,transparent 6px 12px);color:#f2f2ef;box-shadow:inset 0 0 0 1px #f2f2ef}
 .sched-axis{margin-left:126px;display:flex;justify-content:space-between;font-size:11px;letter-spacing:.12em;color:#7a7a75}
 .sched-head{display:none}
 .film .sched-head{display:block;position:absolute;top:-10px;bottom:20px;left:126px;width:2px;background:#ff3a1f;pointer-events:none}
 .film .curtain,.film .count,.film .countdown{animation:none}
+.stat-wide{font-size:clamp(34px,5.2vw,84px)}
+.reduce-motion .count,.reduce-motion .countdown{animation:none}
 
 /* 04: pantalla partida. A la izquierda, fijo, el flujo de la plantilla que pasa por el centro de la lista;
    se transforma de una a otra. Solo en pantallas anchas y con movimiento; si no, queda la lista */
 .tpl-diagram{display:none}
-.film .tpl-list .tpl{animation:none;opacity:.32;transition:opacity .45s cubic-bezier(.16,1,.3,1),color .3s cubic-bezier(.16,1,.3,1)}
-.film .tpl-list .tpl.is-active{opacity:1}
-@media (min-width:1024px){.film .tpl-list .tpl{padding-top:36px !important;padding-bottom:36px !important}}
-.film .tpl-list .tpl.is-active > span:first-child{color:#ff3a1f}
+.film .tpl-list .tpl{animation:none}
 @media (min-width:1024px){
   .film .tpl-stage{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);column-gap:64px;align-items:start}
   .film .tpl-list{grid-template-columns:minmax(0,1fr) !important}
   .film .tpl-diagram{display:block;position:sticky;top:max(12vh,calc(50vh - 260px))}
+  .film .tpl-list .tpl{padding-top:36px !important;padding-bottom:36px !important}
+  .film .tpl-list .t-name{color:#8a8a86;transition:color .45s cubic-bezier(.16,1,.3,1),translate .5s cubic-bezier(.16,1,.3,1)}
+  .film .tpl-list .tpl.is-active .t-name,.film .tpl-list .tpl:focus-visible .t-name{color:#111111}
+  .film .tpl-list .tpl:hover .t-name{color:#ff3a1f}
+  .film .tpl-list .tpl.is-active > span:first-child{color:#ff3a1f}
 }
 .tpl-board{position:relative;aspect-ratio:4 / 3;border:2px solid #111111;background-image:linear-gradient(rgba(17,17,17,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(17,17,17,.08) 1px,transparent 1px);background-size:calc(100% / 12) calc(100% / 9)}
 .tpl-wires{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.tpl-wire{fill:none;stroke:#111111;stroke-width:2;vector-effect:non-scaling-stroke}
-.tpl-wire.is-back{stroke:#ff3a1f;stroke-dasharray:6 6}
+.tpl-wire{fill:none;stroke:#111111;stroke-width:1.4}
+.tpl-wire.is-back{stroke:#ff3a1f;stroke-dasharray:5 5}
 .tpl-node{position:absolute;width:18%;height:14%;box-sizing:border-box;border:2px solid #111111;background:#f2f2ef;display:flex;align-items:center;justify-content:center;padding:0 4px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;text-align:center;line-height:1.05;opacity:0}
 .tpl-node.is-out{background:#111111;color:#f2f2ef}
 .tpl-caption{margin:16px 0 0;display:flex;gap:16px;align-items:baseline;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
@@ -217,7 +227,8 @@ a{color:#111111}a:hover{color:#ff3a1f}
 
 /* 05: la app en vivo se abre como una ventana al entrar */
 .film .demo,.film .demo-bar{animation:none}
-.demo:fullscreen{transform:none !important;clip-path:none !important}
+.demo:fullscreen,.demo:focus-within{transform:none !important;clip-path:none !important}
+.demo:fullscreen .demo-bar,.demo:focus-within .demo-bar{clip-path:none !important}
 
 /* Final: el rojo vuelve en doce columnas, como se fue en el hero, y la frase se monta letra a letra */
 .finale .cta-disc{z-index:1}
@@ -228,8 +239,13 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .finale-shutter span{flex:1 0 0;margin-right:-1px;background:#ff3a1f}
 .film .finale .cta-word,.film .finale .ch,.film .finale .cta-disc,.film .wm .ch{animation:none}
 .film .finale .cta-word{overflow:visible}
+/* Con el foco en el botón del final, la fila se ve aunque el scroll aún no la haya traído */
+.finale > div:last-child > div:last-child:focus-within{opacity:1 !important;transform:none !important}
 /* Las letras van sueltas para poder moverlas, pero cada palabra se parte entera, nunca por dentro */
 .cw{display:inline-block;white-space:nowrap}
+
+.wm-box{container-type:inline-size}
+.wm{font-size:16.5vw;font-size:16cqi}
 
 /* El contador de fotogramas sigue en toda la página, donde lo deja el del hero */
 .film-hud{display:none}
@@ -288,6 +304,7 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .tpl .arr{position:absolute;right:4px;top:24px;font-size:30px;opacity:0;translate:-16px 16px;transition:opacity .35s,translate .5s cubic-bezier(.16,1,.3,1)}
 .tpl:hover .arr{opacity:1;translate:0 0}
 
+@media (min-width:761px) and (max-width:995px){.hero-frame{padding-top:160px}}
 @media (max-width:760px){
   .top .nav{display:none !important}
   .hero-frame{padding-top:170px}
@@ -309,9 +326,12 @@ a{color:#111111}a:hover{color:#ff3a1f}
   [data-node=critic]{--x:68%;--y:30%}
   [data-node=summarizer]{--x:35%;--y:58%}
   [data-node=answer]{--x:35%;--y:86%}
-  .sense{grid-template-columns:44px minmax(0,1fr);grid-template-areas:"n verb"}
-  .sense-meta,.sense-device{display:none}
+  .sense{grid-template-columns:44px minmax(0,1fr);grid-template-areas:"n verb" ". meta" ". device";row-gap:8px}
+  .sense-device{text-align:left}
+  .disc-cta{top:auto;bottom:-76px;right:auto;left:0;width:auto;aspect-ratio:auto}
+  .job-verb{display:none}
   .film .sense{width:86vw;padding:24px}
+  .film .sense .verb{font-size:calc((86vw - 48px) / 4.5)}
   .film .sense-meta,.film .sense-device{display:block}
   .film .sense-device{font-size:11px}
   .sched-lane{grid-template-columns:84px minmax(0,1fr);gap:10px}
@@ -327,6 +347,12 @@ a{color:#111111}a:hover{color:#ff3a1f}
 }
 
 /* ---------- Movimiento reducido ---------- */
+/* Sin JavaScript no hay clase en <html>: se sigue la preferencia del sistema tal cual */
+@media (prefers-reduced-motion:reduce){
+  :root:not(.film):not(.reduce-motion) :is(.breathe,.disc,.ticker,.cue,.cta-disc,.scrub,.cta-word,.ghost,.ch,.live,.count,.countdown){animation:none}
+  :root:not(.film):not(.reduce-motion) :is(.ltr-in,.mask,.reveal,.tpl,.num,.curtain,.iris,.demo,.demo-bar){animation-name:fade}
+  :root:not(.film):not(.reduce-motion) .gridline::before{animation-name:fade}
+}
 /* Lo decide landing/main.ts (y el script del <head>): la preferencia del sistema, salvo que el visitante
    pulse el botón Motion. Sin desplazamientos grandes ni movimiento continuo; quedan fundidos y colores */
 .reduce-motion .breathe,.reduce-motion .disc,.reduce-motion .ticker,.reduce-motion .cue,.reduce-motion .cta-disc,

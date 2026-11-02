@@ -70,9 +70,10 @@ export function senses() {
     const slide = gsap.to(track, {
       x: () => -distance(),
       ease: 'none',
-      scrollTrigger: { trigger: wrap, start: 'top top', end: () => `+=${distance() * 0.8}`, pin: true, scrub: 0.8, invalidateOnRefresh: true },
+      scrollTrigger: { trigger: wrap, start: 'top top', end: () => `+=${distance() * 0.8}`, pin: true, anticipatePin: 1, scrub: 0.8, invalidateOnRefresh: true },
     })
-    gsap.utils.toArray<HTMLElement>('.sense', track).forEach(panel => {
+    const panels = gsap.utils.toArray<HTMLElement>('.sense', track)
+    panels.forEach((panel, i) => {
       const along = (start: string, end: string) => ({ trigger: panel, containerAnimation: slide, start, end, scrub: true })
       // El verbo se ensancha al llegar al centro y vuelve a estrecharse al irse
       const verb = panel.querySelector('.verb')
@@ -81,7 +82,9 @@ export function senses() {
         .to(verb, { fontVariationSettings: '"wdth" 62', duration: 1 })
       const svg = panel.querySelector<SVGSVGElement>('.sense-glyph')
       const glyph = svg && GLYPHS[svg.dataset.glyph ?? '']
-      if (svg && glyph) glyph(gsap.timeline({ scrollTrigger: along('left 85%', 'center 45%') }), svg)
+      // El último panel se para pegado a la derecha y su centro nunca llega al 45 %: termina al llegar
+      const end = i === panels.length - 1 ? 'right right' : 'center 45%'
+      if (svg && glyph) glyph(gsap.timeline({ scrollTrigger: along('left 85%', end) }), svg)
     })
   }, wrap)
   return () => ctx.revert()

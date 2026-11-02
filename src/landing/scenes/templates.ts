@@ -79,10 +79,19 @@ export function templates() {
         const bend = (x2 - x1) / 2
         wire.setAttribute('d', `M${x1} ${y1}C${x1 + bend} ${y1} ${x2 - bend} ${y2} ${x2} ${y2}`)
       }
+      // pathLength normaliza el trazo para dibujarlo; el discontinuo de vuelta necesita su longitud real
+      if (back) wire.removeAttribute('pathLength')
+      else wire.setAttribute('pathLength', '1')
       wire.style.strokeDasharray = back ? '' : '1'
       wire.style.strokeDashoffset = back ? '' : String(1 - drawn.t)
       wire.style.opacity = back ? String(drawn.t) : ''
     })
+  }
+
+  const focus = (event: FocusEvent) => {
+    const row = (event.target as Element).closest('.tpl')
+    const i = row ? rows.indexOf(row as HTMLElement) : -1
+    if (i >= 0) show(i)
   }
 
   let morph: gsap.core.Timeline | null = null
@@ -118,11 +127,14 @@ export function templates() {
     rows.forEach((row, i) => {
       ScrollTrigger.create({ trigger: row, start: 'top 58%', end: 'bottom 58%', onToggle: self => self.isActive && show(i) })
     })
+    // Con el teclado, el tablero sigue al foco aunque la fila no pase por el centro
+    stage.addEventListener('focusin', focus)
   })
   show(0)
 
   return () => {
     morph?.kill()
+    stage.removeEventListener('focusin', focus)
     ctx.revert()
     gsap.set(nodes, { clearProps: 'all' })
     wires.forEach(wire => wire.remove())

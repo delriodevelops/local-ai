@@ -47,7 +47,7 @@ export function canvasRun() {
     const center = () => ({ x: message.offsetLeft + message.offsetWidth / 2, y: message.offsetTop + message.offsetHeight / 2 })
     const tl = gsap.timeline({
       defaults: { ease: 'none' },
-      scrollTrigger: { trigger: box, start: 'top top', end: '+=220%', pin: true, scrub: 0.8, invalidateOnRefresh: true },
+      scrollTrigger: { trigger: box, start: 'top top', end: '+=220%', pin: true, anticipatePin: 1, scrub: 0.8, invalidateOnRefresh: true },
     })
     const run = (list: SVGPathElement[], at: number) =>
       list.forEach((w, i) => tl.to(travel[wires.indexOf(w)], { t: 1, duration: 1.4, ease: 'power1.inOut' }, at + i * 0.15))

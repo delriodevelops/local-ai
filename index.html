@@ -23,6 +23,7 @@
     if (window.isSecureContext && 'serviceWorker' in navigator) navigator.serviceWorker.register('%BASE_URL%isolation-sw.js')
   </script>
   <script type="module" src="/src/landing/main.ts"></script>
+  <noscript><style>.demo-stage,.demo-intro{display:none}.demo-alt{display:flex}.flow-fallback{display:inline}</style></noscript>
 </head>
 <body>
 <main style="font-family: 'Archivo Variable', system-ui, sans-serif; color: #111111; background: #f2f2ef; overflow: clip">
@@ -37,7 +38,7 @@
       <a href="#start" style="text-decoration: none">04 Start</a>
       <a href="#try" style="text-decoration: none">05 Try</a>
     </nav>
-    <button class="motion" type="button" aria-pressed="true"><span class="dot" aria-hidden="true"></span>Motion <span class="state">On</span></button>
+    <button class="motion" type="button" aria-pressed="true" hidden><span class="dot" aria-hidden="true"></span>Motion <span class="state">On</span></button>
     <a class="btn" href="./app/" style="display: inline-block; background-color: #111111; color: #f2f2ef; padding: 14px 20px; text-decoration: none; font-weight: 600">Open the app <span class="arrow">↗</span></a>
   </header>
 
@@ -119,6 +120,7 @@
         <div class="ticker" style="display: flex; width: max-content; gap: 56px; white-space: nowrap; font-weight: 800; font-size: 56px; letter-spacing: -0.03em; text-transform: uppercase; font-variation-settings: 'wdth' 70">
           <span>Think</span><span style="color:#ff3a1f">●</span><span>See</span><span style="color:#ff3a1f">●</span><span>Paint</span><span style="color:#ff3a1f">●</span><span>Listen</span><span style="color:#ff3a1f">●</span><span>Speak</span><span style="color:#ff3a1f">●</span><span>Split</span><span style="color:#ff3a1f">●</span><span>Join</span><span style="color:#ff3a1f">●</span><span>Decide</span><span style="color:#ff3a1f">●</span>
           <span>Think</span><span style="color:#ff3a1f">●</span><span>See</span><span style="color:#ff3a1f">●</span><span>Paint</span><span style="color:#ff3a1f">●</span><span>Listen</span><span style="color:#ff3a1f">●</span><span>Speak</span><span style="color:#ff3a1f">●</span><span>Split</span><span style="color:#ff3a1f">●</span><span>Join</span><span style="color:#ff3a1f">●</span><span>Decide</span><span style="color:#ff3a1f">●</span>
+          <span>Think</span><span style="color:#ff3a1f">●</span><span>See</span><span style="color:#ff3a1f">●</span><span>Paint</span><span style="color:#ff3a1f">●</span><span>Listen</span><span style="color:#ff3a1f">●</span><span>Speak</span><span style="color:#ff3a1f">●</span><span>Split</span><span style="color:#ff3a1f">●</span><span>Join</span><span style="color:#ff3a1f">●</span><span>Decide</span><span style="color:#ff3a1f">●</span>
         </div>
       </div>
     </div>
@@ -136,7 +138,7 @@
 
     <div class="flow" role="img" aria-label="A flow: a message goes to three assistants at once, and a fourth merges their answers into one reply">
       <div class="flow-cam">
-        <svg class="flow-wires" aria-hidden="true"></svg>
+        <svg class="flow-wires" viewBox="0 0 1200 500" aria-hidden="true"><g class="flow-fallback"><path class="flow-wire" d="M198 250C270 250 270 90 342 90"/><path class="flow-wire" d="M198 250H342"/><path class="flow-wire" d="M198 250C270 250 270 410 342 410"/><path class="flow-wire" d="M522 90C600 90 600 250 678 250"/><path class="flow-wire" d="M522 250H678"/><path class="flow-wire" d="M522 410C600 410 600 250 678 250"/><path class="flow-wire" d="M858 250H1002"/></g></svg>
         <div class="flow-node" data-node="message"><span class="flow-kind">Message</span><span class="flow-text">A bakery run by a fox</span></div>
         <div class="flow-node" data-node="researcher"><span class="flow-kind">Assistant</span><span class="flow-name">Researcher</span><span class="flow-bar"></span></div>
         <div class="flow-node" data-node="designer"><span class="flow-kind">Assistant</span><span class="flow-name">Designer</span><span class="flow-bar"></span></div>
@@ -226,28 +228,28 @@
         <h2 class="mask" style="margin: 0; font-weight: 800; font-size: clamp(44px, 5.6vw, 84px); line-height: .92; letter-spacing: -0.035em; text-transform: uppercase">Your whole machine</h2>
         <p class="reveal" style="margin: 0; max-width: 520px; font-size: 18px; line-height: 1.6; color: #bdbdb8">Every model gets the best place on your machine: the graphics card when it can, every processor core when it can't. The next model loads while the current one works, so nothing waits.</p>
         <div class="sched" role="img" aria-label="The graphics card and the processor work at the same time, and the next model loads while the current one works">
-          <div class="sched-lane"><span class="sched-label">Graphics card</span><div class="sched-track"><span class="job" style="--a: 0; --b: .42">Qwen 2.5 · thinking</span><span class="job is-red" style="--a: .5; --b: .92">Janus-Pro · painting</span></div></div>
-          <div class="sched-lane"><span class="sched-label">Processor</span><div class="sched-track"><span class="job is-red" style="--a: .08; --b: .5">Kokoro · speaking</span><span class="job" style="--a: .58; --b: .74">Split · sorting</span></div></div>
-          <div class="sched-lane"><span class="sched-label">Next up</span><div class="sched-track"><span class="job is-next" style="--a: .04; --b: .46">Janus-Pro · loading</span></div></div>
+          <div class="sched-lane"><span class="sched-label">Graphics card</span><div class="sched-track"><span class="job" style="--a: 0; --b: .42">Qwen 2.5<span class="job-verb"> · thinking</span></span><span class="job is-red" style="--a: .5; --b: .92">Janus-Pro<span class="job-verb"> · painting</span></span></div></div>
+          <div class="sched-lane"><span class="sched-label">Processor</span><div class="sched-track"><span class="job is-red" style="--a: .08; --b: .5">Kokoro<span class="job-verb"> · speaking</span></span><span class="job" style="--a: .58; --b: .74">Split</span></div></div>
+          <div class="sched-lane"><span class="sched-label">Next up</span><div class="sched-track"><span class="job is-next" style="--a: .04; --b: .46">Janus-Pro<span class="job-verb"> · loading</span></span></div></div>
           <div class="sched-axis"><span>0 s</span><span>5 s</span><span>10 s</span></div>
           <span class="sched-head"></span>
         </div>
       </div>
       <div style="flex: 1 1 520px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 2px solid #f2f2ef">
         <div style="padding: 28px 24px 36px 0; border-bottom: 1px solid #3a3a3a; border-right: 1px solid #3a3a3a">
-          <div class="countdown" style="--n: 0; font-weight: 800; font-size: clamp(72px, 8vw, 128px); line-height: .9; letter-spacing: -0.05em; font-variation-settings: 'wdth' 70"></div>
-          <div style="margin-top: 10px; font-size: 15px; color: #bdbdb8">servers reading your prompts</div>
+          <div class="countdown" aria-hidden="true" style="--n: 0; font-weight: 800; font-size: clamp(72px, 8vw, 128px); line-height: .9; letter-spacing: -0.05em; font-variation-settings: 'wdth' 70"></div>
+          <div style="margin-top: 10px; font-size: 15px; color: #bdbdb8"><span class="sr-only">0 </span>servers reading your prompts</div>
         </div>
         <div style="padding: 28px 0 36px 24px; border-bottom: 1px solid #3a3a3a">
-          <div style="font-weight: 800; font-size: clamp(72px, 8vw, 128px); line-height: .9; letter-spacing: -0.05em; font-variation-settings: 'wdth' 70"><span class="count" style="--n: 250"></span><span style="font-size: .35em; letter-spacing: 0"> KB</span></div>
-          <div style="margin-top: 10px; font-size: 15px; color: #bdbdb8">to open the app</div>
+          <div style="font-weight: 800; font-size: clamp(72px, 8vw, 128px); line-height: .9; letter-spacing: -0.05em; font-variation-settings: 'wdth' 70"><span class="count" aria-hidden="true" style="--n: 250"></span><span style="font-size: .35em; letter-spacing: 0" aria-hidden="true"> KB</span></div>
+          <div style="margin-top: 10px; font-size: 15px; color: #bdbdb8"><span class="sr-only">250 KB </span>to open the app</div>
         </div>
         <div style="padding: 28px 24px 36px 0; border-right: 1px solid #3a3a3a">
-          <div class="count" style="--n: 4; font-weight: 800; font-size: clamp(72px, 8vw, 128px); line-height: .9; letter-spacing: -0.05em; font-variation-settings: 'wdth' 70"></div>
-          <div style="margin-top: 10px; font-size: 15px; color: #bdbdb8">kinds of model in one flow</div>
+          <div class="count" aria-hidden="true" style="--n: 4; font-weight: 800; font-size: clamp(72px, 8vw, 128px); line-height: .9; letter-spacing: -0.05em; font-variation-settings: 'wdth' 70"></div>
+          <div style="margin-top: 10px; font-size: 15px; color: #bdbdb8"><span class="sr-only">4 </span>kinds of model in one flow</div>
         </div>
         <div style="padding: 28px 0 36px 24px">
-          <div style="font-weight: 800; font-size: clamp(72px, 8vw, 128px); line-height: .9; letter-spacing: -0.05em; color: #ff3a1f; font-variation-settings: 'wdth' 70">GPU+CPU</div>
+          <div class="stat-wide" style="font-weight: 800; line-height: .9; letter-spacing: -0.05em; color: #ff3a1f; font-variation-settings: 'wdth' 70">GPU+CPU</div>
           <div style="margin-top: 10px; font-size: 15px; color: #bdbdb8">working at the same time</div>
         </div>
       </div>
@@ -339,8 +341,8 @@
   <section class="iris finale" data-scene="Your turn" data-tone="red" style="position: relative; background: #ff3a1f; overflow: hidden">
     <div class="finale-shutter" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
     <div aria-hidden="true" class="cta-disc" style="position: absolute; right: -8vw; top: -12vw; width: 46vw; aspect-ratio: 1; border-radius: 50%; background: #f2f2ef"></div>
-    <div style="position: relative; max-width: 1440px; margin: 0 auto; padding: 140px 40px; display: flex; flex-direction: column; gap: 48px">
-      <h2 aria-label="Draw your first mesh." style="margin: 0; font-weight: 800; font-size: clamp(72px, 12vw, 200px); line-height: .8; letter-spacing: -0.05em; text-transform: uppercase">
+    <div style="position: relative; max-width: 1440px; margin: 0 auto; padding: min(140px, 12vh) 40px; display: flex; flex-direction: column; gap: min(48px, 5vh)">
+      <h2 aria-label="Draw your first mesh." style="margin: 0; font-weight: 800; font-size: clamp(56px, min(12vw, 22vh), 200px); line-height: .8; letter-spacing: -0.05em; text-transform: uppercase">
         <span class="cta-word" aria-hidden="true" style="font-stretch: 125%"><span class="ch" style="--k: 0">D</span><span class="ch" style="--k: 1">r</span><span class="ch" style="--k: 2">a</span><span class="ch" style="--k: 3">w</span></span>
         <span class="cta-word alt" aria-hidden="true" style="font-stretch: 62%; margin-left: 12vw"><span class="cw"><span class="ch" style="--k: 2">y</span><span class="ch" style="--k: 3">o</span><span class="ch" style="--k: 4">u</span><span class="ch" style="--k: 5">r</span></span><span class="ch" style="--k: 6; width: .3em">&#160;</span><span class="cw"><span class="ch" style="--k: 6">f</span><span class="ch" style="--k: 7">i</span><span class="ch" style="--k: 8">r</span><span class="ch" style="--k: 9">s</span><span class="ch" style="--k: 10">t</span></span></span>
         <span class="cta-word" aria-hidden="true" style="font-stretch: 100%"><span class="ch" style="--k: 4">m</span><span class="ch" style="--k: 5">e</span><span class="ch" style="--k: 6">s</span><span class="ch" style="--k: 7">h</span><span class="ch" style="--k: 8">.</span></span>
@@ -353,8 +355,8 @@
   </section>
 
   <footer data-scene="End" style="max-width: 1440px; margin: 0 auto; padding: 48px 40px 32px">
-    <div aria-label="MeshMind" style="overflow: hidden">
-      <div class="breathe wm skew" aria-hidden="true" style="font-weight: 800; font-size: 16.5vw; line-height: .8; letter-spacing: -0.05em; text-transform: uppercase; white-space: nowrap; padding-bottom: .04em"><span class="ch" style="--k: 0">M</span><span class="ch" style="--k: 1">e</span><span class="ch" style="--k: 2">s</span><span class="ch" style="--k: 3">h</span><span class="ch" style="--k: 4">M</span><span class="ch" style="--k: 5">i</span><span class="ch" style="--k: 6">n</span><span class="ch" style="--k: 7">d</span></div>
+    <div class="wm-box" aria-label="MeshMind" style="overflow: hidden">
+      <div class="breathe wm skew" aria-hidden="true" style="font-weight: 800; line-height: .8; letter-spacing: -0.05em; text-transform: uppercase; white-space: nowrap; padding-bottom: .04em"><span class="ch" style="--k: 0">M</span><span class="ch" style="--k: 1">e</span><span class="ch" style="--k: 2">s</span><span class="ch" style="--k: 3">h</span><span class="ch" style="--k: 4">M</span><span class="ch" style="--k: 5">i</span><span class="ch" style="--k: 6">n</span><span class="ch" style="--k: 7">d</span></div>
     </div>
     <div style="margin-top: 32px; padding-top: 16px; border-top: 2px solid #111111; display: flex; flex-wrap: wrap; gap: 12px 40px; justify-content: space-between; font-size: 13px">
       <span>WebLLM · Transformers.js · Kokoro · React Flow</span>
