@@ -139,7 +139,14 @@
       "deps": ["LN-02", "DS-01", "DS-02"],
       "at": "2026-10-30T16:43:07Z",
       "by": "claude-code",
-      "desc": "Capturas nuevas y enlace correcto en la ficha del portfolio.\n\n**Terminado:** la ficha enseña la versión publicada."
+      "desc": "Capturas nuevas y enlace correcto en la ficha del portfolio.\n\n**Terminado:** la ficha enseña la versión publicada.",
+      "notes": [
+        {
+          "at": "2026-11-02T17:53:38Z",
+          "by": "claude-code",
+          "text": "Vídeo promocional listo para usarlo aquí (aa79bf4): 27 s de motion graphics con voz de ElevenLabs, música y efectos, sin iconos. El archivo final es motion/out/MeshMind-motion-v3.mp4; no va en git y se regenera con `npm run render` dentro de motion/. Queda pendiente que lo escuches: los niveles están medidos (−14 LUFS), no escuchados."
+        }
+      ]
     },
     {
       "id": "DS-01",
