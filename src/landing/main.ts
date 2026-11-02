@@ -96,6 +96,10 @@ document.querySelector('.disc-play')?.addEventListener('click', () => {
   lenis?.scrollTo(0, { immediate: true })
 })
 systemReduced.addEventListener('change', apply)
+// Lo que ocupa la barra de scroll: lo que va a sangre (la tira de 02) mide la ventana sin ella
+const scrollbar = () => root.style.setProperty('--sbw', `${window.innerWidth - root.clientWidth}px`)
+window.addEventListener('resize', scrollbar)
+scrollbar()
 // Los cables del flujo de 01 se dibujan siempre; la película solo los anima
 getFlow()
 apply()
