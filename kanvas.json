@@ -161,6 +161,11 @@
           "at": "2026-11-01T19:55:01Z",
           "by": "claude-code",
           "text": "Sustituye a la nota anterior: el diseño final es suizo. Papel #f2f2ef, tinta #111, un solo rojo señal, Archivo de ancho variable y Plex Mono para datos, esquinas rectas. Aplicado a toda la app (cabecera, chat, lienzo, nodos, monitor, ajustes) y a la landing nueva. Modo oscuro con selector Sistema/Claro/Oscuro en Ajustes. En móvil en vertical el flujo baja de arriba abajo (entradas arriba, salidas abajo) y la X de borrar nodo se ve siempre en pantallas táctiles. Probado a 375 px en claro y oscuro y en escritorio."
+        },
+        {
+          "at": "2026-11-02T00:45:43Z",
+          "by": "claude-code",
+          "text": "Hero cinematográfico publicado (da4ac2e). Ahora es una película que avanza y rebobina con el scroll (GSAP ScrollTrigger, con Lenis en el mismo reloj): 1) MESH y MIND se abren letra a letra y salen de cuadro mientras la retícula se corta; 2) el disco rojo se abre como un diafragma hasta llenar la pantalla y dentro se dibuja, del centro hacia fuera, una malla con los modelos de la app (en vertical en móviles); 3) sube «Your machine is the server.» y la señal enciende los nodos; 4) el rojo se va en las doce columnas de la retícula. Además: las letras suben una a una al cargar y se ensanchan al pasar el ratón, el disco sigue al puntero, hay contador de fotogramas y en móvil el cartel ocupa la pantalla entera. Si el sistema pide menos movimiento (es el caso de tu Windows), el hero lo dice y ofrece «Play it»; la elección se recuerda. Ya no depende de las animaciones de scroll de CSS, así que también va en Firefox. Para revisar: abrir la web en Chrome o Edge y bajar despacio por el hero."
         }
       ]
     },
