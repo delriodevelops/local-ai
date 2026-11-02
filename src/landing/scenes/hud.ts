@@ -13,17 +13,24 @@ export function hud() {
   let frame = -1
   let shown: HTMLElement | null = null
   let marks: { section: HTMLElement; st: ScrollTrigger }[] = []
+  // En el móvil no se enseña; el final del hero se mide al recalcular, no en cada fotograma
+  const narrow = matchMedia('(max-width: 760px)')
+  let heroEnd = pin.offsetHeight - innerHeight
+  const measure = () => {
+    heroEnd = pin.offsetHeight - innerHeight
+  }
 
   // La escena es la última cuyo comienzo ya pasó: vale aunque el scroll salte varias de golpe
   const tick = () => {
-    const heroEnd = pin.offsetHeight - innerHeight
-    const now = Math.round(240 + (Math.max(0, scrollY - heroEnd) / innerHeight) * 80)
+    if (narrow.matches) return
+    const y = scrollY
+    const now = Math.round(240 + (Math.max(0, y - heroEnd) / innerHeight) * 80)
     if (now !== frame) {
       frame = now
       counter.textContent = String(now).padStart(4, '0')
     }
     let current: HTMLElement | null = null
-    for (const mark of marks) if (mark.st.start <= scrollY) current = mark.section
+    for (const mark of marks) if (mark.st.start <= y) current = mark.section
     if (current === shown) return
     shown = current
     label.textContent = current?.dataset.scene ?? ''
@@ -48,9 +55,11 @@ export function hud() {
     if (footer) ScrollTrigger.create({ trigger: footer, start: 'top bottom', end: 'max', onToggle: self => hide('footer', self.isActive) })
   })
   gsap.ticker.add(tick)
+  ScrollTrigger.addEventListener('refresh', measure)
 
   return () => {
     gsap.ticker.remove(tick)
+    ScrollTrigger.removeEventListener('refresh', measure)
     ctx.revert()
     el.classList.remove('is-on', 'on-dark', 'is-hidden')
   }

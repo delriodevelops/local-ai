@@ -14,6 +14,14 @@ const root = document.documentElement
 const KEY = 'mm-motion'
 const systemReduced = window.matchMedia('(prefers-reduced-motion: reduce)')
 let lenis: Lenis | null = null
+// Lo único que se inclina con la velocidad: --v se escribe en ellos, no en <html>, y solo cuando cambia
+const skews = Array.from(document.querySelectorAll<HTMLElement>('.skew'))
+let tilt = ''
+const lean = (value: string) => {
+  if (value === tilt) return
+  tilt = value
+  for (const el of skews) el.style.setProperty('--v', value)
+}
 let stopFilm: (() => void) | null = null
 
 // La elección del visitante, guardada si se puede; sin almacenamiento vale para esta visita
@@ -36,7 +44,7 @@ function smooth(on: boolean) {
   if (on && !lenis) {
     lenis = new Lenis({ lerp: 0.085, anchors: true })
     lenis.on('scroll', ({ velocity }: { velocity: number }) => {
-      root.style.setProperty('--v', Math.max(-1, Math.min(1, velocity / 45)).toFixed(3))
+      lean(Math.max(-1, Math.min(1, velocity / 45)).toFixed(2))
       ScrollTrigger.update()
     })
     gsap.ticker.add(tick)
@@ -44,7 +52,7 @@ function smooth(on: boolean) {
     gsap.ticker.remove(tick)
     lenis.destroy()
     lenis = null
-    root.style.setProperty('--v', '0')
+    lean('0')
   }
 }
 
@@ -102,14 +110,28 @@ systemReduced.addEventListener('change', apply)
 const scrollbar = () => root.style.setProperty('--sbw', `${window.innerWidth - root.clientWidth}px`)
 window.addEventListener('resize', scrollbar)
 scrollbar()
-// La barra roja de arriba: cuánto se ha leído. Va en JavaScript porque Firefox no tiene animaciones ligadas al scroll
+// La barra roja de arriba: cuánto se ha leído. Va en JavaScript porque Firefox no tiene animaciones ligadas al scroll.
+// Se escribe en la propia barra (solo transform) y el alto de la página se mide al cambiar, no en cada fotograma
+const bar = document.querySelector<HTMLElement>('.progress')
+let room = 0
 const progress = () => {
-  const room = root.scrollHeight - window.innerHeight
-  root.style.setProperty('--p', room > 0 ? (window.scrollY / room).toFixed(4) : '0')
+  if (bar) bar.style.transform = `scaleX(${room > 0 ? Math.min(1, window.scrollY / room).toFixed(4) : 0})`
+}
+const measure = () => {
+  room = root.scrollHeight - window.innerHeight
+  progress()
 }
 window.addEventListener('scroll', progress, { passive: true })
-window.addEventListener('resize', progress)
-progress()
+window.addEventListener('resize', measure)
+ScrollTrigger.addEventListener('refresh', measure)
+measure()
+// La firma del pie respira solo mientras se ve: con el ancho de letra animado, cada fotograma vuelve a maquetarla
+const signatureMark = document.querySelector<HTMLElement>('.wm')
+if (signatureMark) {
+  new IntersectionObserver(([entry]) => {
+    signatureMark.style.animationPlayState = entry.isIntersecting ? '' : 'paused'
+  }).observe(signatureMark)
+}
 // Los cables del flujo de 01 se dibujan siempre; la película solo los anima
 getFlow()
 apply()
@@ -117,16 +139,31 @@ apply()
 // La app incrustada (05) solo se descarga en pantallas anchas con ratón: en móviles (también apaisados) y tabletas
 // táctiles el marco está oculto y sin src. Una vez cargada se queda, aunque la ventana cambie.
 // Misma consulta que el CSS, para que el marco nunca se vea sin src ni se cargue oculto
+// Arrancar la app ocupa el hilo principal unos 150 ms y el scroll se pararía: se carga cuando el visitante está a una
+// pantalla de la demo y deja de desplazarse un momento
 const small = window.matchMedia('(max-width: 760px), (pointer: coarse)')
 const stage = document.querySelector<HTMLElement>('.demo')
 const demo = document.querySelector<HTMLIFrameElement>('.demo-frame')
+let near = false
+let still = 0
 function loadDemo() {
-  if (!demo || small.matches || demo.src) return
+  if (!demo || small.matches || demo.src || !near) return
   demo.src = demo.dataset.src!
   small.removeEventListener('change', loadDemo)
+  window.removeEventListener('scroll', waitStill)
+}
+function waitStill() {
+  window.clearTimeout(still)
+  still = window.setTimeout(loadDemo, 300)
+}
+if (stage && demo) {
+  new IntersectionObserver(entries => {
+    near = entries.some(entry => entry.isIntersecting)
+    if (near) waitStill()
+  }, { rootMargin: '100% 0px' }).observe(stage)
+  window.addEventListener('scroll', waitStill, { passive: true })
 }
 small.addEventListener('change', loadDemo)
-loadDemo()
 
 // Hasta que el visitante hace clic, una capa encima del marco deja que la rueda siga bajando la página
 // (si no, el lienzo la usaría para hacer zoom) y el marco es inerte, para que el tabulador no recorra la app entera.

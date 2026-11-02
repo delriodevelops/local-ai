@@ -148,6 +148,7 @@ export function startFilm() {
       clip = next
       aperture.style.clipPath = next
     }
+    title.classList.toggle('is-off', tl.progress() > 0.34)
     const now = Math.round(tl.progress() * FRAMES)
     if (now !== frame) {
       frame = now
@@ -270,6 +271,7 @@ export function startFilm() {
     aperture.style.removeProperty('visibility')
     aperture.style.removeProperty('clip-path')
     disc.style.removeProperty('visibility')
+    title.classList.remove('is-off')
     counter.textContent = '000'
   }
 }

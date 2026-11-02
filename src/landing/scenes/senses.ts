@@ -75,9 +75,10 @@ export function senses() {
     const panels = gsap.utils.toArray<HTMLElement>('.sense', track)
     panels.forEach((panel, i) => {
       const along = (start: string, end: string) => ({ trigger: panel, containerAnimation: slide, start, end, scrub: true })
-      // El verbo se ensancha al llegar al centro y vuelve a estrecharse al irse
+      // El verbo se ensancha al llegar al centro y vuelve a estrecharse al irse. Solo mientras cruza el centro:
+      // cambiar el ancho de letra vuelve a maquetar la palabra, y con varias a la vez el scroll da tirones
       const verb = panel.querySelector('.verb')
-      gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: along('left right', 'right left') })
+      gsap.timeline({ defaults: { ease: 'none' }, scrollTrigger: along('left 65%', 'right 35%') })
         .to(verb, { fontVariationSettings: '"wdth" 125', duration: 1 })
         .to(verb, { fontVariationSettings: '"wdth" 62', duration: 1 })
       const svg = panel.querySelector<SVGSVGElement>('.sense-glyph')

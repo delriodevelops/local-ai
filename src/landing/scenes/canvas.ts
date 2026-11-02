@@ -48,6 +48,8 @@ export function canvasRun() {
     const tl = gsap.timeline({
       defaults: { ease: 'none' },
       scrollTrigger: { trigger: box, start: 'top top', end: '+=220%', pin: true, anticipatePin: 1, scrub: 0.8, invalidateOnRefresh: true },
+      // Los cables y los puntos se pintan cuando la escena avanza, no en cada fotograma de toda la visita
+      onUpdate: render,
     })
     const run = (list: SVGPathElement[], at: number) =>
       list.forEach((w, i) => tl.to(travel[wires.indexOf(w)], { t: 1, duration: 1.4, ease: 'power1.inOut' }, at + i * 0.15))
@@ -67,10 +69,9 @@ export function canvasRun() {
     tl.to(node('answer').querySelector('.flow-text'), { clipPath: 'inset(0% 0% 0% 0%)', duration: 1 }, 8.9)
     tl.to({}, { duration: 0.8 })
   })
-  gsap.ticker.add(render)
+  render()
 
   return () => {
-    gsap.ticker.remove(render)
     ctx.revert()
     dots.forEach(dot => dot.remove())
     wires.forEach(w => w.style.removeProperty('stroke-dashoffset'))
