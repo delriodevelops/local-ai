@@ -71,7 +71,9 @@ function apply() {
       ? 'Your system asks for reduced motion; showing full motion because you chose it'
       : 'Turn the scroll animations on or off'
   }
-  // Apagado por el sistema y no por el visitante: el hero lo explica y ofrece encenderlo
+  // Sin movimiento, el disco del hero es el botón de play; si lo apagó el sistema, una línea explica por qué
+  const play = document.querySelector<HTMLElement>('.disc-cta')
+  if (play) play.hidden = !reduce
   const note = document.querySelector<HTMLElement>('.motion-note')
   if (note) note.hidden = !(reduce && choice === null)
 }
@@ -79,7 +81,11 @@ function apply() {
 document.querySelector('.motion')?.addEventListener('click', () => {
   choose(root.classList.contains('reduce-motion') ? 'full' : 'reduced')
 })
-document.querySelector('.motion-play')?.addEventListener('click', () => choose('full'))
+// La película empieza siempre en el primer fotograma
+document.querySelector('.disc-play')?.addEventListener('click', () => {
+  choose('full')
+  lenis?.scrollTo(0, { immediate: true })
+})
 systemReduced.addEventListener('change', apply)
 apply()
 
