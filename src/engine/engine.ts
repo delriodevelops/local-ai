@@ -59,6 +59,17 @@ export type GenerateOptions = {
   repetitionPenalty?: number
 }
 
+// Qwen3 y Qwen3.5 piensan antes de responder si no se les dice lo contrario: en un flujo es lento y se come los tokens de la respuesta
+const thinksByDefault = (modelId: string | null) => !!modelId?.startsWith('Qwen3')
+
+// Los que piensan igualmente (DeepSeek R1) escriben el razonamiento hasta </think>, a veces sin la etiqueta de apertura:
+// solo pasa la respuesta, y mientras piensan no se enseña nada
+const answerOf = (text: string) => {
+  const end = text.lastIndexOf('</think>')
+  if (end >= 0) return text.slice(end + '</think>'.length).trimStart()
+  return /^\s*<think>/.test(text) ? '' : text
+}
+
 // Una respuesta en streaming; devuelve el texto completo.
 // El motor atiende una respuesta cada vez: las ramas paralelas con asistentes hacen cola aquí
 export function generate(messages: ChatCompletionMessageParam[], { temperature, maxTokens, signal, onToken, onStart, responseFormat, repetitionPenalty = 1.1 }: GenerateOptions) {
@@ -74,6 +85,7 @@ export function generate(messages: ChatCompletionMessageParam[], { temperature, 
       // La penalización evita que los modelos pequeños entren en bucle con contextos largos
       const stream = await engine.chat.completions.create({
         messages, stream: true, temperature, max_tokens: maxTokens, repetition_penalty: repetitionPenalty, response_format: responseFormat,
+        extra_body: thinksByDefault(modelId) ? { enable_thinking: false } : undefined,
       })
       let text = ''
       let tokens = 0
@@ -87,11 +99,11 @@ export function generate(messages: ChatCompletionMessageParam[], { temperature, 
         started ||= performance.now()
         tokens++
         text += chunk.choices[0]?.delta?.content ?? ''
-        onToken(text)
+        onToken(answerOf(text))
       }
       const seconds = (performance.now() - started) / 1000
       if (tokens > 8 && seconds > 0 && useEngine.getState().modelId === modelId) resources.set({ tokensPerSecond: tokens / seconds })
-      return text
+      return answerOf(text)
     } finally {
       resources.set({ llmBusy: false })
     }

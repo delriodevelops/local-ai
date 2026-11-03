@@ -43,7 +43,7 @@ Everything downloads the first time it's needed and stays cached in the browser.
 
 | For | Model | Runs on | Size |
 |---|---|---|---|
-| Assistants | Any [WebLLM](https://github.com/mlc-ai/web-llm) chat model you pick (Qwen 2.5 1.5B recommended) | WebGPU | 0.4–5 GB |
+| Assistants | Any [WebLLM](https://github.com/mlc-ai/web-llm) chat model you pick; the newest, smartest ones that fit your device come first | WebGPU | 0.4–5 GB |
 | See / create image | [Janus-Pro 1B](https://huggingface.co/onnx-community/Janus-Pro-1B-ONNX) via Transformers.js | WebGPU | ~2.4 GB |
 | Transcribe | [Whisper base](https://huggingface.co/onnx-community/whisper-base) via Transformers.js | WebGPU | ~0.3 GB |
 | Speak | [Kokoro 82M](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX) via kokoro-js | WebGPU (WASM fallback) | 0.1–0.3 GB |
@@ -57,7 +57,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) for the landing page or [http://localhost:5173/app/](http://localhost:5173/app/) for the app, choose a model (start with a recommended one) and send a message, or pick a template from the welcome screen.
+Open [http://localhost:5173](http://localhost:5173) for the landing page or [http://localhost:5173/app/](http://localhost:5173/app/) for the app, choose a model (the first one is the best for your device) and send a message, or pick a template from the welcome screen.
 
 ## Stack
 
