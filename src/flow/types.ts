@@ -18,8 +18,7 @@ export type SplitData = { label: string; max: number }
 export type ConditionData = { label: string; match: string }
 export type OutputData = { label: string }
 export type DescribeData = { label: string; prompt: string }
-// Sin online, pinta Janus-Pro en el equipo; con online, el modelo de fal.ai que diga model
-export type ImagineData = { label: string; style: string; online?: boolean; model?: string }
+export type ImagineData = { label: string; style: string }
 export type TranscribeData = { label: string }
 export type SpeakData = { label: string; voice: string }
 export type VideoData = { label: string; model: string }

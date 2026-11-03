@@ -16,7 +16,7 @@ import { edgeTypes } from './edges'
 import { fromVertical, toVertical, Vertical, VERTICAL_QUERY } from './orientation'
 import { ASSISTANTS, TEMPLATES, newId } from './presets'
 import { useSession } from '@/chat/session'
-import { DEFAULT_VIDEO_MODEL } from '@/media/fal'
+import { DEFAULT_VIDEO_MODEL } from '@/media/video'
 import type { FlowNode } from './types'
 
 // Una copia traspuesta por cada nodo guardado: los que no cambian conservan la suya y React Flow no los repinta
@@ -174,7 +174,7 @@ function Flow() {
             <MenuItem icon={<GitBranch className="w-4 h-4" />} title="Condition" text="Route by whether the text contains a word." onSelect={() => add({ type: 'condition', data: { label: 'Condition', match: 'yes' } })} />
             <p className="label px-2.5 pt-3 pb-1">Image &amp; sound · local</p>
             <MenuItem icon={<Eye className="w-4 h-4" />} title="See image" text="Image → text: describes or reads a picture." onSelect={() => add({ type: 'describe', data: { label: 'See image', prompt: 'Describe this image in detail.' } })} />
-            <MenuItem icon={<ImagePlus className="w-4 h-4" />} title="Create image" text="Text → image, on your GPU or online with fal.ai." onSelect={() => add({ type: 'imagine', data: { label: 'Create image', style: '' } })} />
+            <MenuItem icon={<ImagePlus className="w-4 h-4" />} title="Create image" text="Text → image, generated on your GPU." onSelect={() => add({ type: 'imagine', data: { label: 'Create image', style: '' } })} />
             <MenuItem icon={<Mic className="w-4 h-4" />} title="Transcribe" text="Audio → text with Whisper." onSelect={() => add({ type: 'transcribe', data: { label: 'Transcribe' } })} />
             <MenuItem icon={<AudioLines className="w-4 h-4" />} title="Speak" text="Text → natural voice." onSelect={() => add({ type: 'speak', data: { label: 'Speak', voice: 'af_heart' } })} />
             <p className="label px-2.5 pt-3 pb-1">Online · your key</p>

@@ -2,7 +2,7 @@ import { generate } from '@/engine/engine'
 import { useDevice } from '@/engine/device'
 import { decodeAudio, media, preload, voiceModel } from '@/media/media'
 import type { MediaModel, MediaTask } from '@/media/worker'
-import { generateImage, generateVideo } from '@/media/fal'
+import { generateVideo } from '@/media/video'
 import { toolArguments } from '@/mcp/args'
 import type { McpServer } from '@/mcp/types'
 import { OUTPUTS, topologicalOrder } from './graph'
@@ -21,12 +21,11 @@ type RunOptions = {
   onUpdate: (steps: StepResult[]) => void
 }
 
-// El modelo local de imagen o audio de cada nodo; la voz depende del idioma (Kokoro en inglés, Supertonic en los demás).
-// Crear imagen en fal.ai no usa ninguno
+// El modelo de imagen o audio de cada nodo; la voz depende del idioma (Kokoro en inglés, Supertonic en los demás)
 function mediaModelOf(node: FlowNode): MediaModel | undefined {
   switch (node.type) {
     case 'describe': return 'vision'
-    case 'imagine': return node.data.online ? undefined : 'janus'
+    case 'imagine': return 'janus'
     case 'transcribe': return 'whisper'
     case 'speak': return voiceModel(node.data.voice)
   }
@@ -187,13 +186,7 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
         }
         case 'imagine': {
           const prompt = [text(), node.data.style].filter(Boolean).join(', ')
-          if (node.data.online) {
-            if (!falKey) throw new Error('Add your fal.ai key in Settings to create images online.')
-            if (!node.data.model) throw new Error('Type the fal.ai model to create this image with.')
-            current.value = { type: 'image', url: await generateImage({ prompt, model: node.data.model, key: falKey, signal, onStatus }) }
-          } else {
-            current.value = { type: 'image', url: await runMedia({ task: 'imagine', prompt }) }
-          }
+          current.value = { type: 'image', url: await runMedia({ task: 'imagine', prompt }) }
           results.set(`${node.id}:out`, current.value)
           break
         }

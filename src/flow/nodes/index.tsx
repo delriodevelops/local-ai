@@ -11,7 +11,7 @@ import { defaultArgs, firstLine, INPUT, toolFields } from '@/mcp/args'
 import { refreshServer, useMcp } from '@/mcp/store'
 import type { McpServer, ToolRef } from '@/mcp/types'
 import { LANGUAGES, VOICES } from '@/media/media'
-import { IMAGE_MODELS, VIDEO_MODELS } from '@/media/fal'
+import { VIDEO_MODELS } from '@/media/video'
 import MediaView from '@/chat/MediaView'
 import type {
   AgentNode, AssistantNode, ConditionNode, DescribeNode, ImagineNode, InputNode, JoinNode, OutputNode, PortType,
@@ -277,28 +277,11 @@ export const DescribeNodeView = memo(({ id, data, selected }: NodeProps<Describe
 })
 
 export const ImagineNodeView = memo(({ id, data, selected }: NodeProps<ImagineNode>) => {
-  const updateNode = useApp(s => s.updateNode)
   const step = useStep(id)
-  // En el equipo con Janus-Pro, o en fal.ai con un modelo de la lista o cualquier otro escrito a mano
-  const where = !data.online ? 'local' : IMAGE_MODELS.some(m => m.id === data.model) ? data.model! : 'other'
-  const choose = (value: string) =>
-    updateNode(id, value === 'local' ? { online: false } : { online: true, model: value === 'other' ? '' : value })
   return (
-    <Shell id={id} kind="Create image" icon={<ImagePlus className="w-3 h-3" />} selected={selected} step={step} width="w-64" local={!data.online}>
+    <Shell id={id} kind="Create image" icon={<ImagePlus className="w-3 h-3" />} selected={selected} step={step} width="w-64">
       <Title id={id} value={data.label} />
-      <label className="flex flex-col gap-1 text-xs text-neutral-400">
-        Model
-        <select value={where} onChange={e => choose(e.target.value)} className={cn(fieldClass, 'px-2 py-1.5')}>
-          <option value="local">This device · Janus-Pro 1B</option>
-          <optgroup label="Online on fal.ai, per image">
-            {IMAGE_MODELS.map(m => <option key={m.id} value={m.id}>{m.name} · {m.price}</option>)}
-            <option value="other">Other fal.ai model…</option>
-          </optgroup>
-        </select>
-      </label>
-      {where === 'other' && <Field id={id} label="Model id" value={data.model ?? ''} field="model" mono />}
       <Field id={id} label="Style added to the prompt" value={data.style} field="style" />
-      {data.online && <p className="text-[11px] leading-relaxed text-neutral-400">The prompt goes to fal.ai, billed to your key.</p>}
       <Preview step={step} />
       <TypeTag type="image" />
       <Port type="target" id="in" kind="text" />

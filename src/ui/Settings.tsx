@@ -107,13 +107,13 @@ export default function Settings() {
             <span className="text-xs leading-relaxed text-neutral-500">Auto picks the newest, smartest model that fits this device. Voices follow the language chosen in each Speak node.</span>
           </div>
           <label className="flex flex-col gap-2 border-t border-line pt-4">
-            <span className="label text-neutral-50">fal.ai key <span className="text-neutral-500">· video and online images</span></span>
+            <span className="label text-neutral-50">fal.ai key <span className="text-neutral-500">· only for video</span></span>
             <input
               type="password" value={falKey} onChange={e => set({ falKey: e.target.value.trim() })}
               placeholder="Not set" autoComplete="off"
               className="border border-line bg-transparent px-3 py-2 font-mono text-xs outline-none focus:border-signal placeholder:text-neutral-500"
             />
-            <span className="text-xs leading-relaxed text-neutral-500">Stays in this browser. Prompts for video and online images are sent to fal.ai and billed to this key.</span>
+            <span className="text-xs leading-relaxed text-neutral-500">Stays in this browser. Video prompts are sent to fal.ai and billed to this key.</span>
           </label>
           <div className="flex flex-col gap-2 border-t border-line pt-4">
             <span id="theme-label" className="label text-neutral-50">Theme</span>
