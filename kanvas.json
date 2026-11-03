@@ -29,6 +29,10 @@
     {
       "id": "MC",
       "name": "MCP"
+    },
+    {
+      "id": "MO",
+      "name": "Modelos"
     }
   ],
   "tasks": [
@@ -56,7 +60,7 @@
     {
       "id": "PR-01",
       "title": "Arrancarlo y probarlo en el navegador",
-      "state": "todo",
+      "state": "done",
       "group": "PR",
       "deps": ["CN-01"],
       "at": "2026-10-30T16:43:07Z",
@@ -67,13 +71,18 @@
           "at": "2026-10-30T18:11:06Z",
           "by": "claude-code",
           "text": "Probado en el navegador (Chrome con WebGPU y la NVIDIA del PC), con SmolLM2-360M (~210 MB):\n- ✅ Compila, descarga el modelo, chatea, el botón de detener funciona, y una cadena Product Research → Developer pasa la respuesta del primero al segundo.\n- Arreglado: la lista de modelos ofrecía modelos de embeddings (no chatean); las pestañas de la cadena se salían por la derecha (el ancho se calculaba con JS); la longitud por defecto (2048) hacía que los modelos pequeños entraran en bucle, ahora 512; la página no tenía título (ahora «MeshMind»).\n- En el móvil se ve bien.\n- Nota: con modelos tan pequeños las respuestas son flojas; para enseñarlo conviene un modelo de 1–3 B (Llama 3.2, Qwen).\nNo puedo darla por terminada en el tablero porque depende de CN-01, que espera tu revisión."
+        },
+        {
+          "at": "2026-11-03T20:23:36Z",
+          "by": "claude-code",
+          "text": "Hecho: MeshMind arranca en el navegador, descarga un modelo y responde. Los arreglos de la prueba del 30 de octubre están en c0c7d89. Después la app se rehízo con Vite y React (DS-02), así que ya no hace falta actualizar Next.js. Comprobado en la web publicada: la app carga con sus nueve plantillas."
         }
       ]
     },
     {
       "id": "PR-02",
       "title": "Ver la cadena de razonamiento como un esquema",
-      "state": "todo",
+      "state": "done",
       "group": "PR",
       "deps": ["PR-01"],
       "at": "2026-10-30T16:43:07Z",
@@ -84,13 +93,18 @@
           "at": "2026-10-30T18:16:50Z",
           "by": "claude-code",
           "text": "Hecho y probado en el navegador (PC y móvil), con una cadena de dos asistentes:\n- Botón **«Chain»** arriba (con el número de pasos y, mientras trabaja, el asistente que va en curso). Abre el esquema: **Tú → paso 1 → paso 2 → … → Result**, unido con flechas. Se abre solo al lanzar una cadena de 2 o más pasos.\n- Cada paso muestra su estado (**Working… / Waiting / Done / Not run yet**) y el principio de lo que respondió. Al pulsarlo, salta a esa respuesta en el chat; **Result** salta a la respuesta final.\n- **Reordenar arrastrando** las tarjetas (también en el móvil). Tras reordenar, los pasos vuelven a «Not run yet» porque sus respuestas eran de otro orden. La × quita un paso.\n- En el móvil, el mismo esquema en vertical dentro de la ventana «Chain».\n- Por dentro: cada respuesta guarda ahora el asistente y el número de paso que la generó.\nNo puedo moverla de estado en el tablero: depende de PR-01, que depende de CN-01 (en tu revisión)."
+        },
+        {
+          "at": "2026-11-03T20:23:37Z",
+          "by": "claude-code",
+          "text": "Hecho en 9da5bed, y superado después por el lienzo de nodos de DS-02: el flujo se ve como nodos conectados, cada paso enseña lo que responde y la señal roja recorre el nodo que trabaja. Comprobado en la web publicada: la vista Flow y sus nodos."
         }
       ]
     },
     {
       "id": "LN-01",
       "title": "Nombre y README de MeshMind",
-      "state": "todo",
+      "state": "done",
       "group": "LN",
       "deps": ["CN-01"],
       "at": "2026-10-30T16:43:07Z",
@@ -101,13 +115,18 @@
           "at": "2026-10-30T18:21:51Z",
           "by": "claude-code",
           "text": "Hecho (sin renombrar aún el repo):\n- La app se presenta como MeshMind: título, icono propio (tres nodos conectados en lima), nombre del paquete, y una **pantalla de bienvenida** con el chat vacío que explica los tres pasos (elegir modelo, encadenar asistentes, seguir el razonamiento). Antes la pantalla salía en blanco.\n- README nuevo en inglés: qué es, funciones, cómo arrancarlo, qué modelo elegir.\n- Quitados el favicon y los SVG de la plantilla de Next.\nPendiente de decidir: renombrar el repo de GitHub `local-ai` → `meshmind` (GitHub redirige las URLs viejas)."
+        },
+        {
+          "at": "2026-11-03T20:23:37Z",
+          "by": "claude-code",
+          "text": "Hecho: la app, el README y el repo se llaman MeshMind; el repo es ahora delriodevelops/meshmind. Comprobado en la web publicada: se presenta como MeshMind y lleva el icono nuevo de DS-05."
         }
       ]
     },
     {
       "id": "LN-02",
       "title": "Volver a publicar la web",
-      "state": "todo",
+      "state": "done",
       "group": "LN",
       "deps": ["PR-02", "LN-01"],
       "at": "2026-10-30T16:43:07Z",
@@ -128,6 +147,11 @@
           "at": "2026-11-01T20:26:33Z",
           "by": "claude-code",
           "text": "Publicado f15b15f (2026-11-01): móvil en vertical, voz en GPU, modo oscuro, demo de la landing con arreglos de revisión y MCP. Comprobado en https://delriodevelops.github.io/meshmind/: los cuatro servidores MCP sugeridos conectan desde github.io y la plantilla 'Docs agent' con Qwen2.5 1.5B llamó sola a microsoft_docs_search y respondió con la documentación real. Falta la revisión de MCP, que sigue en marcha."
+        },
+        {
+          "at": "2026-11-03T20:23:38Z",
+          "by": "claude-code",
+          "text": "Hecho: MeshMind está publicada en GitHub Pages, en https://delriodevelops.github.io/meshmind/, y se vuelve a publicar sola con cada push a main. Comprobado: la landing y la app cargan, y los cuatro últimos despliegues salieron bien."
         }
       ]
     },
@@ -145,13 +169,23 @@
           "at": "2026-11-02T17:53:38Z",
           "by": "claude-code",
           "text": "Vídeo promocional listo para usarlo aquí (aa79bf4): 27 s de motion graphics con voz de ElevenLabs, música y efectos, sin iconos. El archivo final es motion/out/MeshMind-motion-v3.mp4; no va en git y se regenera con `npm run render` dentro de motion/. Queda pendiente que lo escuches: los niveles están medidos (−14 LUFS), no escuchados."
+        },
+        {
+          "at": "2026-11-03T15:51:26Z",
+          "by": "claude-code",
+          "text": "Hecho a petición tuya en el chat, aunque la tarea sigue bloqueada en el tablero: la ficha de MeshMind en iamdelrio.com ya está al día.\n- Nombre «MeshMind», descripción nueva y enlace a https://delriodevelops.github.io/meshmind/ (el de Vercel daba error 402)\n- Portada y galería con cuatro imágenes nuevas sacadas de la película (la portada anterior, /meshmind/1.png, ya no existía)\n- La película de lanzamiento, con botón de reproducir, y MeshMind destacada en «Selected work» (05/05)\nComprobado en la web publicada: la película se reproduce, las cuatro imágenes cargan y no hay errores.\nRevisa: https://www.iamdelrio.com/projects/WXkXTlmLnHkNeEvR6W1c\nPendiente tuyo: añadir las variables NEXT_PUBLIC_FIREBASE_* en Cloudflare (delriodevelops → Settings → Build → Build variables). Si no, el próximo despliegue automático deja la web sin leer Firestore y esta ficha da 404."
+        },
+        {
+          "at": "2026-11-03T18:26:05Z",
+          "by": "claude-code",
+          "text": "Las variables de compilación ya están en Cloudflare (delriodevelops → Settings → Builds), como pediste: las seis de Firebase y NEXT_PUBLIC_ADMIN_EMAIL. Los dos builds automáticos de la otra sesión (CitySwipe y Billonario, y el README) se habían hecho sin ellas, y la web había dejado de leer Firestore. He relanzado el build y ya está arreglado.\nComprobado en la web publicada: la página de MeshMind carga y su película se reproduce, la portada vuelve a leer los proyectos de Firestore y el admin pide iniciar sesión. A partir de ahora, cada build lleva las variables."
         }
       ]
     },
     {
       "id": "DS-01",
       "title": "Rediseño visual de MeshMind",
-      "state": "todo",
+      "state": "review",
       "group": "DS",
       "deps": ["LN-02"],
       "yolo": true,
@@ -173,13 +207,18 @@
           "at": "2026-11-02T00:45:43Z",
           "by": "claude-code",
           "text": "Hero cinematográfico publicado (da4ac2e). Ahora es una película que avanza y rebobina con el scroll (GSAP ScrollTrigger, con Lenis en el mismo reloj): 1) MESH y MIND se abren letra a letra y salen de cuadro mientras la retícula se corta; 2) el disco rojo se abre como un diafragma hasta llenar la pantalla y dentro se dibuja, del centro hacia fuera, una malla con los modelos de la app (en vertical en móviles); 3) sube «Your machine is the server.» y la señal enciende los nodos; 4) el rojo se va en las doce columnas de la retícula. Además: las letras suben una a una al cargar y se ensanchan al pasar el ratón, el disco sigue al puntero, hay contador de fotogramas y en móvil el cartel ocupa la pantalla entera. Si el sistema pide menos movimiento (es el caso de tu Windows), el hero lo dice y ofrece «Play it»; la elección se recuerda. Ya no depende de las animaciones de scroll de CSS, así que también va en Firefox. Para revisar: abrir la web en Chrome o Edge y bajar despacio por el hero."
+        },
+        {
+          "at": "2026-11-03T20:23:38Z",
+          "by": "claude-code",
+          "text": "La app y la landing tienen el diseño suizo, publicado: papel, tinta y un solo rojo, Archivo y Plex Mono, esquinas rectas, modo oscuro y el hero que avanza con el scroll.\n- Para revisar: abre https://delriodevelops.github.io/meshmind/ y la app (/app/), en escritorio y en móvil, en claro y en oscuro.\nLas tareas de las que dependía (PR-01, PR-02, LN-01 y LN-02) ya están hechas."
         }
       ]
     },
     {
       "id": "DS-02",
       "title": "Editor de nodos en lugar de la cadena lineal",
-      "state": "todo",
+      "state": "review",
       "group": "DS",
       "at": "2026-11-01T15:52:45Z",
       "by": "claude-code",
@@ -194,13 +233,18 @@
           "at": "2026-11-01T17:06:47Z",
           "by": "claude-code",
           "text": "Published: rebuild merged into main (fast-forward), live at delriodevelops.github.io/meshmind."
+        },
+        {
+          "at": "2026-11-03T20:23:42Z",
+          "by": "claude-code",
+          "text": "MeshMind es un lienzo de nodos, publicado: arrastras nodos y los conectas, y el lienzo vive junto al chat (vistas Chat, Both y Flow). Además de Mensaje, asistentes, Split, Join, Condición y Respuesta, hay nodos para ver y crear imágenes, transcribir, hablar, vídeo, herramientas MCP y Agente.\n- Comprobado en la web publicada: el menú Add node trae todos esos nodos y hay nueve plantillas.\n- Para revisar: abre la app, pasa a Flow y carga la plantilla Panel of experts."
         }
       ]
     },
     {
       "id": "ML-01",
       "title": "Imágenes y audio como tipos de conexión",
-      "state": "doing",
+      "state": "done",
       "group": "ML",
       "at": "2026-11-01T16:44:11Z",
       "by": "claude-code",
@@ -210,13 +254,18 @@
           "at": "2026-11-01T17:06:46Z",
           "by": "claude-code",
           "text": "Done and published (1153a4f). Connections can carry image, audio and video, each with its own colour. The Message node has text, image and audio outputs; the chat lets you attach a photo and record a voice note, and shows images and plays audio/video."
+        },
+        {
+          "at": "2026-11-03T20:23:38Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado (1153a4f): las conexiones llevan texto, lista, imagen, audio y vídeo, cada uno con su color. En el chat adjuntas una foto o grabas una nota de voz, y las respuestas enseñan imágenes y reproducen audio. Comprobado en la web publicada: el chat tiene los botones de foto y de nota de voz."
         }
       ]
     },
     {
       "id": "ML-02",
       "title": "Nodo Describir imagen (visión)",
-      "state": "todo",
+      "state": "done",
       "group": "ML",
       "deps": ["ML-01"],
       "at": "2026-11-01T16:44:11Z",
@@ -227,13 +276,18 @@
           "at": "2026-11-01T17:06:46Z",
           "by": "claude-code",
           "text": "Done. 'See image' node with Janus-Pro 1B (Transformers.js, WebGPU). Tested: it correctly described a generated image (person on rocks looking at the sea)."
+        },
+        {
+          "at": "2026-11-03T20:23:39Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado: el nodo See image. Ahora usa LFM3-VL 2B, o LFM2.5-VL 450M en equipos pequeños (MO-03). Comprobado: está en el menú Add node de la web publicada."
         }
       ]
     },
     {
       "id": "ML-03",
       "title": "Nodo Generar imagen",
-      "state": "todo",
+      "state": "done",
       "group": "ML",
       "deps": ["ML-01"],
       "at": "2026-11-01T16:44:11Z",
@@ -244,13 +298,18 @@
           "at": "2026-11-01T17:06:46Z",
           "by": "claude-code",
           "text": "Done. 'Create image' node with Janus-Pro 1B (the same model as seeing, so it is a single download of ~2.4 GB). 384x384 image in about 30-60 s once downloaded. Tested on the public site."
+        },
+        {
+          "at": "2026-11-03T20:23:39Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado: el nodo Create image. Ahora pinta con FLUX.2 klein 4B donde cabe, o con Janus-Pro en equipos pequeños (MO-06), sin salir del navegador. Comprobado: está en el menú Add node de la web publicada."
         }
       ]
     },
     {
       "id": "ML-04",
       "title": "Nodo Transcribir (voz a texto)",
-      "state": "todo",
+      "state": "done",
       "group": "ML",
       "deps": ["ML-01"],
       "at": "2026-11-01T16:44:11Z",
@@ -261,13 +320,18 @@
           "at": "2026-11-01T17:06:46Z",
           "by": "claude-code",
           "text": "Done. 'Transcribe' node with Whisper base (WebGPU). Tested by transcribing a Kokoro narration: almost word for word."
+        },
+        {
+          "at": "2026-11-03T20:23:40Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado: el nodo Transcribe. Ahora usa Whisper large-v3 turbo donde cabe, o Whisper base (MO-01). Comprobado: está en el menú Add node de la web publicada."
         }
       ]
     },
     {
       "id": "ML-05",
       "title": "Nodo Hablar (texto a voz)",
-      "state": "todo",
+      "state": "done",
       "group": "ML",
       "deps": ["ML-01"],
       "at": "2026-11-01T16:44:11Z",
@@ -283,13 +347,18 @@
           "at": "2026-11-01T19:55:01Z",
           "by": "claude-code",
           "text": "Kokoro ahora va en la gráfica (WebGPU, fp32, 326 MB) y si la prueba de arranque falla vuelve solo al procesador (WASM q8, 92 MB). Medido con el modelo cargado: 13,8 s de audio en 1,6 s (en procesador eran ~15 s para 12 s). El monitor muestra GPU o CPU según dónde cargó."
+        },
+        {
+          "at": "2026-11-03T20:23:40Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado: el nodo Speak, con Kokoro en inglés y Supertonic 2 en español, portugués, francés y coreano (MO-02). Comprobado: está en el menú Add node de la web publicada."
         }
       ]
     },
     {
       "id": "ML-06",
       "title": "Plantillas multimodales",
-      "state": "todo",
+      "state": "review",
       "group": "ML",
       "deps": ["ML-02", "ML-03", "ML-04", "ML-05"],
       "yolo": true,
@@ -301,13 +370,18 @@
           "at": "2026-11-01T17:06:46Z",
           "by": "claude-code",
           "text": "Done. Three templates: Illustrate & narrate, Photo remix and Voice assistant. All three tested end to end in the browser, and the first one also on the public site."
+        },
+        {
+          "at": "2026-11-03T20:23:41Z",
+          "by": "claude-code",
+          "text": "Las tres plantillas multimodales están publicadas y en el menú: Illustrate & narrate, Photo remix y Voice assistant.\n- Para revisar: carga Voice assistant y graba una nota de voz, y prueba Photo remix con una foto tuya (con el modelo de visión nuevo solo se ha probado con una imagen de prueba).\nLos nodos de los que dependen (ML-01 a ML-05) ya están hechos."
         }
       ]
     },
     {
       "id": "ML-07",
       "title": "Nodo Generar vídeo con servicio externo (opcional)",
-      "state": "todo",
+      "state": "review",
       "group": "ML",
       "deps": ["ML-01"],
       "yolo": true,
@@ -319,6 +393,11 @@
           "at": "2026-11-01T17:06:47Z",
           "by": "claude-code",
           "text": "Done but NOT tested: there is no fal.ai key. 'Create video' node marked 'online'; the key goes in Settings and stays in the browser. It uses fal's queue API (submit → status → response), checked against their documentation. Default model fal-ai/ltx-video."
+        },
+        {
+          "at": "2026-11-03T20:23:41Z",
+          "by": "claude-code",
+          "text": "El nodo Create video está publicado: genera el vídeo en fal.ai con tu clave (Settings → fal.ai key) y va marcado como online. Ofrece modelos actuales con su precio, con MiniMax H3 Max Turbo por defecto (MO-04).\n- Sin probar con un vídeo de verdad, porque cuesta dinero de tu clave.\n- Para revisar: pon tu clave de fal y genera un clip con el modelo por defecto (unos 0,13 $ por 5 s)."
         }
       ]
     },
@@ -329,7 +408,14 @@
       "group": "RN",
       "at": "2026-11-01T17:22:29Z",
       "by": "claude-code",
-      "desc": "Ahora el procesador trabaja con 1 solo núcleo (en tu PC hay 24) porque GitHub Pages no permite las cabeceras que activan los hilos en el navegador. Se arregla con un service worker (coi-serviceworker) que las añade. Hecho cuando la web pública reporta crossOriginIsolated = true y la voz (Kokoro) genera varias veces más rápido."
+      "desc": "Ahora el procesador trabaja con 1 solo núcleo (en tu PC hay 24) porque GitHub Pages no permite las cabeceras que activan los hilos en el navegador. Se arregla con un service worker (coi-serviceworker) que las añade. Hecho cuando la web pública reporta crossOriginIsolated = true y la voz (Kokoro) genera varias veces más rápido.",
+      "notes": [
+        {
+          "at": "2026-11-03T20:23:57Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado (f02ce2f y 5569caf): un service worker activa los hilos del procesador en GitHub Pages. Comprobado en la web publicada: crossOriginIsolated = true, con los 24 núcleos de tu PC. La voz ya va en la gráfica (ML-05), así que los hilos sirven sobre todo a Supertonic y al respaldo en el procesador."
+        }
+      ]
     },
     {
       "id": "RN-02",
@@ -338,7 +424,14 @@
       "group": "RN",
       "at": "2026-11-01T17:22:29Z",
       "by": "claude-code",
-      "desc": "Como el 'qué modelo cabe en tu ordenador' de Strata: detectar la gráfica, si admite fp16, sus límites de memoria, la RAM, los núcleos y el espacio libre del navegador. El selector marca qué modelos caben, cuáles irán justos y cuáles no, y siempre se pide la gráfica dedicada en portátiles con dos. Hecho cuando el selector muestra esa valoración en tu PC."
+      "desc": "Como el 'qué modelo cabe en tu ordenador' de Strata: detectar la gráfica, si admite fp16, sus límites de memoria, la RAM, los núcleos y el espacio libre del navegador. El selector marca qué modelos caben, cuáles irán justos y cuáles no, y siempre se pide la gráfica dedicada en portátiles con dos. Hecho cuando el selector muestra esa valoración en tu PC.",
+      "notes": [
+        {
+          "at": "2026-11-03T20:23:57Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado (f02ce2f; el orden del selector llegó después, con PR-03): la app lee la gráfica, pidiendo siempre la dedicada, si admite fp16, su límite de memoria, la RAM, los núcleos y el espacio libre del navegador, y el selector marca cada modelo como fits, tight o won't fit."
+        }
+      ]
     },
     {
       "id": "RN-03",
@@ -354,6 +447,11 @@
           "at": "2026-11-01T19:55:02Z",
           "by": "claude-code",
           "text": "Cada modelo tiene su propia cola: modelos distintos trabajan a la vez y el siguiente se precarga mientras el actual trabaja. Con la voz ya en la gráfica, el procesador queda para el respaldo WASM y para cargar/decodificar. Pendiente de que apruebes la tarea."
+        },
+        {
+          "at": "2026-11-03T20:23:57Z",
+          "by": "claude-code",
+          "text": "Sin medir todavía: el reparto entre gráfica y procesador está hecho y publicado, pero falta comprobar que Illustrate & narrate tarda claramente menos, que es lo que pide la tarea. Por eso no entra en CN-02."
         }
       ]
     },
@@ -364,7 +462,14 @@
       "group": "RN",
       "at": "2026-11-01T17:22:29Z",
       "by": "claude-code",
-      "desc": "Como Strata, que carga la siguiente capa mientras calcula la actual: al lanzar un flujo se cargan en segundo plano los modelos de los nodos siguientes. Y se descargan de memoria los que no se usan cuando la gráfica va justa. Hecho cuando el nodo de imagen empieza a pintar nada más llegarle el texto, sin esperar a cargar Janus."
+      "desc": "Como Strata, que carga la siguiente capa mientras calcula la actual: al lanzar un flujo se cargan en segundo plano los modelos de los nodos siguientes. Y se descargan de memoria los que no se usan cuando la gráfica va justa. Hecho cuando el nodo de imagen empieza a pintar nada más llegarle el texto, sin esperar a cargar Janus.",
+      "notes": [
+        {
+          "at": "2026-11-03T20:23:58Z",
+          "by": "claude-code",
+          "text": "Hecha en parte: al lanzar un flujo se precargan sus modelos de imagen y sonido, así que el de imagen va cargando mientras el asistente escribe el prompt (f02ce2f). Falta la otra mitad: liberar memoria es manual, con el botón de cada modelo en Resources, y nada se descarga solo cuando la gráfica va justa. Por eso no entra en CN-02."
+        }
+      ]
     },
     {
       "id": "RN-05",
@@ -481,6 +586,239 @@
           "text": "Hecho en feat/mcp: plantillas 'Ask a GitHub repo' (DeepWiki → asistente local que resume) y 'Docs agent' (agente con Microsoft Learn y DeepWiki). Al cargarlas se añaden los servidores que necesitan."
         }
       ]
+    },
+    {
+      "id": "DS-03",
+      "title": "La app con el mismo diseño que la landing",
+      "state": "proposed",
+      "group": "DS",
+      "at": "2026-11-02T21:13:33Z",
+      "by": "claude-code",
+      "desc": "La app y la landing parecen dos productos distintos, sobre todo en oscuro. Que la app hable el mismo lenguaje que la landing: papel #f2f2ef, tinta #111 y un solo rojo; Archivo en mayúsculas apretada para titulares y etiquetas espaciadas; reglas de 2 px en lugar de paneles grises; esquinas rectas y el disco rojo. El tema oscuro pasa a ser el de la sección «03 Your whole machine» de la landing (#111 plano, texto papel, reglas #3a3a3a), no un gris de app genérica.\nSin cambiar cómo funciona nada: mismas pantallas, mismos controles.\nHecho cuando: abierta junto a la landing, en claro y en oscuro, la app se reconoce como el mismo producto (escritorio y móvil).",
+      "notes": [
+        {
+          "at": "2026-11-02T21:37:20Z",
+          "by": "claude-code",
+          "text": "Hecho, a falta de que apruebes la tarea y la revises. Está sin commitear en la carpeta (rama motion/v4, solo archivos de la app; la landing no se ha tocado).\n- Oscuro = la sección «03 Your whole machine» de la landing: #111 plano, texto papel, reglas #3a3a3a, sin paneles grises. Claro = papel y tinta.\n- Bienvenida como el hero: retícula de 12 columnas, titular enorme y el disco rojo con la malla dentro.\n- Cabecera con la firma de la landing (MeshMind / Local AI flows), vistas numeradas 01 Chat · 02 Both · 03 Flow con subrayado rojo y barra roja arriba mientras baja un modelo.\n- Chat sin burbujas: cada turno abre con su número en rojo y tu mensaje como titular; la respuesta lleva la regla roja.\n- Lienzo con retícula de líneas, nodos de 2 px como los de la landing, puertos cuadrados, Answer invertido y la señal roja recorriendo el nodo que trabaja. El color de cada asistente queda como muestra cuadrada (se sigue cambiando al pulsarla).\nProbado: tipos y build sin errores; recorrido automático (plantillas, vistas, añadir nodo, color, tema, monitor, buscador de modelos) correcto; capturas en claro y oscuro, escritorio y móvil, y la demo incrustada en la landing.\nPara revisar: npm run dev y abrir /app/ junto a la landing, en claro y en oscuro."
+        },
+        {
+          "at": "2026-11-02T22:07:11Z",
+          "by": "claude-code",
+          "text": "Guardado en la rama feat/app-landing-design (commit 5238115, sobre main, sin subir). Ya no está en la carpeta de motion/v4. Para verlo: git checkout feat/app-landing-design y npm run dev."
+        },
+        {
+          "at": "2026-11-02T22:09:04Z",
+          "by": "claude-code",
+          "text": "PR abierto: https://github.com/delriodevelops/meshmind/pull/1 (feat/app-landing-design → main). Al fusionarlo se publica en GitHub Pages. El check de Vercel que sale en rojo no es de este cambio: la cuenta de Vercel está bloqueada y falla igual en main."
+        },
+        {
+          "at": "2026-11-03T00:29:22Z",
+          "by": "claude-code",
+          "text": "Fusionado por ti en main (PR #1) y publicado. El punto rojo que recorre los cables llegó tarde a esa rama: va en el PR #2."
+        }
+      ]
+    },
+    {
+      "id": "DS-04",
+      "title": "Lo que me llevo de las referencias: capítulos, tu máquina, el disco y la señal",
+      "state": "proposed",
+      "group": "DS",
+      "at": "2026-11-03T00:29:22Z",
+      "by": "claude-code",
+      "desc": "Cuatro ideas de las 25 webs de referencia, más una decisión tuya:\n- Landing, 01 The canvas: el scroll ejecuta el flujo en cinco capítulos (Message, Split, Think, Merge, Answer) con su pista roja y su frase.\n- Landing: la página lee tu máquina (gráfica y núcleos en la nota del hero; línea viva con gráfica, hora y puntero; marcas de corte).\n- Landing: se entra en la app por el disco (al final el disco se traga la pantalla; los enlaces a la app abren un anillo rojo).\n- App: mientras corre un flujo, un punto rojo recorre el cable activo en lugar de las rayas.\n- La película se ve siempre: fuera «Play the film» y el botón Motion.\nHecho en el PR #2 (https://github.com/delriodevelops/meshmind/pull/2), sin fusionar. Para revisar: abrir la rama, bajar por 01 The canvas y el final, y pulsar «Open MeshMind».",
+      "notes": [
+        {
+          "at": "2026-11-03T00:31:13Z",
+          "by": "claude-code",
+          "text": "Fusionado en main (PR #2, cf62f5e) a petición tuya y publicándose en GitHub Pages. A partir de ahora trabajo directamente en main, sin ramas ni PR."
+        }
+      ]
+    },
+    {
+      "id": "PR-03",
+      "title": "Selector de modelos: primero los nuevos y listos que caben en tu equipo",
+      "state": "proposed",
+      "group": "PR",
+      "at": "2026-11-03T00:48:55Z",
+      "by": "claude-code",
+      "desc": "El selector de modelos parece viejo: ordena por tamaño, así que arriba salen TinyLlama y SmolLM2, y los modelos nuevos (Qwen3.5, Gemma 4, Ministral 3) quedan entre las filas 33 y 95. La lista en sí está al día (WebLLM 0.2.87, la última).\n- Arriba, los modelos que caben bien en tu equipo; luego los que irán justos; al final, los que no caben.\n- Dentro de cada grupo, primero los más nuevos y listos. Lo listo es una estimación: más nuevo y más grande cuenta más; los de nicho (código, mates), los que piensan antes de responder y los modelos base bajan.\n- Cada modelo sale una vez, en la versión que mejor va en tu gráfica; las demás versiones, al final.\n- Cada fila enseña de cuándo es el modelo, y la primera lleva «best for this device».\n- Qwen3, Qwen3.5 y DeepSeek R1 no meten su razonamiento en las respuestas.\nHecho cuando: en tu PC, lo primero del selector son modelos de 2025–2026 que caben.",
+      "notes": [
+        {
+          "at": "2026-11-03T00:55:33Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado en main (1318ccf). Falta que apruebes la tarea y la revises.\n- Arriba salen los modelos que caben bien en tu equipo, primero los más nuevos y listos. En la preview de tu PC: Qwen3.5 4B («best for this device»), Qwen3 8B, Ministral 3 3B, Gemma 4 E2B y Qwen3.5 2B.\n- Cada modelo sale una vez, en la versión que mejor va en tu gráfica. Las demás versiones están al final, en «Other versions».\n- Cada fila enseña el mes en que salió el modelo.\n- Qwen3 y Qwen3.5 responden sin pensar antes, y el razonamiento de DeepSeek R1 no entra en las respuestas.\nProbado: tipos y build sin errores; el orden en la preview, en escritorio y en móvil; un flujo de 4 pasos con Qwen3.5 0.8B da respuestas sin razonamiento.\nSin probar: el nodo Agent (herramientas MCP) con Qwen3 o Qwen3.5.\nPara revisar: abre el selector de modelos en la web publicada."
+        }
+      ]
+    },
+    {
+      "id": "MO-01",
+      "title": "Transcribir con Whisper large-v3 turbo",
+      "state": "proposed",
+      "group": "MO",
+      "at": "2026-11-03T01:01:17Z",
+      "by": "claude-code",
+      "desc": "Transcribe usa Whisper base, de 2022, que se equivoca mucho, sobre todo en español. Usar Whisper large-v3 turbo (octubre de 2024, unos 0,9 GB) cuando quepa en tu equipo, y Whisper base cuando no. Se puede cambiar en Ajustes, con el mismo orden que el selector de chat.\nHecho cuando: en tu PC, una nota de voz en español sale bien transcrita.",
+      "notes": [
+        {
+          "at": "2026-11-03T01:23:02Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado en main (957c12a), junto con MO-02 y MO-03. Falta que apruebes la tarea y la revises.\n- Transcribe usa Whisper large-v3 turbo en gráficas con fp16 (1,6 GB) y Whisper base en las demás.\n- Se puede cambiar en Ajustes → Local models; en Auto elige el más nuevo y listo que cabe.\nProbado: una frase en español dicha por Supertonic sale transcrita palabra por palabra, también desde el chat con un flujo Speak → Transcribe.\nPara revisar: graba una nota de voz en español con la plantilla Voice assistant."
+        }
+      ]
+    },
+    {
+      "id": "MO-02",
+      "title": "Voz en español con Supertonic 2",
+      "state": "proposed",
+      "group": "MO",
+      "at": "2026-11-03T01:01:17Z",
+      "by": "claude-code",
+      "desc": "Kokoro sigue siendo de lo mejor en su tamaño, pero las cinco voces de Speak solo hablan inglés. Añadir Supertonic 2 (enero de 2026, 0,26 GB), que habla español, inglés, portugués, francés y coreano. Speak deja elegir idioma y voz; Kokoro se queda para el inglés si suena mejor.\nHecho cuando: Speak lee un texto en español con una voz natural.",
+      "notes": [
+        {
+          "at": "2026-11-03T01:23:02Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado en main (957c12a). Falta que apruebes la tarea y la revises.\n- Speak tiene ahora Idioma y Voz: inglés con Kokoro (las cinco voces de antes) y español, portugués, francés y coreano con Supertonic 2 (diez voces, Female 1–5 y Male 1–5).\n- Supertonic va en el procesador (0,26 GB) y deja la gráfica a los demás modelos.\nProbado: en español suena natural y Whisper lo transcribe sin un error; Kokoro en inglés sigue funcionando.\nPara revisar: pon un nodo Speak en Spanish y escucha un par de voces."
+        }
+      ]
+    },
+    {
+      "id": "MO-03",
+      "title": "Ver imagen con un modelo de visión de 2026",
+      "state": "proposed",
+      "group": "MO",
+      "at": "2026-11-03T01:01:17Z",
+      "by": "claude-code",
+      "desc": "See image usa Janus-Pro 1B (enero de 2025), que describe flojo. Usar LFM3-VL 2B (octubre de 2026, 1,3 GB) y, en equipos pequeños, LFM2.5-VL 450M (abril de 2026, 0,3 GB): el mejor que quepa. Janus se queda solo para crear imágenes.\nHecho cuando: la plantilla Photo remix describe una foto mejor que ahora.",
+      "notes": [
+        {
+          "at": "2026-11-03T01:23:02Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado en main (957c12a). Falta que apruebes la tarea y la revises.\n- See image usa LFM3-VL 2B (1,9 GB) y, en equipos pequeños o sin fp16, LFM2.5-VL 450M (0,5 GB). Se puede fijar en Ajustes → Local models.\n- LFM3-VL va con el razonamiento apagado: solo devuelve la descripción. Janus-Pro queda solo para crear imágenes.\nProbado: con una imagen de prueba (círculo rojo, cuadrado azul y la palabra HOLA) LFM3-VL lo describe todo bien; LFM2.5-VL también acierta. Cambiar el modelo en Ajustes suelta el cargado.\nSin probar: la plantilla Photo remix con una foto real (no pude adjuntar archivos desde la preview).\nPara revisar: Photo remix con una foto tuya."
+        }
+      ]
+    },
+    {
+      "id": "MO-04",
+      "title": "Vídeo: modelos actuales de fal.ai con su precio",
+      "state": "proposed",
+      "group": "MO",
+      "at": "2026-11-03T01:01:17Z",
+      "by": "claude-code",
+      "desc": "Create video usa por defecto LTX-Video (noviembre de 2024). Que el nodo ofrezca los modelos actuales de fal.ai (MiniMax H3, Seedance 2.5, FLUX 3…) con lo que cuesta cada vídeo, y uno actual y barato por defecto. Se puede seguir escribiendo cualquier otro modelo de fal.\nHecho cuando: con tu clave de fal, el modelo por defecto genera un vídeo.",
+      "notes": [
+        {
+          "at": "2026-11-03T01:23:02Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado en main (3fc4530). Falta que apruebes la tarea y la revises.\n- Create video ofrece modelos actuales de fal.ai con lo que cuesta un clip: MiniMax H3 Max Turbo por defecto (0,13 $ por 5 s), H3 Max, FLUX 3 Max, Kling 3, Grok Imagine y PixVerse V6. Precios de fal en noviembre de 2026.\n- «Other fal.ai model…» deja escribir cualquier otro; los nodos que ya usaban LTX-Video lo conservan.\nProbado: los seis modelos existen en fal y devuelven el vídeo donde la app lo busca; la petición sale con los campos que pide cada uno.\nSin probar: generar un vídeo de verdad, porque cuesta dinero de tu clave.\nPara revisar: genera un clip con el modelo por defecto."
+        }
+      ]
+    },
+    {
+      "id": "LN-04",
+      "title": "Vídeo promocional nuevo, de cine",
+      "state": "proposed",
+      "group": "LN",
+      "at": "2026-11-03T01:10:15Z",
+      "by": "claude-code",
+      "desc": "Rehacer desde cero el vídeo de MeshMind (el de ahora es flojo): más dinámico, cinematográfico y profesional, al nivel de un lanzamiento de una app de millones.\n- Misma voz y música; imagen y efectos nuevos.\n- Una sola cámara 3D que viaja (sin diapositivas una tras otra), con desenfoque de movimiento real, profundidad de campo, grano y luz en la señal roja.\n- La app de verdad, grande y en movimiento; tipografía a sangre con el ancho variable de Archivo.\n- Final corto y vivo, no una tarjeta quieta de 6 s.\n\nHecho cuando: motion/out/MeshMind-motion.mp4 se ve de principio a fin sin parones, con la mezcla a −14 LUFS, y la v5 queda guardada en la rama local motion/v5.",
+      "notes": [
+        {
+          "at": "2026-11-03T03:03:01Z",
+          "by": "claude-code",
+          "text": "Hecho, a falta de que apruebes la tarea y la revises (commit 5c6a834, en main).\n- El vídeo: motion/out/MeshMind-motion-v6.mp4 (24,5 s, 1080p, −14 LUFS). No va en git; se regenera con `npm run render` dentro de motion/.\n- Qué cambia: ya no es una tarjeta por frase. Una cámara que viaja (pasillo de servidores, lienzo de la app a ras, travelling con latigazos por los sentidos, chip iluminado), desenfoque de movimiento real, la O de «NOT» como disco rojo que se abre en el golpe, los tres «No» cortados por una hoja roja y un cierre de 2 s con la dirección y «Open the app».\n- Misma voz y música; efectos nuevos, cada palabra queda al menos 6 LU por encima (medido, no escuchado).\n- La v5 queda en la rama local motion/v5.\nPara revisar: verlo con sonido de principio a fin, sobre todo los latigazos de los sentidos (11–13 s) y los cortes de la hoja (15–17 s)."
+        }
+      ]
+    },
+    {
+      "id": "MO-06",
+      "title": "Crear imagen en el navegador con FLUX.2 klein 4B",
+      "state": "proposed",
+      "group": "MO",
+      "at": "2026-11-03T01:38:20Z",
+      "by": "claude-code",
+      "desc": "Janus-Pro 1B pinta a 384 px y con poca calidad. FLUX.2 klein 4B (enero de 2026, Apache-2.0) ya funciona dentro del navegador con WebGPU: 512×512 en 4 pasos, unos 22 s por imagen en una gráfica dedicada, y 6,5 GB de descarga la primera vez. En los equipos donde quepa pasa a ser el modelo de Create image, como los demás modelos locales; Janus-Pro se queda para los equipos pequeños, y se puede elegir en Ajustes.\nRiesgos: es una conversión de la comunidad, no oficial, y ONNX Runtime no suelta la memoria de la gráfica, así que cada fase va en su propio worker.\nPara probarlo hace falta tu Chrome: la preview solo tiene 6 GB de espacio.\nHecho cuando: en tu PC, Create image pinta con FLUX.2 klein sin salir del navegador.",
+      "notes": [
+        {
+          "at": "2026-11-03T02:04:41Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado en main (7282885). Falta que apruebes la tarea y la revises.\n- Create image pinta con FLUX.2 klein 4B dentro del navegador (WebGPU), a 512×512 en 4 pasos. En Ajustes → Local models, Auto lo elige donde cabe y deja Janus-Pro para los equipos pequeños.\n- La primera vez descarga 6,5 GB y los guarda en el navegador; en esta máquina tarda unos 45 s por imagen después (cargar en la gráfica ~15 s, los 4 pasos ~22 s).\n- Si falla (lo normal sería que no quepa en la gráfica junto a otros modelos), el aviso propone pasar a Janus-Pro.\nProbado en la preview: «an old bookshop with a cat in the window» y «a red fox sleeping in the snow at sunrise» salen fotorrealistas y fieles al prompt.\nOjo: es una conversión de la comunidad, no oficial de Black Forest Labs.\nPara revisar: en tu Chrome, Create image con cualquier prompt; la primera vez espera a que baje."
+        }
+      ]
+    },
+    {
+      "id": "MO-07",
+      "title": "Quitar el modo online de Create image",
+      "state": "proposed",
+      "group": "MO",
+      "at": "2026-11-03T01:38:20Z",
+      "by": "claude-code",
+      "desc": "Las imágenes se generan en el navegador: fuera la opción de fal.ai que añadió MO-05. Los nodos que la tenían vuelven a pintar en el equipo.\nHecho cuando: Create image ya no ofrece modelos online.",
+      "notes": [
+        {
+          "at": "2026-11-03T02:04:41Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado en main (fbf0eb6). Falta que apruebes la tarea y la revises.\nCreate image ya no ofrece modelos de fal.ai: pinta siempre en el equipo. Los nodos guardados en modo online pintan en local. La clave de fal vuelve a ser solo para vídeo."
+        }
+      ]
+    },
+    {
+      "id": "DS-05",
+      "title": "Icono de la app con su propio estilo",
+      "state": "proposed",
+      "group": "DS",
+      "at": "2026-11-03T12:27:14Z",
+      "by": "claude-code",
+      "desc": "El icono actual (la malla en triángulo sobre papel) no encaja con la app. Uno nuevo con su lenguaje: esquinas rectas, reglas de tinta, puertos cuadrados y la señal roja, que se lea a 16 px en la pestaña y a 512 px instalado. Terminado: la pestaña de la app y de la landing, los iconos de instalación y la película con el icono nuevo.",
+      "notes": [
+        {
+          "at": "2026-11-03T12:58:28Z",
+          "by": "claude-code",
+          "text": "Hecho y publicado (commit 85cb95c), a petición tuya en el chat: elegiste el diseño «disc». Es la M en tinta, gruesa y de esquinas rectas, delante del disco rojo de la landing, sobre papel. Está en la pestaña de la app y de la landing (public/favicon.svg) y como icono de pantalla de inicio de 180 px (public/apple-touch-icon.png). Revisa: la pestaña en claro y en oscuro."
+        }
+      ]
+    },
+    {
+      "id": "LN-05",
+      "title": "Película de lanzamiento con tu voz",
+      "state": "proposed",
+      "group": "LN",
+      "deps": ["DS-05"],
+      "at": "2026-11-03T12:27:14Z",
+      "by": "claude-code",
+      "desc": "Una película nueva hecha con la skill app-motion, con tu voz de ElevenLabs y mucho más dinámica y cinematográfica que la v6: la app real reconstruida, cámara que vuela por el lienzo, cortes en la voz y en la música. Terminado: motion/launch/out/MeshMind_launch.mp4 a 1080p con sonido y todos los controles de la skill en verde.",
+      "notes": [
+        {
+          "at": "2026-11-03T12:58:28Z",
+          "by": "claude-code",
+          "text": "En marcha en motion/launch, a petición tuya: once planos con cámara en 3D atados a cada palabra de la locución, y el final con el icono nuevo. Para grabarla con tu voz falta la clave de ElevenLabs en motion/.env.elevenlabs; mientras, la película usa la locución de la v6."
+        },
+        {
+          "at": "2026-11-03T13:31:56Z",
+          "by": "claude-code",
+          "text": "Hecho y subido (commit 8c0289e), con la voz de la v6 porque así lo elegiste: motion/launch, máster en motion/launch/out/MeshMind-launch-v7.mp4 (25 s, 1080p60, desenfoque de movimiento real, -14 LUFS). Todos los controles de la skill pasan. Para cambiar a tu voz más adelante: crea motion/.env.elevenlabs, graba con tools/eleven.py tts y ejecuta prep-audio.mjs; la película se recoloca sola (README de motion/launch)."
+        },
+        {
+          "at": "2026-11-03T14:19:43Z",
+          "by": "claude-code",
+          "text": "Arreglados los planos borrosos que señalaste (commit 74d15b5): de cerca, la app ya no lleva perspectiva 3D, que Chrome pintaba pequeña y ampliaba, sino ángulos planos que pinta a tamaño real; y el vuelo sobre el lienzo ya no persigue la señal con un barrido rápido. Comprobado en fotogramas del máster a tamaño real. El vídeo sigue en motion/launch/out/MeshMind-launch-v7.mp4."
+        },
+        {
+          "at": "2026-11-03T15:51:27Z",
+          "by": "claude-code",
+          "text": "La película ya está en tu portfolio (iamdelrio.com), publicada y comprobada: en la ficha de MeshMind con botón de reproducir, en la portada como una escena que avanza con el scroll, y como uno de los planos del reel."
+        }
+      ]
+    },
+    {
+      "id": "CN-02",
+      "title": "Dar por hechas las tareas ya publicadas",
+      "state": "proposed",
+      "group": "CN",
+      "deps": ["LN-03", "LN-04", "LN-05", "DS-01", "DS-02", "DS-03", "DS-04", "DS-05", "ML-06", "PR-03", "RN-01", "RN-02", "RN-05", "MC-01", "MC-02", "MC-03", "MC-05", "MO-01", "MO-02", "MO-03", "MO-06", "MO-07"],
+      "at": "2026-11-03T20:23:57Z",
+      "by": "claude-code",
+      "desc": "Cierra de una vez 22 tareas que ya están hechas y publicadas, pero que seguían abiertas en el tablero: sin aprobar o esperando a otras.\n- Qué hacer: clic derecho en esta tarjeta → «YOLO up to here…» → botón «YOLO». Eso aprueba las propuestas de la lista, da por buenas DS-01, DS-02 y ML-06, que están en revisión, y me deja cerrar el resto sin pasar por revisión. Esta tarea te llega después a revisión.\n- Entran: LN-03, LN-04, LN-05 (con la voz de la v6, como elegiste), DS-01 a DS-05, ML-06, PR-03, RN-01, RN-02, RN-05, MC-01, MC-02, MC-03, MC-05, MO-01, MO-02, MO-03, MO-06 y MO-07. En las notas de cada una está qué se hizo.\n- Se quedan fuera porque les falta algo: RN-03 (medir que va más rápido), RN-04 (que la memoria se libere sola), MC-04 (probar la guía con un puente de verdad), y MO-04 y ML-07 (generar un vídeo de verdad con tu clave de fal; ML-07 te espera en revisión).\n\nTerminado: las 22 tareas salen como hechas en el tablero."
     }
   ]
 }
