@@ -1,5 +1,6 @@
 import { generate } from '@/engine/engine'
-import { decodeAudio, media, preload } from '@/media/media'
+import { useDevice } from '@/engine/device'
+import { decodeAudio, media, preload, voiceModel } from '@/media/media'
 import type { MediaModel, MediaTask } from '@/media/worker'
 import { generateVideo } from '@/media/video'
 import { toolArguments } from '@/mcp/args'
@@ -20,7 +21,15 @@ type RunOptions = {
   onUpdate: (steps: StepResult[]) => void
 }
 
-const MEDIA_MODEL: Partial<Record<FlowNode['type'], MediaModel>> = { describe: 'janus', imagine: 'janus', transcribe: 'whisper', speak: 'kokoro' }
+// El modelo de imagen o audio de cada nodo; la voz depende del idioma (Kokoro en inglés, Supertonic en los demás)
+function mediaModelOf(node: FlowNode): MediaModel | undefined {
+  switch (node.type) {
+    case 'describe': return 'vision'
+    case 'imagine': return 'janus'
+    case 'transcribe': return 'whisper'
+    case 'speak': return voiceModel(node.data.voice)
+  }
+}
 
 const asText = (value: Value) =>
   value.type === 'text' ? value.text : value.type === 'list' ? value.items.join('\n\n') : ''
@@ -69,7 +78,9 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
   nodes
     .filter(n => n.type === 'input')
     .forEach(n => edges.filter(e => e.source === n.id && carries[e.sourceHandle ?? 'out']).forEach(e => reach(e.target)))
-  preload([...new Set(nodes.filter(n => reachable.has(n.id)).map(n => MEDIA_MODEL[n.type]).filter((m): m is MediaModel => !!m))])
+  // Qué Whisper o qué modelo de visión toca depende de lo que quepa en el equipo: hay que conocerlo antes de cargar nada
+  if (!useDevice.getState().profile) await useDevice.getState().refresh()
+  preload([...new Set(nodes.filter(n => reachable.has(n.id)).map(mediaModelOf).filter((m): m is MediaModel => !!m))])
 
   const finished = new Map<string, Promise<void>>()
   const runNode = async (node: FlowNode) => {
@@ -100,7 +111,7 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
     let since: number | null = null
     const start = () => { since = performance.now(); current.state = 'running'; current.status = undefined; flush() }
     const pause = () => { if (since !== null) active += performance.now() - since; since = null }
-    if (node.type === 'assistant' || node.type === 'agent' || MEDIA_MODEL[node.type]) {
+    if (node.type === 'assistant' || node.type === 'agent' || mediaModelOf(node)) {
       current.status = 'Queued'
       flush()
     } else start()

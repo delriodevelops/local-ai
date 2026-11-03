@@ -5,14 +5,15 @@ import { cn } from '@/lib/cn'
 import { useDevice } from '@/engine/device'
 import { useEngine } from '@/engine/engine'
 import { MEDIA_INFO, useResources, type ModelState } from '@/engine/resources'
-import { unloadModel } from '@/media/media'
+import { useApp } from '@/flow/store'
+import { mediaInfo, unloadModel } from '@/media/media'
 import type { MediaBackend, MediaModel } from '@/media/worker'
 
 const BACKEND_LABEL: Record<MediaBackend, string> = { webgpu: 'GPU', wasm: 'CPU' }
 
 // El tamaño del backend en uso; si el modelo puede ir en los dos y aún no ha cargado, el rango
 function sizeOf(model: MediaModel, backend?: MediaBackend) {
-  const size = MEDIA_INFO[model].sizeGB
+  const size = mediaInfo(model).sizeGB
   if (typeof size === 'number') return `${size} GB`
   if (backend) return `${size[backend]} GB`
   const [min, max] = [Math.min(...Object.values(size)), Math.max(...Object.values(size))]
@@ -49,6 +50,8 @@ export default function Monitor() {
   const { profile, refresh } = useDevice()
   const { status, modelId } = useEngine()
   const { media, tokensPerSecond, llmBusy } = useResources()
+  // Cambiar de modelo en Ajustes cambia el nombre de su fila
+  useApp(s => s.localModels)
   const anyBusy = llmBusy || Object.values(media).some(m => m.state === 'busy' || m.state === 'loading')
 
   useEffect(() => { refresh() }, [refresh])
@@ -101,7 +104,7 @@ export default function Monitor() {
             {(Object.keys(MEDIA_INFO) as MediaModel[]).map(model => (
               <Row
                 key={model}
-                name={MEDIA_INFO[model].name}
+                name={mediaInfo(model).name}
                 device={media[model].backend ? BACKEND_LABEL[media[model].backend] : MEDIA_INFO[model].device}
                 state={media[model].state}
                 detail={media[model].status ?? (media[model].state === 'off'

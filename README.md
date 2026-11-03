@@ -18,7 +18,7 @@ Build a flow on a canvas and MeshMind runs every model on your own GPU. No serve
 | **See image** | image | text | Describes or reads a picture |
 | **Create image** | text | image | Paints an image from a prompt |
 | **Transcribe** | audio | text | Speech to text |
-| **Speak** | text | audio | Text to a natural voice, five voices |
+| **Speak** | text | audio | Text to a natural voice in English, Spanish, Portuguese, French or Korean |
 | **Create video** | text | video | Optional and **online**: runs on [fal.ai](https://fal.ai) with your own key |
 | **MCP tool** | text or list | text or list, image | **Online**: calls one tool of an MCP server. Arguments are typed in the node; `{input}` is what reaches it. A list makes one call per item (only the first image goes out) |
 | **Agent** | text | text | **Online tools, local model**: an assistant that decides which MCP tools to call (up to 5 tools and 4 calls) |
@@ -39,14 +39,16 @@ Settings → **MCP servers** connects [MCP](https://modelcontextprotocol.io) ser
 
 ## Models
 
-Everything downloads the first time it's needed and stays cached in the browser.
+Everything downloads the first time it's needed and stays cached in the browser. Settings → **Local models** chooses the model for Transcribe and See image; Auto takes the newest, smartest one that fits your device.
 
 | For | Model | Runs on | Size |
 |---|---|---|---|
 | Assistants | Any [WebLLM](https://github.com/mlc-ai/web-llm) chat model you pick; the newest, smartest ones that fit your device come first | WebGPU | 0.4–5 GB |
-| See / create image | [Janus-Pro 1B](https://huggingface.co/onnx-community/Janus-Pro-1B-ONNX) via Transformers.js | WebGPU | ~2.4 GB |
-| Transcribe | [Whisper base](https://huggingface.co/onnx-community/whisper-base) via Transformers.js | WebGPU | ~0.3 GB |
-| Speak | [Kokoro 82M](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX) via kokoro-js | WebGPU (WASM fallback) | 0.1–0.3 GB |
+| See image | [LFM3-VL 2B](https://huggingface.co/onnx-community/LFM3-VL-2B-ONNX), or [LFM2.5-VL 450M](https://huggingface.co/onnx-community/LFM2.5-VL-450M-ONNX) on smaller devices, via Transformers.js | WebGPU | 0.5–1.9 GB |
+| Create image | [Janus-Pro 1B](https://huggingface.co/onnx-community/Janus-Pro-1B-ONNX) via Transformers.js | WebGPU | ~2.4 GB |
+| Transcribe | [Whisper large-v3 turbo](https://huggingface.co/onnx-community/whisper-large-v3-turbo), or [Whisper base](https://huggingface.co/onnx-community/whisper-base) without fp16, via Transformers.js | WebGPU | 0.3–1.6 GB |
+| Speak, English | [Kokoro 82M](https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX) via kokoro-js | WebGPU (WASM fallback) | 0.1–0.3 GB |
+| Speak, other languages | [Supertonic 2](https://huggingface.co/onnx-community/Supertonic-TTS-2-ONNX) via Transformers.js | WASM | ~0.26 GB |
 
 ## Run it
 

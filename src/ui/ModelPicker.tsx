@@ -6,12 +6,7 @@ import { useEngine } from '@/engine/engine'
 import { isCached, loadModels, rankModels, type ModelInfo, type RankedModel } from '@/engine/models'
 import { useApp } from '@/flow/store'
 import { useDevice } from '@/engine/device'
-
-// 2026-03 → Mar 2026
-const monthOf = (released: string) => {
-  const [year, month] = released.split('-').map(Number)
-  return new Date(year, month - 1).toLocaleDateString('en', { month: 'short', year: 'numeric' })
-}
+import { monthOf } from '@/lib/month'
 
 export default function ModelPicker() {
   const [open, setOpen] = useState(false)

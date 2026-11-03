@@ -1,9 +1,10 @@
-import { AutoProcessor, MultiModalityCausalLM, pipeline, env, type Tensor } from '@huggingface/transformers'
+import { AutoModelForImageTextToText, AutoProcessor, MultiModalityCausalLM, load_image, pipeline, env, type Tensor } from '@huggingface/transformers'
 import { KokoroTTS } from 'kokoro-js'
 import { env as kokoroEnv } from 'kokoro-transformers'
+import { findLocal } from './catalog'
 
 // Modelos de imagen y audio, fuera del hilo principal. Cada uno se descarga la primera vez que hace falta.
-// Hay dos copias de este worker: una para Janus y Whisper y otra solo para Kokoro,
+// Hay dos copias de este worker: una para Janus, la visión y Whisper y otra para las voces,
 // así una no bloquea a la otra y trabajan a la vez
 env.allowLocalModels = false
 // Con aislamiento entre orígenes, la parte que corre en WebAssembly usa varios núcleos (sin él, solo uno).
@@ -13,18 +14,20 @@ if (env.backends.onnx.wasm) env.backends.onnx.wasm.numThreads = threads
 if (kokoroEnv.backends.onnx.wasm) kokoroEnv.backends.onnx.wasm.numThreads = threads
 
 const JANUS = 'onnx-community/Janus-Pro-1B-ONNX'
-const WHISPER = 'onnx-community/whisper-base'
 const KOKORO = 'onnx-community/Kokoro-82M-v1.0-ONNX'
+const SUPERTONIC = 'onnx-community/Supertonic-TTS-2-ONNX'
 
-export type MediaModel = 'janus' | 'whisper' | 'kokoro'
+// Whisper y la visión tienen varios modelos posibles (catalog.ts): variant dice cuál, y lo pone media.ts
+export type MediaModel = 'janus' | 'vision' | 'whisper' | 'kokoro' | 'supertonic'
 export type MediaBackend = 'webgpu' | 'wasm'
 
 export type MediaTask =
-  | { task: 'load'; model: MediaModel }
+  | { task: 'load'; model: MediaModel; variant?: string }
   | { task: 'unload'; model: MediaModel }
-  | { task: 'describe'; image: string; prompt: string }
+  | { task: 'describe'; image: string; prompt: string; variant?: string }
   | { task: 'imagine'; prompt: string }
-  | { task: 'transcribe'; audio: Float32Array }
+  | { task: 'transcribe'; audio: Float32Array; variant?: string }
+  // Voces de Kokoro (af_heart) o de Supertonic con su idioma (es:F1)
   | { task: 'speak'; text: string; voice: string }
 
 export type MediaMessage =
@@ -41,6 +44,16 @@ const loading = new Map<string, Promise<unknown>>()
 function once<T>(key: string, load: () => Promise<T>) {
   if (!loading.has(key)) loading.set(key, load().catch(error => { loading.delete(key); throw error }))
   return loading.get(key) as Promise<T>
+}
+
+// Qué modelo ocupa cada hueco con varios posibles. Si piden otro, el cargado sale antes para no tener los dos en memoria
+const current = new Map<MediaModel, string>()
+async function swap<T>(slot: MediaModel, id: string, load: () => Promise<T>) {
+  if (current.get(slot) !== id) {
+    await unload(slot)
+    current.set(slot, id)
+  }
+  return once(slot, load)
 }
 
 // Convierte el progreso de descarga de Transformers.js en un texto corto
@@ -75,8 +88,33 @@ const janus = (report: Report) => once('janus', async () => {
   return { processor, model: model as MultiModalityCausalLM }
 })
 
-const whisper = (report: Report) => once('whisper', () =>
-  pipeline('automatic-speech-recognition', WHISPER, { device: 'webgpu', progress_callback: downloads(report, 'Whisper') }))
+// LFM-VL describe y lee imágenes. Sin fp16, los pesos van en fp32 y el texto a 4 bits
+const vision = (report: Report, variant?: string) => {
+  const choice = findLocal('describe', variant)
+  return swap('vision', choice.id, async () => {
+    const fp16 = await supportsFp16()
+    const progress_callback = downloads(report, choice.name)
+    const processor = await AutoProcessor.from_pretrained(choice.repo, { progress_callback })
+    const model = await AutoModelForImageTextToText.from_pretrained(choice.repo, {
+      dtype: fp16
+        ? { embed_tokens: 'fp16', vision_encoder: 'fp16', decoder_model_merged: 'q4f16' }
+        : { embed_tokens: 'fp32', vision_encoder: 'fp32', decoder_model_merged: 'q4' },
+      device: 'webgpu',
+      progress_callback,
+    })
+    return { processor, model }
+  })
+}
+
+// El turbo solo se elige con fp16 (catalog.ts): codificador en fp16 y decodificador a 4 bits, como en la demo de Transformers.js
+const whisper = (report: Report, variant?: string) => {
+  const choice = findLocal('transcribe', variant)
+  return swap('whisper', choice.id, () => pipeline('automatic-speech-recognition', choice.repo, {
+    device: 'webgpu',
+    dtype: choice.fp16Only ? { encoder_model: 'fp16', decoder_model_merged: 'q4' } : undefined,
+    progress_callback: downloads(report, choice.name),
+  }))
+}
 
 const hasAdapter = async () => {
   try {
@@ -129,6 +167,24 @@ const kokoro = (report: Report) => once('kokoro', async () => {
   return tts
 })
 
+// Supertonic 2 pone voz al español, portugués, francés y coreano. Es pequeño y rápido en el procesador,
+// así deja la gráfica a los modelos de texto e imagen
+const supertonic = (report: Report) => once('supertonic', async () => {
+  const tts = await pipeline('text-to-speech', SUPERTONIC, { device: 'wasm', dtype: 'fp32', progress_callback: downloads(report, 'Supertonic 2') })
+  loadedOn('supertonic', 'wasm')
+  return tts
+})
+
+// Cada voz de Supertonic es un fichero con su timbre: se descarga una vez por voz
+const timbres = new Map<string, Promise<Float32Array>>()
+const timbre = (voice: string) => {
+  if (!timbres.has(voice)) {
+    const url = `https://huggingface.co/${SUPERTONIC}/resolve/main/voices/${voice}.bin`
+    timbres.set(voice, fetch(url).then(r => r.arrayBuffer()).then(b => new Float32Array(b)).catch(error => { timbres.delete(voice); throw error }))
+  }
+  return timbres.get(voice)!
+}
+
 const toDataUrl = (blob: Blob) => new Promise<string>((resolve, reject) => {
   const reader = new FileReader()
   reader.onload = () => resolve(reader.result as string)
@@ -159,12 +215,48 @@ const clean = (text: string) => text
   .replace(/\s+/g, ' ')
   .trim()
 
-const loaders: Record<MediaModel, (report: Report) => Promise<unknown>> = { janus, whisper, kokoro }
+// Por tramos de unas frases: Kokoro corta en silencio lo que pase de ~500 fonemas, y tts.stream() se
+// queda esperando más texto. Una frase demasiado larga se parte por palabras
+function speechChunks(text: string) {
+  const sentences = (clean(text).match(/[^.!?]+[.!?]+["')\]]*\s*|[^.!?]+$/g) ?? [])
+    .flatMap(s => (s.length <= 250 ? [s] : s.match(/.{1,250}(?:\s|$)|\S+/g) ?? [s]))
+  return sentences.reduce<string[]>((acc, sentence) => {
+    const last = acc.at(-1)
+    if (last && last.length + sentence.length < 280) acc[acc.length - 1] = last + sentence
+    else acc.push(sentence)
+    return acc
+  }, [])
+}
+
+// Dice un tramo de texto con la voz elegida
+type Say = (chunk: string) => Promise<{ audio: Float32Array; sampling_rate: number }>
+
+async function kokoroVoice(report: Report, voice: string): Promise<Say> {
+  const tts = await kokoro(report)
+  return async chunk => {
+    // En la gráfica, el ruido depende de la frase y un fallo puede llegar tarde (memoria, dispositivo perdido):
+    // cualquiera de los dos pasa el trabajo entero a WebAssembly
+    const audio = await tts.generate(chunk, { voice: voice as never })
+      .catch(error => { throw kokoroOn === 'webgpu' ? gpuFailure(error) : error })
+    if (kokoroOn === 'webgpu' && corrupt(audio.audio)) throw new GpuFailure('Kokoro produced invalid audio on WebGPU')
+    return audio
+  }
+}
+
+// Supertonic recibe el idioma como etiqueta alrededor del texto
+async function supertonicVoice(report: Report, lang: string, voice: string): Promise<Say> {
+  const tts = await supertonic(report)
+  const speaker_embeddings = await timbre(voice)
+  return async chunk => await tts(`<${lang}>${chunk}</${lang}>`, { speaker_embeddings, num_inference_steps: 5, speed: 1.05 } as never) as { audio: Float32Array; sampling_rate: number }
+}
+
+const loaders: Record<MediaModel, (report: Report, variant?: string) => Promise<unknown>> = { janus, vision, whisper, kokoro, supertonic }
 
 // Libera la memoria de la gráfica de un modelo cargado; la RAM de WebAssembly solo vuelve al cerrar el worker (media.ts)
 async function unload(model: MediaModel) {
   const pending = loading.get(model)
   loading.delete(model)
+  current.delete(model)
   if (model === 'kokoro') kokoroOn = undefined
   const loaded = await pending?.catch(() => null) as { model?: { dispose(): Promise<unknown> }; dispose?: () => Promise<unknown> } | null
   await (loaded?.model?.dispose() ?? loaded?.dispose?.())
@@ -173,7 +265,7 @@ async function unload(model: MediaModel) {
 async function run(job: MediaTask, report: Report): Promise<string> {
   switch (job.task) {
     case 'load': {
-      await loaders[job.model](report)
+      await loaders[job.model](report, job.variant)
       return 'ready'
     }
     case 'unload': {
@@ -181,13 +273,17 @@ async function run(job: MediaTask, report: Report): Promise<string> {
       return 'freed'
     }
     case 'describe': {
-      const { processor, model } = await janus(report)
+      const { processor, model } = await vision(report, job.variant)
       report('Looking at the image…')
-      const conversation = [{ role: '<|User|>', content: `<image_placeholder>\n${job.prompt}`, images: [job.image] }]
-      const inputs = await processor(conversation)
-      const output = await model.generate({ ...inputs, max_new_tokens: 320, do_sample: false }) as Tensor
+      const messages = [{ role: 'user', content: [{ type: 'image' }, { type: 'text', text: job.prompt }] }]
+      // LFM3-VL razona antes de responder si no se le dice lo contrario: aquí solo hace falta la descripción.
+      // enable_thinking no está en los tipos de Transformers.js, pero llega a la plantilla del chat
+      const options = { add_generation_prompt: true, enable_thinking: false } as { add_generation_prompt: true }
+      const prompt = processor.apply_chat_template(messages as never, options)
+      const inputs = await processor(await load_image(job.image), prompt, { add_special_tokens: false })
+      const output = await model.generate({ ...inputs, max_new_tokens: 512, do_sample: false }) as Tensor
       const fresh = output.slice(null, [inputs.input_ids.dims.at(-1), null])
-      return processor.batch_decode(fresh, { skip_special_tokens: true })[0].trim()
+      return processor.batch_decode(fresh, { skip_special_tokens: true })[0].replace(/^[\s\S]*<\/think>/, '').trim()
     }
     case 'imagine': {
       const { processor, model } = await janus(report)
@@ -204,32 +300,20 @@ async function run(job: MediaTask, report: Report): Promise<string> {
       return toDataUrl(await image.toBlob('image/png'))
     }
     case 'transcribe': {
-      const asr = await whisper(report)
+      const asr = await whisper(report, job.variant)
       report('Listening…')
       const result = await asr(job.audio, { chunk_length_s: 30, stride_length_s: 5 }) as { text: string } | { text: string }[]
       return (Array.isArray(result) ? result.map(r => r.text).join(' ') : result.text).trim()
     }
     case 'speak': {
-      const tts = await kokoro(report)
-      // Por tramos de unas frases: el modelo corta en silencio lo que pase de ~500 fonemas, y tts.stream() se
-      // queda esperando más texto. Una frase demasiado larga se parte por palabras
-      const sentences = (clean(job.text).match(/[^.!?]+[.!?]+["')\]]*\s*|[^.!?]+$/g) ?? [])
-        .flatMap(s => (s.length <= 250 ? [s] : s.match(/.{1,250}(?:\s|$)|\S+/g) ?? [s]))
-      const chunks = sentences.reduce<string[]>((acc, sentence) => {
-        const last = acc.at(-1)
-        if (last && last.length + sentence.length < 280) acc[acc.length - 1] = last + sentence
-        else acc.push(sentence)
-        return acc
-      }, [])
+      const chunks = speechChunks(job.text)
+      const [lang, voice] = job.voice.split(':')
+      const say = voice ? await supertonicVoice(report, lang, voice) : await kokoroVoice(report, job.voice)
       const parts: Float32Array[] = []
       let rate = 24000
       for (const [i, chunk] of chunks.entries()) {
         report(`Speaking · ${i + 1}/${chunks.length}`)
-        // En la gráfica, el ruido depende de la frase y un fallo puede llegar tarde (memoria, dispositivo perdido):
-        // cualquiera de los dos pasa el trabajo entero a WebAssembly
-        const audio = await tts.generate(chunk.trim(), { voice: job.voice as never })
-          .catch(error => { throw kokoroOn === 'webgpu' ? gpuFailure(error) : error })
-        if (kokoroOn === 'webgpu' && corrupt(audio.audio)) throw new GpuFailure('Kokoro produced invalid audio on WebGPU')
+        const audio = await say(chunk.trim())
         parts.push(audio.audio)
         rate = audio.sampling_rate
       }

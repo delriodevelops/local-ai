@@ -4,6 +4,7 @@ import { addEdge, applyEdgeChanges, applyNodeChanges, type Connection, type Edge
 import { EMBED } from '@/embed'
 import { SUGGESTED } from '@/mcp/servers'
 import type { McpServer } from '@/mcp/types'
+import type { LocalTask } from '@/media/catalog'
 import { TEMPLATES } from './presets'
 import type { FlowEdge, FlowNode } from './types'
 
@@ -19,6 +20,8 @@ type AppState = {
   modelId: string | null
   // Clave de fal.ai para el nodo de vídeo; solo se guarda en este navegador
   falKey: string
+  // Whisper y modelo de visión elegidos en Ajustes; sin elección, el más nuevo y listo que cabe en el equipo
+  localModels: Partial<Record<LocalTask, string>>
   // Servidores MCP online, con su token y la última lista de herramientas que dieron
   mcpServers: McpServer[]
   view: View
@@ -34,7 +37,7 @@ type AppState = {
   updateServer: (id: string, patch: Partial<McpServer>) => void
   removeServer: (id: string) => void
   loadTemplate: (id: string) => void
-  set: (patch: Partial<Pick<AppState, 'temperature' | 'maxTokens' | 'modelId' | 'view' | 'falKey' | 'theme'>>) => void
+  set: (patch: Partial<Pick<AppState, 'temperature' | 'maxTokens' | 'modelId' | 'view' | 'falKey' | 'localModels' | 'theme'>>) => void
 }
 
 const initial = TEMPLATES[1].build()
@@ -57,6 +60,7 @@ export const useApp = create<AppState>()(
       maxTokens: 512,
       modelId: null,
       falKey: '',
+      localModels: {},
       mcpServers: [],
       view: 'split',
       theme: 'system',
@@ -98,8 +102,8 @@ export const useApp = create<AppState>()(
       name: 'meshmind',
       version: 1,
       storage: createJSONStorage(() => (EMBED ? readOnly : localStorage)),
-      partialize: ({ nodes, edges, temperature, maxTokens, modelId, falKey, mcpServers, view, theme }) =>
-        ({ nodes: nodes.map(({ selected: _, ...n }) => n) as FlowNode[], edges, temperature, maxTokens, modelId, falKey, mcpServers, view, theme }),
+      partialize: ({ nodes, edges, temperature, maxTokens, modelId, falKey, localModels, mcpServers, view, theme }) =>
+        ({ nodes: nodes.map(({ selected: _, ...n }) => n) as FlowNode[], edges, temperature, maxTokens, modelId, falKey, localModels, mcpServers, view, theme }),
     },
   ),
 )

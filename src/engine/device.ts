@@ -48,11 +48,12 @@ export const useDevice = create<{ profile: DeviceProfile | null; refresh: () => 
 
 export type Fit = { level: 'good' | 'tight' | 'no'; reason: string }
 
-// Valoración aproximada: WebGPU no dice cuánta memoria tiene la gráfica, así que se estima con la RAM
-export function rateModel(model: { id: string; sizeGB: number }, profile: DeviceProfile | null, cached: boolean): Fit {
+// Valoración aproximada: WebGPU no dice cuánta memoria tiene la gráfica, así que se estima con la RAM.
+// Los modelos de WebLLM dicen en el nombre si necesitan fp16; los de imagen y audio lo dicen con fp16
+export function rateModel(model: { id: string; sizeGB: number; fp16?: boolean }, profile: DeviceProfile | null, cached: boolean): Fit {
   if (!profile) return { level: 'good', reason: '' }
   if (!profile.webgpu) return { level: 'no', reason: 'no WebGPU adapter in this browser' }
-  if (/f16/.test(model.id) && !profile.fp16) return { level: 'no', reason: 'needs fp16, not supported here' }
+  if ((model.fp16 ?? /f16/.test(model.id)) && !profile.fp16) return { level: 'no', reason: 'needs fp16, not supported here' }
   const free = profile.quotaGB - profile.usedGB
   if (!cached && model.sizeGB > free) return { level: 'no', reason: `needs ${model.sizeGB.toFixed(1)} GB, ${free.toFixed(1)} GB free` }
   const ram = profile.ramGB ?? 8

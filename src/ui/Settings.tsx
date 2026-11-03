@@ -2,8 +2,13 @@ import * as Popover from '@radix-ui/react-popover'
 import * as Slider from '@radix-ui/react-slider'
 import { ChevronRight, Monitor, Moon, Plug, SlidersHorizontal, Sun } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { monthOf } from '@/lib/month'
 import { useApp, type Theme } from '@/flow/store'
 import { useMcp } from '@/mcp/store'
+import { useDevice } from '@/engine/device'
+import { useResources } from '@/engine/resources'
+import { localModel, rankLocal, unloadModel } from '@/media/media'
+import type { LocalTask } from '@/media/catalog'
 
 const THEMES: { id: Theme; label: string; icon: typeof Sun }[] = [
   { id: 'system', label: 'System', icon: Monitor },
@@ -29,6 +34,35 @@ function Range({ label, hint, value, min, max, step, onChange, format }: {
       </Slider.Root>
       <span className="text-xs leading-relaxed text-neutral-500">{hint}</span>
     </div>
+  )
+}
+
+// Automático (el más nuevo y listo que cabe) o uno fijo. Si cambia el modelo, el cargado se suelta para no ocupar memoria
+function LocalModelSelect({ task, label }: { task: LocalTask; label: string }) {
+  const { localModels, set } = useApp()
+  const profile = useDevice(s => s.profile)
+  const options = rankLocal(task, profile)
+  const slot = task === 'transcribe' ? 'whisper' : 'vision'
+  const choose = (id: string) => {
+    const before = localModel(task).id
+    set({ localModels: { ...localModels, [task]: id || undefined } })
+    if (localModel(task).id !== before && useResources.getState().media[slot].state === 'ready') unloadModel(slot)
+  }
+  return (
+    <label className="flex flex-col gap-1 text-xs text-neutral-400">
+      {label}
+      <select
+        value={localModels[task] ?? ''} onChange={e => choose(e.target.value)}
+        className="bg-paper border border-line px-2 py-1.5 font-mono text-xs text-neutral-100 outline-none focus:border-signal duration-200"
+      >
+        <option value="">Auto · {options[0].name}</option>
+        {options.map(m => (
+          <option key={m.id} value={m.id}>
+            {m.name} · {m.sizeGB} GB · {monthOf(m.released)}{m.fit.level === 'tight' ? ' · tight' : m.fit.level === 'no' ? " · won't fit" : ''}
+          </option>
+        ))}
+      </select>
+    </label>
   )
 }
 
@@ -66,6 +100,12 @@ export default function Settings() {
               <ChevronRight className="w-4 h-4 text-neutral-500 group-hover:text-signal-ink group-hover:translate-x-1 duration-300 ease-snap" />
             </button>
           </Popover.Close>
+          <div className="flex flex-col gap-3 border-t border-line pt-4">
+            <span className="label text-neutral-50">Local models</span>
+            <LocalModelSelect task="transcribe" label="Transcribe" />
+            <LocalModelSelect task="describe" label="See image" />
+            <span className="text-xs leading-relaxed text-neutral-500">Auto picks the newest, smartest model that fits this device. Voices follow the language chosen in each Speak node.</span>
+          </div>
           <label className="flex flex-col gap-2 border-t border-line pt-4">
             <span className="label text-neutral-50">fal.ai key <span className="text-neutral-500">· only for video</span></span>
             <input

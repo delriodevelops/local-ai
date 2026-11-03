@@ -10,7 +10,7 @@ import { useSession } from '@/chat/session'
 import { defaultArgs, firstLine, INPUT, toolFields } from '@/mcp/args'
 import { refreshServer, useMcp } from '@/mcp/store'
 import type { McpServer, ToolRef } from '@/mcp/types'
-import { VOICES } from '@/media/media'
+import { LANGUAGES, VOICES } from '@/media/media'
 import MediaView from '@/chat/MediaView'
 import type {
   AgentNode, AssistantNode, ConditionNode, DescribeNode, ImagineNode, InputNode, JoinNode, OutputNode, PortType,
@@ -306,19 +306,33 @@ export const TranscribeNodeView = memo(({ id, data, selected }: NodeProps<Transc
 export const SpeakNodeView = memo(({ id, data, selected }: NodeProps<SpeakNode>) => {
   const updateNode = useApp(s => s.updateNode)
   const step = useStep(id)
+  const lang = VOICES.find(v => v.id === data.voice)?.lang ?? 'en'
   return (
     <Shell id={id} kind="Speak" icon={<AudioLines className="w-3 h-3" />} selected={selected} step={step} width="w-60">
       <Title id={id} value={data.label} />
-      <label className="flex flex-col gap-1 text-xs text-neutral-400">
-        Voice
-        <select
-          value={data.voice}
-          onChange={e => updateNode(id, { voice: e.target.value })}
-          className={cn(fieldClass, 'px-2 py-1.5')}
-        >
-          {VOICES.map(v => <option key={v.id} value={v.id}>{v.label}</option>)}
-        </select>
-      </label>
+      {/* Al cambiar de idioma, la primera voz de ese idioma */}
+      <div className="grid grid-cols-2 gap-2">
+        <label className="flex flex-col gap-1 text-xs text-neutral-400">
+          Language
+          <select
+            value={lang}
+            onChange={e => updateNode(id, { voice: VOICES.find(v => v.lang === e.target.value)!.id })}
+            className={cn(fieldClass, 'px-2 py-1.5')}
+          >
+            {LANGUAGES.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-neutral-400">
+          Voice
+          <select
+            value={data.voice}
+            onChange={e => updateNode(id, { voice: e.target.value })}
+            className={cn(fieldClass, 'px-2 py-1.5')}
+          >
+            {VOICES.filter(v => v.lang === lang).map(v => <option key={v.id} value={v.id}>{v.label}</option>)}
+          </select>
+        </label>
+      </div>
       <Preview step={step} />
       <TypeTag type="audio" />
       <Port type="target" id="in" kind="text" />

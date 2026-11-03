@@ -1,13 +1,55 @@
 import type { MediaMessage, MediaModel, MediaTask } from './worker'
+import { LOCAL_MODELS, type LocalModel, type LocalTask } from './catalog'
 import { exclusive, MEDIA_INFO, useResources } from '@/engine/resources'
+import { rateModel, useDevice, type DeviceProfile } from '@/engine/device'
+import { useApp } from '@/flow/store'
 
-export const VOICES = [
-  { id: 'af_heart', label: 'Heart (US, female)' },
-  { id: 'af_bella', label: 'Bella (US, female)' },
-  { id: 'am_michael', label: 'Michael (US, male)' },
-  { id: 'bf_emma', label: 'Emma (UK, female)' },
-  { id: 'bm_george', label: 'George (UK, male)' },
+export const LANGUAGES = [
+  { id: 'en', label: 'English' },
+  { id: 'es', label: 'Spanish' },
+  { id: 'pt', label: 'Portuguese' },
+  { id: 'fr', label: 'French' },
+  { id: 'ko', label: 'Korean' },
 ]
+
+// El inglés lo pone Kokoro. Los demás idiomas, Supertonic 2, cuyas diez voces los hablan todos: es:F1 es la voz F1 en español
+export const VOICES = [
+  { id: 'af_heart', label: 'Heart (US, female)', lang: 'en' },
+  { id: 'af_bella', label: 'Bella (US, female)', lang: 'en' },
+  { id: 'am_michael', label: 'Michael (US, male)', lang: 'en' },
+  { id: 'bf_emma', label: 'Emma (UK, female)', lang: 'en' },
+  { id: 'bm_george', label: 'George (UK, male)', lang: 'en' },
+  ...LANGUAGES.slice(1).flatMap(({ id: lang }) => ['F1', 'F2', 'F3', 'F4', 'F5', 'M1', 'M2', 'M3', 'M4', 'M5']
+    .map(voice => ({ id: `${lang}:${voice}`, label: `${voice[0] === 'F' ? 'Female' : 'Male'} ${voice[1]}`, lang }))),
+]
+
+export const voiceModel = (voice: string): MediaModel => (voice.includes(':') ? 'supertonic' : 'kokoro')
+
+const FIT = { good: 0, tight: 1, no: 2 }
+
+// Los modelos de una tarea, primero los que caben en este equipo y, dentro, del más nuevo y listo al más modesto
+export const rankLocal = (task: LocalTask, profile: DeviceProfile | null) => LOCAL_MODELS[task]
+  .map(model => ({ ...model, fit: rateModel({ id: model.id, sizeGB: model.sizeGB, fp16: model.fp16Only }, profile, false) }))
+  .sort((a, b) => FIT[a.fit.level] - FIT[b.fit.level])
+
+// El modelo de cada tarea: el elegido en Ajustes o, en automático, el primero que cabe
+export function localModel(task: LocalTask): LocalModel {
+  const chosen = useApp.getState().localModels[task]
+  return LOCAL_MODELS[task].find(m => m.id === chosen) ?? rankLocal(task, useDevice.getState().profile)[0]
+}
+
+// Nombre y tamaño para el monitor: Whisper y la visión dependen del modelo elegido
+export function mediaInfo(model: MediaModel) {
+  const local = model === 'whisper' ? localModel('transcribe') : model === 'vision' ? localModel('describe') : null
+  return local ? { ...MEDIA_INFO[model], name: local.name, sizeGB: local.sizeGB } : MEDIA_INFO[model]
+}
+
+// El worker carga el modelo que diga el trabajo; se decide al empezar, por si se cambió en Ajustes mientras hacía cola
+function withVariant(job: MediaTask): MediaTask {
+  if (job.task === 'transcribe' || (job.task === 'load' && job.model === 'whisper')) return { ...job, variant: localModel('transcribe').id }
+  if (job.task === 'describe' || (job.task === 'load' && job.model === 'vision')) return { ...job, variant: localModel('describe').id }
+  return job
+}
 
 type Lane = 'main' | 'voice'
 const workers = new Map<Lane, Worker>()
@@ -29,8 +71,8 @@ function forgetWasm() {
   try { sessionStorage.removeItem(KOKORO_WASM) } catch { /* sin almacenamiento basta con la variable */ }
 }
 
-// Kokoro tiene su propio worker y lo demás comparte otro, para que una voz larga no bloquee a Janus ni a Whisper
-const laneOf = (model: MediaModel): Lane => (model === 'kokoro' ? 'voice' : 'main')
+// Las voces tienen su propio worker y lo demás comparte otro, para que una voz larga no bloquee a Janus ni a Whisper
+const laneOf = (model: MediaModel): Lane => (model === 'kokoro' || model === 'supertonic' ? 'voice' : 'main')
 const modelsOf = (lane: Lane) => (Object.keys(MEDIA_INFO) as MediaModel[]).filter(m => laneOf(m) === lane)
 
 // Cerrar el worker es la única forma de devolver la RAM de WebAssembly, y de limpiar Transformers.js:
@@ -46,9 +88,10 @@ function close(lane: Lane, error = new Error('The media worker restarted after a
 export function modelFor(job: MediaTask): MediaModel {
   switch (job.task) {
     case 'load': case 'unload': return job.model
-    case 'describe': case 'imagine': return 'janus'
+    case 'describe': return 'vision'
+    case 'imagine': return 'janus'
     case 'transcribe': return 'whisper'
-    case 'speak': return 'kokoro'
+    case 'speak': return voiceModel(job.voice)
   }
 }
 
@@ -115,7 +158,7 @@ export function media(job: MediaTask, onStatus: (text: string) => void = () => {
     const was = useResources.getState().media[model].state
     setMedia(model, { state: was === 'off' ? 'loading' : 'busy' })
     try {
-      const result = await send(job, text => {
+      const result = await send(withVariant(job), text => {
         if (text.startsWith('Downloading')) setMedia(model, { state: 'loading', status: text })
         else setMedia(model, { state: job.task === 'load' ? 'loading' : 'busy', status: text })
         onStatus(text)
@@ -154,7 +197,7 @@ export async function decodeAudio(url: string) {
   }
 }
 
-// Fotos grandes se reducen: el modelo trabaja a 384 px y el historial guarda la imagen
+// Fotos grandes se reducen: los modelos trabajan a 384–512 px y el historial guarda la imagen
 export async function shrinkImage(file: Blob, max = 768) {
   const bitmap = await createImageBitmap(file)
   const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height))
