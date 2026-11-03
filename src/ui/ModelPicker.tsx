@@ -43,67 +43,70 @@ export default function ModelPicker() {
       <Dialog.Trigger asChild>
         <button
           type="button"
-          className="relative overflow-hidden flex items-center gap-2 min-w-0 max-w-full sm:w-80 rounded-lg border border-ink hover:bg-ink hover:text-paper bg-neutral-900 px-3 py-2 duration-300 ease-snap"
+          className="flex items-center gap-2 h-10 min-w-0 max-w-full sm:w-80 border-[1.5px] border-ink hover:bg-ink hover:text-paper px-3 duration-300 ease-snap"
         >
           <Cpu className="w-4 h-4 shrink-0 text-neutral-400" />
           <span className="label hidden sm:inline">Model</span>
           <span className={cn('truncate font-mono text-[12.5px]', modelId ? 'text-neutral-100' : 'text-neutral-400')}>
             {modelId ?? 'Select a model'}
           </span>
+          {/* La descarga avanza en la barra roja de arriba; aquí, cuánto lleva */}
+          {status === 'loading' && <span className="shrink-0 font-mono text-[11px] text-signal-ink tabular-nums">{Math.round(progress * 100)}%</span>}
           <ChevronDown className="w-4 h-4 ml-auto shrink-0 text-neutral-500" />
-          {status === 'loading' && (
-            <span className="absolute left-0 bottom-0 h-0.5 bg-signal duration-300" style={{ width: `${Math.max(3, progress * 100)}%` }} />
-          )}
         </button>
       </Dialog.Trigger>
       {status === 'loading' && (
-        <span className="hidden lg:block font-mono text-[11px] text-signal-ink truncate max-w-72" title={progressText}>{progressText}</span>
+        <span className="hidden 2xl:block font-mono text-[11px] text-signal-ink truncate max-w-72" title={progressText}>{progressText}</span>
       )}
 
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-ink/40" />
-        <Dialog.Content className="fixed z-50 inset-x-0 bottom-0 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[32rem] max-h-[85dvh] flex flex-col border-[1.5px] border-ink bg-neutral-900 animate-rise">
-          <div className="flex items-center justify-between px-5 pt-5 pb-3">
-            <Dialog.Title className="display text-3xl">Choose a model</Dialog.Title>
-            <Dialog.Close className="p-1.5 rounded-md text-neutral-400 hover:text-neutral-100 hover:bg-neutral-800"><X className="w-4 h-4" /></Dialog.Close>
+        <Dialog.Content className="fixed z-50 inset-x-0 bottom-0 sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[34rem] max-h-[85dvh] flex flex-col border-2 border-ink bg-paper animate-rise">
+          <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-4">
+            <Dialog.Title className="display text-[40px] text-neutral-50">Choose a model</Dialog.Title>
+            <Dialog.Close className="w-9 h-9 shrink-0 flex items-center justify-center text-neutral-400 hover:bg-ink hover:text-paper duration-200"><X className="w-4 h-4" /></Dialog.Close>
           </div>
-          <Dialog.Description className="px-5 text-sm text-neutral-400">
+          <Dialog.Description className="px-6 text-[15px] leading-relaxed text-neutral-300">
             It downloads once and stays in your browser. Small models (1–2 GB) are quick; bigger ones answer better.
           </Dialog.Description>
           {profile && (
-            <p className="mx-5 mt-3 rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 font-mono text-[10.5px] leading-relaxed text-neutral-400">
+            <p className="mx-6 mt-4 border-y border-line py-2 font-mono text-[10.5px] leading-relaxed text-neutral-400">
               {profile.gpu} · fp16 {profile.fp16 ? 'yes' : 'no'} · {profile.cores} cores{profile.ramGB ? ` · ~${profile.ramGB} GB RAM` : ''} · {Math.max(0, profile.quotaGB - profile.usedGB).toFixed(1)} GB free for models
             </p>
           )}
-          <label className="mx-5 mt-4 mb-2 flex items-center gap-2 rounded-lg border border-neutral-700 focus-within:border-signal bg-neutral-950 px-3">
+          <label className="mx-6 mt-5 flex items-center gap-2 border-b-2 border-ink focus-within:border-signal duration-200">
             <Search className="w-4 h-4 text-neutral-500" />
-            <input autoFocus value={query} onChange={e => setQuery(e.target.value)} placeholder="Search models" className="flex-1 bg-transparent py-2 text-sm outline-none" />
+            <input autoFocus value={query} onChange={e => setQuery(e.target.value)} placeholder="Search models" className="flex-1 bg-transparent py-2.5 text-[15px] outline-none placeholder:text-neutral-500" />
           </label>
-          <ul className="flex-1 overflow-y-auto px-2 pb-3">
-            {!models.length && <li className="px-3 py-6 text-center label">Loading models…</li>}
+          <ul className="flex-1 overflow-y-auto px-6 pb-4">
+            {!models.length && <li className="py-6 text-center label">Loading models…</li>}
             {list.map(model => {
               const fit = rateModel(model, profile, cached.has(model.id))
+              const current = model.id === modelId
               return (
-              <li key={model.id}>
+              <li key={model.id} className="border-b border-line">
                 <button
                   type="button"
                   onClick={() => pick(model.id)}
-                  className={cn('w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-neutral-800 duration-150', model.id === modelId && 'bg-neutral-800')}
+                  aria-current={current || undefined}
+                  className="group relative w-full flex items-center gap-3 py-3 text-left hover:bg-neutral-800 duration-150"
                 >
-                  <span className="flex-1 min-w-0">
-                    <span className="block truncate font-mono text-[12.5px] text-neutral-100">{model.id}</span>
+                  {/* El modelo elegido lleva el cuadrado rojo de la señal */}
+                  {current && <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-signal" aria-hidden="true" />}
+                  <span className={cn('flex-1 min-w-0 duration-300 ease-snap', current ? 'pl-4' : 'group-hover:pl-1.5')}>
+                    <span className={cn('block truncate font-mono text-[12.5px] text-neutral-100', current && 'font-medium text-neutral-50')}>{model.id}</span>
                     <span className="flex gap-3 font-mono text-[10.5px] text-neutral-500">
                       <span>{model.sizeGB.toFixed(1)} GB</span>
                       {model.recommended && <span className="text-signal-ink">recommended</span>}
-                      {cached.has(model.id) && <span className="flex items-center gap-1 text-blue-700"><HardDriveDownload className="w-3 h-3" />downloaded</span>}
+                      {cached.has(model.id) && <span className="flex items-center gap-1 text-neutral-300"><HardDriveDownload className="w-3 h-3" />downloaded</span>}
                     </span>
                   </span>
                   <span
                     title={fit.reason}
-                    className={cn('shrink-0 rounded-full px-2 py-0.5 font-mono text-[10px]', {
-                      'bg-neutral-800 text-neutral-50': fit.level === 'good',
-                      'bg-amber-400/10 text-amber-800': fit.level === 'tight',
-                      'bg-red-400/10 text-red-700': fit.level === 'no',
+                    className={cn('shrink-0 border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em]', {
+                      'border-line text-neutral-400': fit.level === 'good',
+                      'border-ink text-neutral-50': fit.level === 'tight',
+                      'border-signal text-signal-ink': fit.level === 'no',
                     })}
                   >
                     {fit.level === 'good' ? 'fits' : fit.level === 'tight' ? 'tight' : "won't fit"}

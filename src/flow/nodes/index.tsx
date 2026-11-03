@@ -39,13 +39,13 @@ function Port({ type, kind, id, top, left, label }: {
       type={type}
       id={id}
       position={side}
-      style={{ ...(vertical ? { left } : { top }), background: 'var(--color-neutral-950)', borderColor: color }}
+      style={{ ...(vertical ? { left } : { top }), background: 'var(--color-paper)', borderColor: color }}
       className="!w-3 !h-3 !border-2"
     >
       {label && (
         <span
           className={cn(
-            'pointer-events-none absolute font-mono text-[9px] uppercase tracking-widest',
+            'pointer-events-none absolute text-[9px] font-semibold uppercase tracking-[0.12em]',
             // En vertical la etiqueta va dentro del nodo, junto al borde, para no quedar encima de la conexión
             vertical ? cn('left-1/2 -translate-x-1/2', type === 'source' ? 'bottom-4' : 'top-4')
               : cn('top-1/2 -translate-y-1/2', type === 'source' ? 'left-4' : 'right-4'),
@@ -59,34 +59,40 @@ function Port({ type, kind, id, top, left, label }: {
   )
 }
 
+// El marco según el estado de la última ejecución: rojo mientras trabaja o si falló
 const STATE_RING: Record<string, string> = {
-  running: 'border-signal shadow-[0_0_32px_-6px_rgba(255,58,31,0.35)]',
+  running: 'border-signal',
   done: 'border-ink',
-  skipped: 'border-neutral-800 opacity-50',
-  error: 'border-red-600',
+  skipped: 'border-line opacity-50',
+  error: 'border-signal',
 }
 
+// Campos de los nodos: una regla fina alrededor, que se vuelve roja al escribir. Cada campo pone su relleno
+const fieldClass = 'nodrag bg-paper border border-line focus:border-signal text-xs text-neutral-100 outline-none duration-200'
+
+// El nodo de la landing: marco de 2 px, la etiqueta del tipo arriba y el nombre en negrita.
+// tone 'ink' lo invierte, como el nodo Answer de la landing.
 // labels: el nodo tiene puertos con nombre, que en vertical necesitan sitio en el borde de abajo
-function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64', local = true, labels = false }: {
-  id: string; kind: string; icon: ReactNode; color?: string; selected?: boolean; step?: StepResult; children: ReactNode; width?: string; local?: boolean; labels?: boolean
+function Shell({ id, kind, icon, selected, step, children, width = 'w-64', local = true, labels = false, tone = 'paper' }: {
+  id: string; kind: string; icon: ReactNode; selected?: boolean; step?: StepResult; children: ReactNode; width?: string; local?: boolean; labels?: boolean; tone?: 'paper' | 'ink'
 }) {
   const { deleteElements } = useReactFlow()
   const vertical = useContext(Vertical)
+  const ink = tone === 'ink'
   return (
     <div className={cn(
-      'group border-[1.5px] bg-neutral-900 text-neutral-100 duration-300 ease-snap',
+      'group relative border-2 duration-300 ease-snap',
+      ink ? 'node-ink bg-ink text-paper' : 'bg-paper text-neutral-100',
       width,
       step ? STATE_RING[step.state] ?? 'border-ink' : 'border-ink',
-      selected && 'ring-1 ring-signal',
+      selected && 'outline-2 outline-offset-2 outline-signal',
     )}>
-      <div className="flex items-center gap-2 px-3 pt-2.5 pb-2 border-b border-neutral-800">
-        <span className="w-5 h-5 rounded-md flex items-center justify-center" style={{ background: color ?? 'var(--color-ink)', color: color ? '#111111' : 'var(--color-paper)' }}>
-          {icon}
-        </span>
+      <div className={cn('flex items-center gap-2 px-3 pt-2.5 pb-2 border-b', ink ? 'border-paper/25' : 'border-line')}>
+        <span className={cn('flex items-center', ink ? 'text-paper' : 'text-neutral-50')}>{icon}</span>
         <span className="label flex-1">{kind}</span>
-        {!local && <span className="font-mono text-[9px] uppercase tracking-widest text-amber-800" title="Sends data to an online service">online</span>}
+        {!local && <span className="border border-current px-1 py-px text-[9px] font-semibold uppercase tracking-[0.12em] text-neutral-50" title="Sends data to an online service">online ↗</span>}
         {step?.state === 'running' && <LoaderCircle className="w-3.5 h-3.5 text-signal-ink animate-spin" />}
-        {step?.state === 'done' && <Check className="w-3.5 h-3.5 text-signal-ink" />}
+        {step?.state === 'done' && <Check className="w-3.5 h-3.5" />}
         {step?.progress && step.state === 'running' && (
           <span className="font-mono text-[10px] text-neutral-400">{step.progress.index + 1}/{step.progress.total}</span>
         )}
@@ -94,7 +100,7 @@ function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64'
         <button
           type="button"
           onClick={() => deleteElements({ nodes: [{ id }] })}
-          className={cn('nodrag text-neutral-500 hover:text-red-600 duration-200', selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100')}
+          className={cn('nodrag text-neutral-500 hover:text-signal-ink duration-200', selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 pointer-coarse:opacity-100')}
           title="Remove node"
         >
           <X className="w-3.5 h-3.5" />
@@ -104,8 +110,10 @@ function Shell({ id, kind, icon, color, selected, step, children, width = 'w-64'
         {children}
         {step?.state === 'running' && step.status && <p className="font-mono text-[10px] text-signal-ink truncate">{step.status}</p>}
         {step?.state === 'waiting' && step.status && <p className="font-mono text-[10px] text-neutral-500 truncate">{step.status}</p>}
-        {step?.state === 'error' && <p className="text-[11px] text-red-700 line-clamp-3">{step.error}</p>}
+        {step?.state === 'error' && <p className="text-[11px] text-signal-ink line-clamp-3">{step.error}</p>}
       </div>
+      {/* Mientras trabaja, la señal roja recorre el pie del nodo, como en el lienzo de la landing */}
+      {step?.state === 'running' && <span className="signal-bar absolute inset-x-0 bottom-0 h-1 bg-signal" aria-hidden="true" />}
     </div>
   )
 }
@@ -116,15 +124,29 @@ function Title({ id, value }: { id: string; value: string }) {
     <input
       value={value}
       onChange={e => updateNode(id, { label: e.target.value })}
-      className="nodrag bg-transparent text-[15px] font-medium border-b border-transparent focus:border-signal outline-none w-full"
+      className="nodrag bg-transparent text-base font-bold tracking-[-0.01em] border-b border-transparent focus:border-signal outline-none w-full"
       aria-label="Node name"
+    />
+  )
+}
+
+// La muestra cuadrada del color de un asistente: al pulsarla pasa al siguiente color
+function Swatch({ id, color }: { id: string; color: string }) {
+  const updateNode = useApp(s => s.updateNode)
+  return (
+    <button
+      type="button"
+      onClick={() => updateNode(id, { color: COLORS[(COLORS.indexOf(color) + 1) % COLORS.length] })}
+      className="nodrag w-3 h-3 shrink-0 hover:scale-125 duration-200 ease-snap"
+      style={{ background: color }}
+      title="Change colour"
     />
   )
 }
 
 function Field({ id, label, value, field, multiline = false, mono = false }: { id: string; label: string; value: string; field: string; multiline?: boolean; mono?: boolean }) {
   const updateNode = useApp(s => s.updateNode)
-  const className = cn('nodrag nowheel rounded-md bg-neutral-950 border border-neutral-800 focus:border-signal px-2 py-1.5 text-xs text-neutral-200 outline-none', mono && 'font-mono')
+  const className = cn(fieldClass, 'px-2 py-1.5', mono && 'font-mono')
   return (
     <label className="flex flex-col gap-1 text-xs text-neutral-400">
       {label}
@@ -141,14 +163,14 @@ function Preview({ step }: { step?: StepResult }) {
   if (value.type === 'image' || value.type === 'audio' || value.type === 'video') return <MediaView value={value} compact />
   const text = value.type === 'text' ? value.text : value.items.map((t, i) => `${i + 1}. ${t}`).join('\n')
   return (
-    <p className="line-clamp-3 whitespace-pre-wrap rounded-md bg-neutral-950 border border-neutral-800 px-2 py-1.5 text-[11.5px] leading-relaxed text-neutral-300">
+    <p className="line-clamp-3 whitespace-pre-wrap border-l-2 border-ink pl-2 py-0.5 text-[11.5px] leading-relaxed text-neutral-300">
       {text || '…'}
     </p>
   )
 }
 
 const TypeTag = ({ type }: { type: PortType }) => (
-  <span className="font-mono text-[9px] uppercase tracking-widest" style={{ color: portText(PORT_COLOR[type]) }}>→ {type}</span>
+  <span className="text-[9px] font-semibold uppercase tracking-[0.12em]" style={{ color: portText(PORT_COLOR[type]) }}>→ {type}</span>
 )
 
 export const InputNodeView = memo(({ id, data, selected }: NodeProps<InputNode>) => (
@@ -165,17 +187,10 @@ export const AssistantNodeView = memo(({ id, data, selected }: NodeProps<Assista
   const updateNode = useApp(s => s.updateNode)
   const step = useStep(id)
   const out = useOutType(id)
-  const nextColor = COLORS[(COLORS.indexOf(data.color) + 1) % COLORS.length]
   return (
-    <Shell id={id} kind="Assistant" icon={<Sparkles className="w-3 h-3" />} color={data.color} selected={selected} step={step} width="w-72">
+    <Shell id={id} kind="Assistant" icon={<Sparkles className="w-3 h-3" />} selected={selected} step={step} width="w-72">
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => updateNode(id, { color: nextColor })}
-          className="nodrag w-3 h-3 rounded-full shrink-0 ring-2 ring-neutral-900 hover:scale-125 duration-200"
-          style={{ background: data.color }}
-          title="Change colour"
-        />
+        <Swatch id={id} color={data.color} />
         <Title id={id} value={data.label} />
       </div>
       <textarea
@@ -183,9 +198,9 @@ export const AssistantNodeView = memo(({ id, data, selected }: NodeProps<Assista
         onChange={e => updateNode(id, { instructions: e.target.value })}
         rows={3}
         placeholder="What should this assistant do?"
-        className="nodrag nowheel resize-none rounded-md bg-neutral-950 border border-neutral-800 focus:border-signal px-2 py-1.5 text-xs leading-relaxed text-neutral-300 outline-none"
+        className={cn(fieldClass, 'nowheel resize-none px-2 py-1.5 leading-relaxed placeholder:text-neutral-500')}
       />
-      {out === 'list' && <p className="text-[11px] text-blue-700">Gets a list: answers each item separately.</p>}
+      {out === 'list' && <p className="text-[11px]" style={{ color: portText(PORT_COLOR.list) }}>Gets a list: answers each item separately.</p>}
       <Preview step={step} />
       <TypeTag type={out} />
       <Port type="target" id="in" kind="any" />
@@ -219,7 +234,7 @@ export const SplitNodeView = memo(({ id, data, selected }: NodeProps<SplitNode>)
         <input
           type="number" min={1} max={20} value={data.max}
           onChange={e => updateNode(id, { max: Math.max(1, Math.min(20, Number(e.target.value) || 1)) })}
-          className="nodrag w-14 rounded-md bg-neutral-950 border border-neutral-800 px-2 py-1 text-right font-mono text-neutral-100 outline-none"
+          className={cn(fieldClass, 'w-14 px-2 py-1 text-right font-mono')}
         />
       </label>
       <Preview step={step} />
@@ -237,7 +252,7 @@ export const ConditionNodeView = memo(({ id, data, selected }: NodeProps<Conditi
       <Title id={id} value={data.label} />
       <Field id={id} label="If the text contains" value={data.match} field="match" mono />
       {step?.branch && (
-        <p className="font-mono text-[10px] uppercase tracking-widest text-signal-ink">Went → {step.branch}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-signal-ink">Went → {step.branch}</p>
       )}
       <Port type="target" id="in" kind="text" />
       <Port type="source" id="yes" kind="text" top="40%" left="30%" label="yes" />
@@ -249,7 +264,7 @@ export const ConditionNodeView = memo(({ id, data, selected }: NodeProps<Conditi
 export const DescribeNodeView = memo(({ id, data, selected }: NodeProps<DescribeNode>) => {
   const step = useStep(id)
   return (
-    <Shell id={id} kind="See image" icon={<Eye className="w-3 h-3" />} color={PORT_COLOR.image} selected={selected} step={step} width="w-64">
+    <Shell id={id} kind="See image" icon={<Eye className="w-3 h-3" />} selected={selected} step={step} width="w-64">
       <Title id={id} value={data.label} />
       <Field id={id} label="What to look for" value={data.prompt} field="prompt" multiline />
       <Preview step={step} />
@@ -263,7 +278,7 @@ export const DescribeNodeView = memo(({ id, data, selected }: NodeProps<Describe
 export const ImagineNodeView = memo(({ id, data, selected }: NodeProps<ImagineNode>) => {
   const step = useStep(id)
   return (
-    <Shell id={id} kind="Create image" icon={<ImagePlus className="w-3 h-3" />} color={PORT_COLOR.image} selected={selected} step={step} width="w-64">
+    <Shell id={id} kind="Create image" icon={<ImagePlus className="w-3 h-3" />} selected={selected} step={step} width="w-64">
       <Title id={id} value={data.label} />
       <Field id={id} label="Style added to the prompt" value={data.style} field="style" />
       <Preview step={step} />
@@ -277,7 +292,7 @@ export const ImagineNodeView = memo(({ id, data, selected }: NodeProps<ImagineNo
 export const TranscribeNodeView = memo(({ id, data, selected }: NodeProps<TranscribeNode>) => {
   const step = useStep(id)
   return (
-    <Shell id={id} kind="Transcribe" icon={<Mic className="w-3 h-3" />} color={PORT_COLOR.audio} selected={selected} step={step} width="w-60">
+    <Shell id={id} kind="Transcribe" icon={<Mic className="w-3 h-3" />} selected={selected} step={step} width="w-60">
       <Title id={id} value={data.label} />
       <p className="text-xs text-neutral-400">Turns speech into text with Whisper.</p>
       <Preview step={step} />
@@ -292,14 +307,14 @@ export const SpeakNodeView = memo(({ id, data, selected }: NodeProps<SpeakNode>)
   const updateNode = useApp(s => s.updateNode)
   const step = useStep(id)
   return (
-    <Shell id={id} kind="Speak" icon={<AudioLines className="w-3 h-3" />} color={PORT_COLOR.audio} selected={selected} step={step} width="w-60">
+    <Shell id={id} kind="Speak" icon={<AudioLines className="w-3 h-3" />} selected={selected} step={step} width="w-60">
       <Title id={id} value={data.label} />
       <label className="flex flex-col gap-1 text-xs text-neutral-400">
         Voice
         <select
           value={data.voice}
           onChange={e => updateNode(id, { voice: e.target.value })}
-          className="nodrag rounded-md bg-neutral-950 border border-neutral-800 px-2 py-1.5 text-xs text-neutral-200 outline-none"
+          className={cn(fieldClass, 'px-2 py-1.5')}
         >
           {VOICES.map(v => <option key={v.id} value={v.id}>{v.label}</option>)}
         </select>
@@ -315,10 +330,10 @@ export const SpeakNodeView = memo(({ id, data, selected }: NodeProps<SpeakNode>)
 export const VideoNodeView = memo(({ id, data, selected }: NodeProps<VideoNode>) => {
   const step = useStep(id)
   return (
-    <Shell id={id} kind="Create video" icon={<Clapperboard className="w-3 h-3" />} color={PORT_COLOR.video} selected={selected} step={step} width="w-64" local={false}>
+    <Shell id={id} kind="Create video" icon={<Clapperboard className="w-3 h-3" />} selected={selected} step={step} width="w-64" local={false}>
       <Title id={id} value={data.label} />
       <Field id={id} label="fal.ai model" value={data.model} field="model" mono />
-      <p className="text-[11px] text-amber-800">Video models don't fit in a browser: this one runs on fal.ai with your key.</p>
+      <p className="text-[11px] leading-relaxed text-neutral-400">Video models don't fit in a browser: this one runs on fal.ai with your key.</p>
       <Preview step={step} />
       <TypeTag type="video" />
       <Port type="target" id="in" kind="text" />
@@ -336,7 +351,8 @@ function useServerTools(servers: (McpServer | undefined)[]) {
   return status
 }
 
-const selectClass = 'nodrag rounded-md bg-neutral-950 border border-neutral-800 px-2 py-1.5 text-xs text-neutral-200 outline-none focus:border-signal'
+// Los desplegables, con el mismo marco que los campos
+const selectClass = cn(fieldClass, 'px-2 py-1.5')
 
 export const ToolNodeView = memo(({ id, data, selected }: NodeProps<ToolNode>) => {
   const updateNode = useApp(s => s.updateNode)
@@ -374,10 +390,10 @@ export const ToolNodeView = memo(({ id, data, selected }: NodeProps<ToolNode>) =
           </select>
         </div>
       ) : (
-        <p className="text-xs text-amber-800">Add an MCP server in Settings → MCP servers.</p>
+        <p className="text-xs text-signal-ink">Add an MCP server in Settings → MCP servers.</p>
       )}
       {status?.state === 'connecting' && <p className="font-mono text-[10px] text-neutral-500">Connecting to {server?.label}…</p>}
-      {status?.state === 'error' && <p className="text-[11px] text-red-700 line-clamp-2">{status.message}</p>}
+      {status?.state === 'error' && <p className="text-[11px] text-signal-ink line-clamp-2">{status.message}</p>}
       {tool?.description && <p className="text-[11px] leading-relaxed text-neutral-400 line-clamp-2">{firstLine(tool.description, 200)}</p>}
       {fields.map(f => (
         <label key={f.name} className="flex flex-col gap-1 text-xs text-neutral-400">
@@ -386,7 +402,7 @@ export const ToolNodeView = memo(({ id, data, selected }: NodeProps<ToolNode>) =
             value={data.args[f.name] ?? ''}
             onChange={e => updateNode(id, { args: { ...data.args, [f.name]: e.target.value } })}
             placeholder={f.hint}
-            className={cn(selectClass, 'font-mono')}
+            className={cn(fieldClass, 'px-2 py-1.5 font-mono placeholder:text-neutral-500')}
           />
         </label>
       ))}
@@ -408,7 +424,6 @@ export const AgentNodeView = memo(({ id, data, selected }: NodeProps<AgentNode>)
   const servers = useApp(s => s.mcpServers)
   const step = useStep(id)
   const status = useServerTools(servers)
-  const nextColor = COLORS[(COLORS.indexOf(data.color) + 1) % COLORS.length]
   const chosen = (ref: ToolRef) => data.tools.some(t => t.serverId === ref.serverId && t.name === ref.name)
   // Las herramientas elegidas que siguen existiendo: las de un servidor quitado, o que su servidor ya no ofrece,
   // no se ven ni se pueden desmarcar, así que no cuentan y se descartan al marcar otra. Las de un servidor que aún
@@ -421,15 +436,9 @@ export const AgentNodeView = memo(({ id, data, selected }: NodeProps<AgentNode>)
     tools: chosen(ref) ? data.tools.filter(t => !(t.serverId === ref.serverId && t.name === ref.name)) : [...available, ref].slice(-MAX_TOOLS),
   })
   return (
-    <Shell id={id} kind="Agent" icon={<Bot className="w-3 h-3" />} color={data.color} selected={selected} step={step} width="w-80" local={false}>
+    <Shell id={id} kind="Agent" icon={<Bot className="w-3 h-3" />} selected={selected} step={step} width="w-80" local={false}>
       <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => updateNode(id, { color: nextColor })}
-          className="nodrag w-3 h-3 rounded-full shrink-0 ring-2 ring-neutral-900 hover:scale-125 duration-200"
-          style={{ background: data.color }}
-          title="Change colour"
-        />
+        <Swatch id={id} color={data.color} />
         <Title id={id} value={data.label} />
       </div>
       <textarea
@@ -437,7 +446,7 @@ export const AgentNodeView = memo(({ id, data, selected }: NodeProps<AgentNode>)
         onChange={e => updateNode(id, { instructions: e.target.value })}
         rows={3}
         placeholder="What should this agent do? It decides when to use its tools."
-        className="nodrag nowheel resize-none rounded-md bg-neutral-950 border border-neutral-800 focus:border-signal px-2 py-1.5 text-xs leading-relaxed text-neutral-300 outline-none"
+        className={cn(fieldClass, 'nowheel resize-none px-2 py-1.5 leading-relaxed placeholder:text-neutral-500')}
       />
       <div className="flex items-center justify-between text-xs text-neutral-400">
         <span>Tools · {available.length} of {MAX_TOOLS}</span>
@@ -446,23 +455,23 @@ export const AgentNodeView = memo(({ id, data, selected }: NodeProps<AgentNode>)
           <input
             type="number" min={1} max={4} value={data.maxSteps}
             onChange={e => updateNode(id, { maxSteps: Math.max(1, Math.min(4, Number(e.target.value) || 1)) })}
-            className="nodrag w-11 rounded-md bg-neutral-950 border border-neutral-800 px-1.5 py-0.5 text-right font-mono text-neutral-100 outline-none"
+            className={cn(fieldClass, 'w-11 px-1.5 py-0.5 text-right font-mono')}
           />
           calls
         </label>
       </div>
       {servers.length ? (
-        <div className="nodrag nowheel max-h-40 overflow-y-auto rounded-md border border-neutral-800 bg-neutral-950 p-1.5 flex flex-col gap-1.5">
+        <div className="nodrag nowheel max-h-40 overflow-y-auto border border-line p-1.5 flex flex-col gap-1.5">
           {servers.map(server => {
             const state = status[server.id]
             return (
               <div key={server.id}>
                 <p className="label px-1">{server.label}{state?.state === 'connecting' && ' · connecting…'}</p>
-                {state?.state === 'error' && <p className="px-1 text-[11px] text-red-700">{state.message}</p>}
+                {state?.state === 'error' && <p className="px-1 text-[11px] text-signal-ink">{state.message}</p>}
                 {server.tools.map(tool => {
                   const ref = { serverId: server.id, name: tool.name }
                   return (
-                    <label key={tool.name} className="flex items-start gap-2 rounded px-1 py-0.5 hover:bg-neutral-800 cursor-pointer" title={tool.description}>
+                    <label key={tool.name} className="flex items-start gap-2 px-1 py-0.5 hover:bg-neutral-800 cursor-pointer" title={tool.description}>
                       <input type="checkbox" checked={chosen(ref)} onChange={() => toggle(ref)} className="mt-0.5 accent-[var(--color-signal)]" />
                       <span className="font-mono text-[11px] text-neutral-200 break-all">{tool.name}</span>
                     </label>
@@ -473,7 +482,7 @@ export const AgentNodeView = memo(({ id, data, selected }: NodeProps<AgentNode>)
           })}
         </div>
       ) : (
-        <p className="text-xs text-amber-800">Add an MCP server in Settings → MCP servers to give it tools.</p>
+        <p className="text-xs text-signal-ink">Add an MCP server in Settings → MCP servers to give it tools.</p>
       )}
       <p className="text-[11px] text-neutral-500">Small models tend to answer from memory. Qwen2.5 3B or larger decides better when to use a tool.</p>
       <Preview step={step} />
@@ -487,7 +496,7 @@ export const AgentNodeView = memo(({ id, data, selected }: NodeProps<AgentNode>)
 export const OutputNodeView = memo(({ id, data, selected }: NodeProps<OutputNode>) => {
   const step = useStep(id)
   return (
-    <Shell id={id} kind="Answer" icon={<LogOut className="w-3 h-3" />} color="#ff3a1f" selected={selected} step={step} width="w-56">
+    <Shell id={id} kind="Answer" icon={<LogOut className="w-3 h-3" />} selected={selected} step={step} width="w-56" tone="ink">
       <Title id={id} value={data.label} />
       <p className="text-xs text-neutral-400">What reaches here is shown as the answer.</p>
       <Port type="target" id="in" kind="any" />

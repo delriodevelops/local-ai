@@ -40,7 +40,7 @@ function CodeBlock({ code, lang }: { code: string; lang: string }) {
 }
 
 export const Markdown = memo(({ text }: { text: string }) => (
-  <div className="prose max-w-none prose-p:leading-relaxed prose-headings:font-extrabold prose-headings:uppercase prose-headings:tracking-tight prose-strong:text-neutral-50 prose-a:text-signal-ink prose-code:font-mono prose-code:before:content-none prose-code:after:content-none prose-li:marker:text-neutral-500 text-[15px] text-neutral-200">
+  <div className="prose max-w-none prose-p:leading-relaxed prose-headings:font-extrabold prose-headings:uppercase prose-headings:tracking-[-0.035em] prose-strong:text-neutral-50 prose-a:text-signal-ink prose-a:decoration-signal prose-a:underline-offset-2 prose-code:font-mono prose-code:before:content-none prose-code:after:content-none prose-li:marker:text-neutral-500 text-[15px] text-neutral-200">
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       urlTransform={urlTransform}
@@ -59,7 +59,7 @@ export const Markdown = memo(({ text }: { text: string }) => (
           const code = String(children).replace(/\n$/, '')
           return lang || code.includes('\n')
             ? <CodeBlock code={code} lang={lang ?? 'text'} />
-            : <code className="rounded bg-neutral-800 px-1 py-0.5 text-[0.9em]">{children}</code>
+            : <code className="bg-neutral-800 px-1 py-0.5 text-[0.9em]">{children}</code>
         },
       }}
     >

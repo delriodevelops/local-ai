@@ -6,6 +6,7 @@ import {
 import * as Popover from '@radix-ui/react-popover'
 import { AudioLines, Bot, Clapperboard, Eye, GitBranch, ImagePlus, LayoutTemplate, LogIn, LogOut, Merge, Mic, Plus, Sparkles, Split, Wrench } from 'lucide-react'
 import '@xyflow/react/dist/style.css'
+import { cn } from '@/lib/cn'
 import { useApp } from './store'
 import { useScheme } from '@/ui/theme'
 import { useMedia } from '@/lib/useMedia'
@@ -24,19 +25,20 @@ function verticalNode(node: FlowNode) {
   return copy
 }
 
-// Fondo y minimapa se pintan como atributos SVG: necesitan el color ya resuelto, no una variable CSS
+// Fondo y minimapa se pintan como atributos SVG: necesitan el color ya resuelto, no una variable CSS.
+// La retícula es la del tablero de plantillas de la landing: líneas de tinta al 8 %
 const CANVAS_COLORS = {
-  light: { dots: '#c9c9c2', mask: 'rgba(242,242,239,0.75)', node: '#b5b5ad' },
-  dark: { dots: '#3a3a35', mask: 'rgba(15,15,14,0.75)', node: '#4b4b45' },
+  light: { lines: '#dfdfdb', mask: 'rgba(242,242,239,0.75)', node: '#b8b8b1' },
+  dark: { lines: '#1f1f1f', mask: 'rgba(17,17,17,0.75)', node: '#4a4a46' },
 }
 
 function MenuItem({ icon, title, text, onSelect }: { icon: ReactNode; title: string; text?: string; onSelect: () => void }) {
   return (
     <Popover.Close asChild>
-      <button type="button" onClick={onSelect} className="w-full flex items-start gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-neutral-800 duration-200">
+      <button type="button" onClick={onSelect} className="w-full flex items-start gap-3 px-2.5 py-2 text-left hover:bg-ink hover:text-paper duration-200">
         <span className="mt-0.5 text-neutral-300">{icon}</span>
         <span className="flex flex-col">
-          <span className="text-sm text-neutral-100">{title}</span>
+          <span className="text-sm font-semibold text-neutral-50">{title}</span>
           {text && <span className="text-xs text-neutral-400">{text}</span>}
         </span>
       </button>
@@ -50,8 +52,8 @@ function Menu({ trigger, children }: { trigger: ReactNode; children: ReactNode }
       <Popover.Trigger asChild>{trigger}</Popover.Trigger>
       <Popover.Portal>
         <Popover.Content
-          align="start" sideOffset={6}
-          className="z-50 w-72 max-h-[70vh] overflow-y-auto border-[1.5px] border-ink bg-neutral-900 p-1.5 animate-rise"
+          align="start" sideOffset={8}
+          className="z-50 w-72 max-h-[70vh] overflow-y-auto border-2 border-ink bg-paper p-1.5 animate-rise"
         >
           {children}
         </Popover.Content>
@@ -60,11 +62,15 @@ function Menu({ trigger, children }: { trigger: ReactNode; children: ReactNode }
   )
 }
 
-const ToolbarButton = ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+// Los botones de la landing: el principal de tinta con el barrido rojo, el otro con marco
+const ToolbarButton = ({ children, primary = false, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement> & { primary?: boolean }) => (
   <button
     type="button"
     {...props}
-    className="flex items-center gap-2 border-[1.5px] border-ink bg-neutral-900 px-3 py-2 text-sm font-medium text-neutral-50 hover:bg-ink hover:text-paper duration-200 ease-snap"
+    className={cn(
+      'flex items-center gap-2 h-10 px-3.5 text-[11px] font-semibold uppercase tracking-[0.12em]',
+      primary ? 'btn-ink' : 'border-[1.5px] border-ink bg-paper text-neutral-50 hover:bg-ink hover:text-paper data-[state=open]:bg-ink data-[state=open]:text-paper duration-200 ease-snap',
+    )}
   >
     {children}
   </button>
@@ -102,7 +108,7 @@ function Flow() {
     requestAnimationFrame(() => fitView({ padding: 0.2 }))
   }, [vertical, updateNodeInternals, fitView])
 
-  // Las conexiones toman el color de lo que transportan y se animan mientras pasa la señal
+  // Las conexiones toman el color de lo que transportan; mientras pasa la señal, la señal es roja, como en la landing
   const styledEdges = useMemo<Edge[]>(() => edges.map(edge => {
     const type = edgeType(edge, nodes, edges)
     const source = steps?.find(s => s.nodeId === edge.source)
@@ -112,7 +118,7 @@ function Flow() {
     return {
       ...edge,
       animated: active,
-      style: { stroke: PORT_COLOR[type], strokeWidth: active ? 2.5 : 1.5, opacity: dead ? 0.15 : active ? 1 : 0.55 },
+      style: { stroke: active ? '#ff3a1f' : PORT_COLOR[type], strokeWidth: active ? 2.5 : 1.5, opacity: dead ? 0.15 : active ? 1 : 0.75 },
     }
   }), [edges, nodes, steps, running])
 
@@ -142,16 +148,16 @@ function Flow() {
         proOptions={{ hideAttribution: true }}
         deleteKeyCode={['Backspace', 'Delete']}
       >
-        <Background variant={BackgroundVariant.Dots} gap={22} size={1} color={colors.dots} />
+        <Background variant={BackgroundVariant.Lines} gap={80} lineWidth={1} color={colors.lines} />
         <Controls showInteractive={false} className="!shadow-none" />
         <MiniMap pannable zoomable className="!hidden md:!block" maskColor={colors.mask} nodeColor={colors.node} />
         <Panel position="top-left" className="flex gap-2">
-          <Menu trigger={<ToolbarButton><Plus className="w-4 h-4" /> Add node</ToolbarButton>}>
+          <Menu trigger={<ToolbarButton primary><Plus className="w-4 h-4" /> Add node</ToolbarButton>}>
             <p className="label px-2.5 pt-1.5 pb-1">Assistants</p>
             {ASSISTANTS.map(a => (
               <MenuItem
                 key={a.label}
-                icon={<span className="block w-3 h-3 rounded-full mt-1" style={{ background: a.color }} />}
+                icon={<span className="block w-3 h-3 mt-1" style={{ background: a.color }} />}
                 title={a.label} text={a.instructions}
                 onSelect={() => add({ type: 'assistant', data: { ...a } })}
               />
@@ -186,9 +192,9 @@ function Flow() {
             ))}
           </Menu>
         </Panel>
-        <Panel position="bottom-right" className="hidden 2xl:flex gap-4 !mb-3 !mr-[220px] font-mono text-[10px] uppercase tracking-widest text-neutral-500">
+        <Panel position="bottom-right" className="hidden 2xl:flex gap-4 !mb-3 !mr-[220px] bg-paper px-2 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-neutral-500">
           {Object.entries(PORT_COLOR).map(([type, color]) => (
-            <span key={type}><i className="inline-block w-2 h-2 rounded-full mr-1.5" style={{ background: color }} />{type}</span>
+            <span key={type}><i className="inline-block w-2.5 h-2.5 mr-1.5 align-[-1px]" style={{ background: color }} />{type}</span>
           ))}
           <span>drag from a dot to connect · backspace deletes</span>
         </Panel>

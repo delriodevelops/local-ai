@@ -16,7 +16,7 @@
       const dark = theme === 'dark' || (theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
       document.documentElement.classList.toggle('dark', dark)
       document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
-      if (dark) document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#0f0f0e')
+      if (dark) document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#111111')
     </script>
     <script>
       // Activa el aislamiento entre orígenes (hilos en WebAssembly) con un service worker.
