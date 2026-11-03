@@ -4,7 +4,7 @@ Wire AI models into flows that run entirely in your browser: text, images and vo
 
 **Try it:** [delriodevelops.github.io/meshmind](https://delriodevelops.github.io/meshmind/) · the app itself lives at [/meshmind/app/](https://delriodevelops.github.io/meshmind/app/)
 
-Build a flow on a canvas and MeshMind runs every model on your own GPU. No server, no API key; only the nodes marked online (Create video, MCP tool, Agent tools) send data, and only to the services you choose. Assistants work in parallel, lists get handled item by item, conditions route the answer, photos get described and reimagined, voice notes get transcribed and answered out loud. Every step lights up as it runs.
+Build a flow on a canvas and MeshMind runs every model on your own GPU. No server, no API key; only the nodes marked online (Create video, Create image in online mode, MCP tool, Agent tools) send data, and only to the services you choose. Assistants work in parallel, lists get handled item by item, conditions route the answer, photos get described and reimagined, voice notes get transcribed and answered out loud. Every step lights up as it runs.
 
 ## Nodes
 
@@ -16,7 +16,7 @@ Build a flow on a canvas and MeshMind runs every model on your own GPU. No serve
 | **Join** | anything | text | Merges every input and list item into one text |
 | **Condition** | text | text (yes / no) | Sends the text one way or the other depending on whether it contains a word |
 | **See image** | image | text | Describes or reads a picture |
-| **Create image** | text | image | Paints an image from a prompt |
+| **Create image** | text | image | Paints an image from a prompt: on your GPU with Janus-Pro, or **online** on fal.ai with your key (FLUX 2, Seedream, Nano Banana…), priced per image |
 | **Transcribe** | audio | text | Speech to text |
 | **Speak** | text | audio | Text to a natural voice in English, Spanish, Portuguese, French or Korean |
 | **Create video** | text | video | Optional and **online**: runs on [fal.ai](https://fal.ai) with your own key. Pick a current model (MiniMax H3, FLUX 3, Kling 3…) by its price per clip, or type any fal model |
