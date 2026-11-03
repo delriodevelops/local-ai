@@ -1,0 +1,194 @@
+/* film.css: MeshMind en su tema oscuro (src/index.css, .dark) con las medidas reales de la app: barra lateral de
+   288 px, cabecera de 64, chat de 576 y el lienzo en el resto. Esquinas rectas, reglas de #3a3a3a, Archivo e IBM Plex
+   Mono. La ventana mide 1840 x 1000 px de página */
+@font-face { font-family: 'Plex'; src: url(assets/fonts/ibm-plex-mono-latin-400-normal.woff2) format('woff2'); font-weight: 400; }
+@font-face { font-family: 'Plex'; src: url(assets/fonts/ibm-plex-mono-latin-500-normal.woff2) format('woff2'); font-weight: 500; }
+@font-face { font-family: 'Plex'; src: url(assets/fonts/ibm-plex-mono-latin-600-normal.woff2) format('woff2'); font-weight: 600; }
+
+.film { --tx: #f2f2ef; --t100: #ecece8; --t300: #bdbdb8; --t400: #a3a39d; --t500: #85857f; --t600: #5f5f5a; --t700: #4a4a46; --t800: #222221; --rule: #3a3a3a; --sig: #ff3a1f; --sig-ink: #ff6b52; font-family: 'Archivo', system-ui, sans-serif; }
+.ic { display: block; flex: none; }
+
+/* La retícula de la landing: reglas verticales finas sobre el papel, muy por fuera del cuadro para que la cámara
+   nunca vea su borde */
+.hairlines { position: absolute; left: -1920px; top: -1080px; width: 5760px; height: 3240px; background: repeating-linear-gradient(90deg, rgba(17,17,17,.075) 0 1px, transparent 1px 160px); }
+
+/* ---------- la ventana del navegador, sin marca: puntos neutros y la dirección en Archivo ---------- */
+.am-browser.dark .am-bar { background: #1a1a19; border-bottom: 1px solid var(--rule); }
+.am-browser.dark .am-dots i { background: #3a3a3a !important; }
+.am-browser.dark .am-addr { background: #111; color: var(--t100); border-radius: 0; font: 500 15px 'Archivo'; gap: 10px; width: 40%; }
+.am-lock { display: flex; color: var(--t500); }
+.am-cursor path { fill: #fff; stroke: #111; }
+.am-ripple.cursor { border-color: rgba(242,242,239,.9); box-shadow: none; }
+
+/* ---------- la app ---------- */
+.app { position: absolute; inset: 0; display: flex; background: #111; color: var(--tx); font-family: 'Archivo', system-ui, sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }
+.lbl { font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--t500); white-space: nowrap; }
+.mono { font-family: 'Plex', monospace; font-size: 12.5px; color: var(--t100); white-space: nowrap; }
+
+.side { width: 288px; flex: none; box-sizing: border-box; border-right: 1px solid var(--rule); display: flex; flex-direction: column; }
+.side-top { height: 64px; flex: none; box-sizing: border-box; border-bottom: 2px solid var(--tx); display: flex; align-items: center; gap: 4px; padding: 0 16px; }
+.brand { flex: 1; font-size: 15px; line-height: 1.3; }
+.brand b { display: block; font-weight: 800; letter-spacing: -.01em; }
+.brand span { color: var(--t500); }
+.sq { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; color: var(--t400); }
+.side .lbl.h { padding: 24px 16px 8px; }
+.hist { margin: 0 8px; padding: 8px 10px; font-size: 14px; color: var(--t500); white-space: nowrap; }
+.hist.on { color: var(--tx); background: var(--t800); border-left: 2px solid var(--sig); margin-top: 4px; }
+.side-foot { margin-top: auto; padding: 16px; border-top: 1px solid var(--rule); font-size: 10px; color: var(--t600); }
+
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hdr { height: 64px; flex: none; box-sizing: border-box; border-bottom: 2px solid var(--tx); display: flex; align-items: center; gap: 12px; padding: 0 16px; }
+.model { width: 300px; height: 40px; box-sizing: border-box; border: 1.5px solid var(--tx); display: flex; align-items: center; gap: 8px; padding: 0 12px; color: var(--t500); }
+.model .chev { margin-left: auto; color: var(--t600); }
+.tabs { margin-left: auto; display: flex; gap: 24px; }
+.tab { display: flex; gap: 6px; padding: 4px 0 5px; font-size: 13px; color: var(--t500); font-variant-numeric: tabular-nums; }
+.tab.on { color: var(--tx); background: linear-gradient(var(--sig), var(--sig)) 0 100% / 100% 2px no-repeat; }
+.hbtns { display: flex; gap: 8px; margin-left: 8px; }
+.hbtn { position: relative; width: 40px; height: 40px; box-sizing: border-box; border: 1.5px solid var(--tx); display: flex; align-items: center; justify-content: center; }
+.hbtn.on { background: var(--tx); color: #111; }
+.live { position: absolute; right: -4px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--sig); }
+
+.body { flex: 1; min-height: 0; display: flex; }
+.chat { width: 576px; flex: none; box-sizing: border-box; border-right: 1px solid var(--rule); display: flex; flex-direction: column; }
+.thread { flex: 1; min-height: 0; overflow: hidden; padding: 40px 32px 0; }
+.turn-h { display: flex; gap: 16px; align-items: baseline; }
+.turn-n { font-family: 'Plex'; font-size: 13px; color: var(--sig-ink); }
+.turn-t { font-size: 34px; font-weight: 800; line-height: 1.05; letter-spacing: -.03em; white-space: nowrap; }
+.turn-l { margin: 28px 0 10px 32px; font-size: 10px; color: var(--t600); }
+.answer { margin-left: 32px; padding-left: 16px; border-left: 2px solid var(--sig); font-size: 16px; line-height: 1.65; color: var(--t100); min-height: 26px; }
+.answer .cur { display: inline-block; width: 9px; height: 18px; margin-left: 2px; background: var(--sig); vertical-align: -3px; }
+.compose { flex: none; padding: 0 16px 12px; }
+.box { border: 2px solid var(--tx); padding: 6px; display: flex; align-items: center; gap: 4px; }
+.box .sq { width: 40px; height: 40px; color: var(--t600); }
+.field { flex: 1; position: relative; padding: 8px; font-size: 15px; height: 20px; white-space: nowrap; }
+.field .ph { position: absolute; left: 8px; top: 8px; color: var(--t600); }
+.field .typed { color: var(--tx); }
+.send { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--t800); color: var(--t600); }
+.send.on { background: var(--tx); color: #111; }
+.note { margin-top: 8px; font-size: 10px; text-align: center; color: var(--t600); }
+
+/* El lienzo (flow/Canvas.tsx): la retícula de líneas cada 80 unidades, los botones, el zoom, la leyenda y el minimapa */
+.canvas { flex: 1; position: relative; overflow: hidden; background-color: #111; background-image: linear-gradient(rgba(242,242,239,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(242,242,239,.055) 1px, transparent 1px); background-size: 44.8px 44.8px; background-position: 40px 21px; }
+.tools { position: absolute; left: 15px; top: 15px; display: flex; gap: 8px; z-index: 5; }
+.tool { display: flex; align-items: center; gap: 8px; height: 40px; box-sizing: border-box; padding: 0 14px; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+.tool.add { background: var(--tx); color: #111; }
+.tool.tpl { border: 1.5px solid var(--tx); }
+.ctrls { position: absolute; left: 15px; bottom: 15px; border: 2px solid var(--tx); background: #111; z-index: 5; }
+.ctrls span { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; }
+.ctrls span + span { border-top: 1px solid var(--rule); }
+.legend { position: absolute; left: 60px; bottom: 18px; display: flex; gap: 16px; font-size: 10px; color: var(--t600); z-index: 5; }
+.legend span { display: flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; }
+.mini { position: absolute; right: 15px; bottom: 15px; width: 180px; height: 120px; border: 2px solid var(--tx); background: #111; z-index: 5; }
+.mini i { position: absolute; background: var(--t700); }
+
+/* El grafo, en unidades del lienzo con el zoom de la vista (0,56): los nodos miden lo que miden en la app */
+.graph { position: absolute; left: 40px; top: 245px; width: 1600px; height: 796px; transform: scale(.56); transform-origin: 0 0; }
+.wires { position: absolute; left: 0; top: 0; overflow: visible; }
+.wires path { fill: none; }
+.wires .w { stroke: rgba(242,242,239,.55); stroke-width: 2; }
+.wires .tr { stroke: var(--sig); stroke-width: 2.8; }
+.wires .dot { fill: var(--sig); stroke: #111; stroke-width: 2; }
+
+.node { position: absolute; box-sizing: border-box; background: #111; color: var(--t100); border: 2px solid var(--tx); }
+.node .nh { height: 34px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 0 12px; border-bottom: 1px solid var(--rule); color: var(--tx); }
+.node .nh .lbl { flex: 1; }
+.node .st { display: flex; width: 14px; height: 14px; }
+.node .nb { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.node .ttl { display: flex; align-items: center; gap: 8px; font-size: 16px; line-height: 1.45; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
+.node .sw { width: 12px; height: 12px; flex: none; }
+.node .fld { box-sizing: border-box; height: 72.5px; overflow: hidden; border: 1px solid var(--rule); padding: 6px 8px; font-size: 12px; line-height: 1.625; color: var(--t300); }
+.node .tt { font-size: 9px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--tx); }
+.node .msg { margin: 0; padding-right: 40px; font-size: 12px; line-height: 1.5; color: var(--t400); }
+.node .pl { position: absolute; right: 14px; transform: translateY(-50%); font-size: 9px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+.node.ink { background: var(--tx); color: #111; border-color: var(--tx); }
+.node.ink .nh { color: #111; border-bottom-color: rgba(17,17,17,.2); }
+.node.ink .nh .lbl { color: rgba(17,17,17,.7); }
+.node.ink .msg { color: rgba(17,17,17,.7); padding-right: 0; white-space: normal; }
+.node .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: var(--sig); transform-origin: 0 50%; transform: scaleX(0); }
+.port { position: absolute; width: 12px; height: 12px; box-sizing: border-box; transform: translateY(-50%); background: #111; border: 2px solid #8a8a83; }
+.port.l { left: -7px; }
+.port.r { right: -7px; }
+
+/* Resources (ui/Monitor.tsx): el monitor de la cabecera, con cada modelo, dónde corre y en qué estado está */
+.dim { position: absolute; inset: 0; background: #080808; z-index: 25; }
+.res { position: absolute; left: 1456px; top: 62px; width: 320px; box-sizing: border-box; border: 2px solid var(--tx); background: #111; padding: 20px; z-index: 30; }
+.res .rt { font: 800 28px 'Archivo'; text-transform: uppercase; letter-spacing: -.045em; line-height: .85; color: var(--tx); }
+.res .sec { margin-top: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--tx); color: var(--t400); }
+.res ul { list-style: none; margin: 0; padding: 0; }
+.res li { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.res li + li { border-top: 1px solid var(--rule); }
+.res .s { width: 10px; height: 10px; flex: none; box-sizing: border-box; border: 1px solid var(--t600); }
+.res .s.ready { background: var(--tx); border: 0; }
+.res .s.busy { background: var(--sig); border: 0; }
+.res .s.loading { border: 0; background: repeating-linear-gradient(135deg, var(--tx) 0 1.5px, transparent 1.5px 4px); box-shadow: inset 0 0 0 1px var(--tx); }
+.res .nm { display: block; font-size: 14px; font-weight: 500; color: var(--t100); white-space: nowrap; }
+.res .dt { display: block; font-family: 'Plex'; font-size: 10.5px; color: var(--t500); white-space: nowrap; }
+.res .dev { display: inline-block; }
+.res .del { margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px solid var(--rule); padding: 10px 12px; font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--t300); }
+
+/* ---------- las palabras ---------- */
+.hl-dot { color: var(--sig); }
+
+/* ---------- el final: el rojo de la landing, su disco de papel y el nombre en dos anchos ---------- */
+.endc { position: absolute; display: flex; flex-direction: column; align-items: center; color: #111; text-align: center; }
+.endc .mark { width: 132px; height: 132px; margin-bottom: 34px; }
+.endc .word { display: flex; font-weight: 800; font-size: 200px; line-height: .8; letter-spacing: -.05em; text-transform: uppercase; }
+.endc .word .m { display: inline-block; overflow: hidden; padding: 0 .02em .06em; }
+.endc .word .m > span { display: inline-block; }
+.endc .word .a { font-stretch: 125%; font-variation-settings: 'wdth' 125; }
+.endc .word .b { font-stretch: 62%; font-variation-settings: 'wdth' 62; }
+.endc .tag { margin-top: 30px; font-size: 44px; font-weight: 600; letter-spacing: -.02em; }
+.endc .url { margin-top: 34px; background: #111; color: var(--tx); font: 500 30px 'Plex'; padding: 16px 28px; }
+.disc { position: absolute; border-radius: 50%; background: var(--tx); }
+
+/* ---------- los nodos de los sentidos (flow/nodes/index.tsx): lo que hace cada uno, con su vista previa ---------- */
+.node .fl { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--t400); }
+.node .fl .fld { height: auto; }
+.node .help { margin: 0; font-size: 12px; color: var(--t400); }
+.node .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.node .sel { box-sizing: border-box; border: 1px solid var(--rule); padding: 6px 8px; font-size: 12px; color: var(--t100); white-space: nowrap; overflow: hidden; }
+/* Preview: la salida del paso, con la regla de tinta a la izquierda y tres líneas como mucho */
+.node .pv { margin: 0; border-left: 2px solid var(--tx); padding: 2px 0 2px 8px; font-size: 11.5px; line-height: 1.625; color: var(--t300); min-height: 18px; max-height: 56px; overflow: hidden; }
+.node .pv .cur { display: inline-block; width: 6px; height: 12px; margin-left: 2px; background: var(--sig); vertical-align: -2px; }
+.node .pv.au { display: flex; align-items: center; gap: 8px; border-left-color: #d98e00; }
+.node .pv.au .play { width: 22px; height: 22px; flex: none; background: var(--tx); color: #111; display: flex; align-items: center; justify-content: center; }
+.node .wave { display: flex; align-items: center; gap: 3px; height: 40px; }
+.node .wave i { flex: 1; background: var(--tx); min-height: 2px; }
+.node .wave.amber i { background: #d98e00; }
+.node .pic { position: relative; height: 112px; background: var(--tx); overflow: hidden; }
+.node .pic .sun { position: absolute; width: 74px; height: 74px; border-radius: 50%; background: var(--sig); left: 120px; top: 14px; }
+.node .pic .land { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; background: #111; }
+
+/* ---------- el servidor de otro: un armario en la penumbra que escribe tu pregunta en su registro ---------- */
+.srv { position: absolute; width: 2000px; height: 1400px; }
+.rack { position: absolute; left: 0; top: 0; width: 1180px; box-sizing: border-box; padding: 26px; background: #121211; border: 2px solid #2a2a28; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 60px 140px rgba(0,0,0,.6); }
+.unit { position: relative; height: 70px; background: #1b1b1a; border: 1px solid #2c2c2a; display: flex; align-items: center; gap: 18px; padding: 0 22px; }
+.unit .vent { flex: 1; align-self: stretch; margin: 16px 0; background: repeating-linear-gradient(90deg, #0d0d0d 0 4px, transparent 4px 9px); }
+.unit .tag { font: 500 15px 'Plex'; color: #5f5f5a; width: 96px; }
+.unit .led { width: 9px; height: 9px; border-radius: 50%; background: #2f6b3d; }
+.unit .led.on { background: #4ade80; box-shadow: 0 0 10px #4ade80; }
+.unit .slot { width: 170px; height: 18px; background: #050505; border: 1px solid #333; }
+.unit.hit .slot { border-color: var(--sig); }
+.log { position: absolute; left: 1260px; top: 300px; width: 700px; box-sizing: border-box; padding: 26px 30px; background: #0e0e0d; border: 2px solid #2a2a28; font: 500 22px/1.7 'Plex'; color: #a3a39d; white-space: nowrap; }
+.log .lh { color: #5f5f5a; font-size: 16px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px; }
+.log b { color: var(--tx); font-weight: 500; }
+.log .ok { color: #4ade80; }
+.log .me { color: var(--sig-ink); }
+
+/* ---------- 1. el chat de otros: redondeado, gris y en otra letra, para que no se confunda con MeshMind ---------- */
+.ask { position: absolute; width: 1400px; height: 900px; }
+.ask-box { position: absolute; left: 50%; top: 50%; width: 1240px; height: 150px; margin: -75px 0 0 -620px; box-sizing: border-box; border-radius: 75px; background: #1c1c1e; border: 1px solid #2f2f32; display: flex; align-items: center; gap: 24px; padding: 0 22px 0 56px; font: 500 52px 'Instrument Sans', system-ui; color: var(--tx); box-shadow: 0 40px 90px rgba(0,0,0,.5); }
+.ask-box.far { filter: blur(9px); opacity: .45; }
+.ask-t { flex: 1; min-width: 0; white-space: nowrap; }
+.ask-ph { position: absolute; left: 56px; color: #6b6b70; }
+.ask-send { width: 104px; height: 104px; flex: none; border-radius: 50%; background: var(--tx); color: #111; display: flex; align-items: center; justify-content: center; }
+.ask .am-caret { width: 4px; background: var(--tx); }
+.flydot { position: absolute; left: 0; top: 0; width: 34px; height: 34px; border-radius: 50%; background: var(--sig); box-shadow: 0 0 30px 10px rgba(255,58,31,.55), 0 0 90px 30px rgba(255,58,31,.25); z-index: 40; }
+.title .disc, .title .big { position: absolute; }
+
+/* ---------- las palabras grandes de la película: Archivo 900 en sus dos anchos ---------- */
+.big { position: absolute; font-family: 'Archivo'; font-weight: 900; line-height: .86; letter-spacing: -.04em; white-space: nowrap; text-transform: uppercase; }
+.big .r { color: var(--sig); }
+.scrim { position: absolute; inset: 0; }
+.ground { position: absolute; inset: 0; }

@@ -1,0 +1,19 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>App film</title>
+<link rel="stylesheet" href="engine/engine.css">
+<link rel="stylesheet" href="film.css">
+</head><body><div id="mount"></div>
+<script type="module">
+// The shell every film shares: boots film.js, exposes window.__seek / __film for the scripts and,
+// outside ?render, the live preview. Edit film.js and film.css, not this file.
+import { boot } from './engine/film.js';
+try {
+  const mod = await import('./film.js?v=' + Date.now());
+  const f = await boot(mod, document.getElementById('mount'));
+  if (!location.search.includes('render')) (await import('./engine/preview.js')).preview(f);
+} catch (e) {
+  window.__error = String(e && e.stack || e);
+  document.body.innerHTML = `<pre style="color:#ff8a80;padding:24px;font:14px/1.5 monospace;white-space:pre-wrap">${window.__error}</pre>`;
+  console.error(e);
+}
+</script></body></html>

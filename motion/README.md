@@ -2,6 +2,8 @@
 
 The 24-second promo film for MeshMind, made with [Remotion](https://www.remotion.dev). It lives apart from the app and has its own dependencies.
 
+The seventh cut, the launch film made with the app-motion skill, lives in [`launch/`](launch/README.md): the app rebuilt in HTML inside a browser window that turns in 3D, every shot started on a word of the same voice-over.
+
 This is the sixth cut, and the first that is a film rather than a slideshow: one virtual camera travels through the story, shots hand over to each other physically (a whip, an iris, a blade, columns falling) and everything that moves fast carries real motion blur. The look is the landing's, taken into the dark: ink as the stage, paper for type and light, and one red, which is the signal that travels the wires.
 
 The shots, set to the voice-over:

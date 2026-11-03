@@ -1,0 +1,6 @@
+node_modules/
+out/
+# Rehechos por prep-audio.mjs
+assets/audio/music-film.wav
+assets/audio/bed.wav
+assets/sfx/vo.wav
