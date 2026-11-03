@@ -1,7 +1,9 @@
 import { generate } from '@/engine/engine'
 import { useDevice } from '@/engine/device'
-import { decodeAudio, media, preload, voiceModel } from '@/media/media'
+import { decodeAudio, localModel, media, preload, voiceModel } from '@/media/media'
 import type { MediaModel, MediaTask } from '@/media/worker'
+import { FLUX } from '@/media/catalog'
+import { paintFlux } from '@/media/flux'
 import { generateVideo } from '@/media/video'
 import { toolArguments } from '@/mcp/args'
 import type { McpServer } from '@/mcp/types'
@@ -21,11 +23,14 @@ type RunOptions = {
   onUpdate: (steps: StepResult[]) => void
 }
 
-// El modelo de imagen o audio de cada nodo; la voz depende del idioma (Kokoro en inglés, Supertonic en los demás)
+const paintsWithFlux = () => localModel('imagine').id === FLUX
+
+// El modelo de imagen o audio del worker que usa cada nodo; la voz depende del idioma (Kokoro en inglés, Supertonic
+// en los demás). FLUX.2 klein no está en ese worker: abre los suyos al pintar
 function mediaModelOf(node: FlowNode): MediaModel | undefined {
   switch (node.type) {
     case 'describe': return 'vision'
-    case 'imagine': return 'janus'
+    case 'imagine': return paintsWithFlux() ? undefined : 'janus'
     case 'transcribe': return 'whisper'
     case 'speak': return voiceModel(node.data.voice)
   }
@@ -111,7 +116,7 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
     let since: number | null = null
     const start = () => { since = performance.now(); current.state = 'running'; current.status = undefined; flush() }
     const pause = () => { if (since !== null) active += performance.now() - since; since = null }
-    if (node.type === 'assistant' || node.type === 'agent' || mediaModelOf(node)) {
+    if (node.type === 'assistant' || node.type === 'agent' || node.type === 'imagine' || mediaModelOf(node)) {
       current.status = 'Queued'
       flush()
     } else start()
@@ -186,7 +191,10 @@ export async function runFlow({ input, attachments, nodes, edges, temperature, m
         }
         case 'imagine': {
           const prompt = [text(), node.data.style].filter(Boolean).join(', ')
-          current.value = { type: 'image', url: await runMedia({ task: 'imagine', prompt }) }
+          const url = paintsWithFlux()
+            ? await paintFlux(prompt, { onStatus, signal, onStart: start }).finally(pause)
+            : await runMedia({ task: 'imagine', prompt })
+          current.value = { type: 'image', url }
           results.set(`${node.id}:out`, current.value)
           break
         }

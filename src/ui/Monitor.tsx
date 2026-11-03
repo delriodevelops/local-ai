@@ -6,7 +6,8 @@ import { useDevice } from '@/engine/device'
 import { useEngine } from '@/engine/engine'
 import { MEDIA_INFO, useResources, type ModelState } from '@/engine/resources'
 import { useApp } from '@/flow/store'
-import { mediaInfo, unloadModel } from '@/media/media'
+import { localModel, mediaInfo, unloadModel } from '@/media/media'
+import { FLUX } from '@/media/catalog'
 import type { MediaBackend, MediaModel } from '@/media/worker'
 
 const BACKEND_LABEL: Record<MediaBackend, string> = { webgpu: 'GPU', wasm: 'CPU' }
@@ -43,16 +44,16 @@ function Row({ name, device, state, detail, action }: { name: string; device: st
 }
 
 // La caché es de todo el origen (en GitHub Pages, la comparten todos los proyectos de la cuenta): solo se tocan las de modelos
-const MODEL_CACHES = /^(webllm\/(model|config|wasm)|transformers-cache|experimental_transformers-hash-cache|kokoro-voices)$/
+const MODEL_CACHES = /^(webllm\/(model|config|wasm)|transformers-cache|experimental_transformers-hash-cache|kokoro-voices|meshmind-flux)$/
 
 // Qué corre dónde, a qué velocidad y cuánto ocupa: como el monitor de Strata, dentro de la página
 export default function Monitor() {
   const { profile, refresh } = useDevice()
   const { status, modelId } = useEngine()
-  const { media, tokensPerSecond, llmBusy } = useResources()
+  const { media, flux, tokensPerSecond, llmBusy } = useResources()
   // Cambiar de modelo en Ajustes cambia el nombre de su fila
   useApp(s => s.localModels)
-  const anyBusy = llmBusy || Object.values(media).some(m => m.state === 'busy' || m.state === 'loading')
+  const anyBusy = llmBusy || [...Object.values(media), flux].some(m => m.state === 'busy' || m.state === 'loading')
 
   useEffect(() => { refresh() }, [refresh])
 
@@ -117,6 +118,13 @@ export default function Monitor() {
                 )}
               />
             ))}
+            {/* FLUX.2 klein solo ocupa la gráfica mientras pinta: sin botón para soltarlo */}
+            {(localModel('imagine').id === FLUX || flux.state !== 'off') && (
+              <Row
+                name="FLUX.2 klein 4B" device="GPU" state={flux.state}
+                detail={flux.status ?? (flux.state === 'off' ? 'loads while painting · 6.5 GB' : flux.state)}
+              />
+            )}
           </ul>
 
           <button

@@ -42,7 +42,8 @@ function LocalModelSelect({ task, label }: { task: LocalTask; label: string }) {
   const { localModels, set } = useApp()
   const profile = useDevice(s => s.profile)
   const options = rankLocal(task, profile)
-  const slot = task === 'transcribe' ? 'whisper' : 'vision'
+  // FLUX.2 klein no se queda cargado; pasar a él suelta Janus
+  const slot = task === 'transcribe' ? 'whisper' : task === 'describe' ? 'vision' : 'janus'
   const choose = (id: string) => {
     const before = localModel(task).id
     set({ localModels: { ...localModels, [task]: id || undefined } })
@@ -104,6 +105,7 @@ export default function Settings() {
             <span className="label text-neutral-50">Local models</span>
             <LocalModelSelect task="transcribe" label="Transcribe" />
             <LocalModelSelect task="describe" label="See image" />
+            <LocalModelSelect task="imagine" label="Create image" />
             <span className="text-xs leading-relaxed text-neutral-500">Auto picks the newest, smartest model that fits this device. Voices follow the language chosen in each Speak node.</span>
           </div>
           <label className="flex flex-col gap-2 border-t border-line pt-4">

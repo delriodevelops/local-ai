@@ -17,16 +17,19 @@ type MediaEntry = { state: ModelState; status?: string; backend?: MediaBackend }
 
 type ResourcesState = {
   media: Record<MediaModel, MediaEntry>
+  // FLUX.2 klein va en sus propios workers, uno por fase (flux.ts): solo está cargado mientras pinta
+  flux: MediaEntry
   // Velocidad de la última respuesta del modelo de texto
   tokensPerSecond: number | null
   llmBusy: boolean
   setMedia: (model: MediaModel, patch: Partial<MediaEntry>) => void
-  set: (patch: Partial<Pick<ResourcesState, 'tokensPerSecond' | 'llmBusy'>>) => void
+  set: (patch: Partial<Pick<ResourcesState, 'flux' | 'tokensPerSecond' | 'llmBusy'>>) => void
 }
 
 // Qué modelo está cargado, trabajando o apagado, para el monitor y la planificación
 export const useResources = create<ResourcesState>(set => ({
   media: { janus: { state: 'off' }, vision: { state: 'off' }, whisper: { state: 'off' }, kokoro: { state: 'off' }, supertonic: { state: 'off' } },
+  flux: { state: 'off' },
   tokensPerSecond: null,
   llmBusy: false,
   setMedia: (model, patch) => set(s => ({ media: { ...s.media, [model]: { ...s.media[model], ...patch } } })),

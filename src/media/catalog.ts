@@ -11,7 +11,10 @@ export type LocalModel = {
   fp16Only?: boolean
 }
 
-export type LocalTask = 'transcribe' | 'describe'
+export type LocalTask = 'transcribe' | 'describe' | 'imagine'
+
+// FLUX.2 klein no va en el worker de imagen y audio sino en los suyos (flux.ts)
+export const FLUX = 'flux2-klein-4b'
 
 export const LOCAL_MODELS: Record<LocalTask, LocalModel[]> = {
   transcribe: [
@@ -21,6 +24,10 @@ export const LOCAL_MODELS: Record<LocalTask, LocalModel[]> = {
   describe: [
     { id: 'lfm3-vl-2b', name: 'LFM3-VL 2B', repo: 'onnx-community/LFM3-VL-2B-ONNX', released: '2026-10', sizeGB: 1.9, fp16Only: true },
     { id: 'lfm2.5-vl-450m', name: 'LFM2.5-VL 450M', repo: 'onnx-community/LFM2.5-VL-450M-ONNX', released: '2026-04', sizeGB: 0.5 },
+  ],
+  imagine: [
+    { id: FLUX, name: 'FLUX.2 klein 4B', repo: 'cgb/flux2-klein-4b-onnx-webgpu', released: '2026-01', sizeGB: 6.5, fp16Only: true },
+    { id: 'janus-pro-1b', name: 'Janus-Pro 1B', repo: 'onnx-community/Janus-Pro-1B-ONNX', released: '2025-01', sizeGB: 2.4 },
   ],
 }
 

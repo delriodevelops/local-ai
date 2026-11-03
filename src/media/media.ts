@@ -27,9 +27,11 @@ export const voiceModel = (voice: string): MediaModel => (voice.includes(':') ? 
 
 const FIT = { good: 0, tight: 1, no: 2 }
 
-// Los modelos de una tarea, primero los que caben en este equipo y, dentro, del más nuevo y listo al más modesto
+// Los modelos de una tarea, primero los que caben en este equipo y, dentro, del más nuevo y listo al más modesto.
+// El espacio libre no cuenta (como si ya estuviera descargado): al descargarlo, el propio modelo lo gasta y pasaría a
+// no caber. Si no cabe en la caché, se descarga cada vez
 export const rankLocal = (task: LocalTask, profile: DeviceProfile | null) => LOCAL_MODELS[task]
-  .map(model => ({ ...model, fit: rateModel({ id: model.id, sizeGB: model.sizeGB, fp16: model.fp16Only }, profile, false) }))
+  .map(model => ({ ...model, fit: rateModel({ id: model.id, sizeGB: model.sizeGB, fp16: model.fp16Only }, profile, true) }))
   .sort((a, b) => FIT[a.fit.level] - FIT[b.fit.level])
 
 // El modelo de cada tarea: el elegido en Ajustes o, en automático, el primero que cabe
