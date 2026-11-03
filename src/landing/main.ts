@@ -1,19 +1,18 @@
-// La landing es HTML y CSS; este módulo trae la fuente (servida desde la propia web), los estilos,
-// el scroll suave, la película del hero, el botón de movimiento y la inclinación según la velocidad del scroll
+// La landing es HTML y CSS; este módulo trae la fuente (servida desde la propia web), los estilos, el scroll suave,
+// la película, la máquina de quien la lee, la entrada a la app y la inclinación según la velocidad del scroll
 import Lenis from 'lenis'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import 'lenis/dist/lenis.css'
 import '@fontsource-variable/archivo/wdth.css'
 import './landing.css'
+import { readMachine } from './device'
+import { enterThroughDisc } from './enter'
 import { startFilm } from './film'
 import { getFlow } from './flow'
 import { startScenes } from './scenes'
 
 const root = document.documentElement
-const KEY = 'mm-motion'
-const systemReduced = window.matchMedia('(prefers-reduced-motion: reduce)')
-let lenis: Lenis | null = null
 // Lo único que se inclina con la velocidad: --v se escribe en ellos, no en <html>, y solo cuando cambia
 const skews = Array.from(document.querySelectorAll<HTMLElement>('.skew'))
 let tilt = ''
@@ -22,90 +21,28 @@ const lean = (value: string) => {
   tilt = value
   for (const el of skews) el.style.setProperty('--v', value)
 }
-let stopFilm: (() => void) | null = null
-
-// La elección del visitante, guardada si se puede; sin almacenamiento vale para esta visita
-let choice: string | null = null
-try { choice = localStorage.getItem(KEY) } catch { /* sin almacenamiento */ }
-function choose(value: 'full' | 'reduced') {
-  choice = value
-  try { localStorage.setItem(KEY, value) } catch { /* sin almacenamiento: solo esta visita */ }
-  apply()
-}
 
 // Scroll suave: la rueda del ratón avanza a saltos y las animaciones ligadas al scroll se verían a tirones.
 // Lenis interpola la posición y además da la velocidad, que inclina lo que se mueve (--v).
 // Va con el reloj de GSAP, para que la película del hero y el scroll avancen en el mismo fotograma
 gsap.registerPlugin(ScrollTrigger)
 gsap.ticker.lagSmoothing(0)
-const tick = (time: number) => lenis?.raf(time * 1000)
+const lenis = new Lenis({ lerp: 0.085, anchors: true })
+lenis.on('scroll', ({ velocity }: { velocity: number }) => {
+  lean(Math.max(-1, Math.min(1, velocity / 45)).toFixed(2))
+  ScrollTrigger.update()
+})
+gsap.ticker.add(time => lenis.raf(time * 1000))
 
-function smooth(on: boolean) {
-  if (on && !lenis) {
-    lenis = new Lenis({ lerp: 0.085, anchors: true })
-    lenis.on('scroll', ({ velocity }: { velocity: number }) => {
-      lean(Math.max(-1, Math.min(1, velocity / 45)).toFixed(2))
-      ScrollTrigger.update()
-    })
-    gsap.ticker.add(tick)
-  } else if (!on && lenis) {
-    gsap.ticker.remove(tick)
-    lenis.destroy()
-    lenis = null
-    lean('0')
-  }
-}
-
-// La película necesita el contenedor alto y el escenario fijo (clase film) antes de medir.
-// El hero y las escenas de después van juntos: con el movimiento apagado, toda la página queda quieta
-function film(on: boolean) {
-  root.classList.toggle('film', on)
-  if (on && !stopFilm) {
-    const stopHero = startFilm()
-    const stopScenes = startScenes()
-    stopFilm = () => {
-      stopScenes()
-      stopHero()
-    }
-  } else if (!on && stopFilm) {
-    stopFilm()
-    stopFilm = null
-  }
+// La página es siempre una película, también si el sistema pide menos movimiento: no hay versión quieta ni botón
+// para elegirla. El hero y las escenas de después necesitan el contenedor alto y el escenario fijo (clase film)
+// antes de medir. Sin JavaScript no hay película y la página queda en su estado final
+function film() {
+  root.classList.add('film')
+  startFilm()
+  startScenes()
   ScrollTrigger.refresh()
 }
-
-// Movimiento reducido si el sistema lo pide, salvo que el visitante haya elegido otra cosa
-function apply() {
-  const reduce = choice === 'reduced' || (choice !== 'full' && systemReduced.matches)
-  root.classList.toggle('reduce-motion', reduce)
-  smooth(!reduce)
-  film(!reduce)
-  // El botón Motion empieza oculto: sin JavaScript no podría hacer nada
-  const button = document.querySelector<HTMLButtonElement>('.motion')
-  if (button) {
-    button.hidden = false
-    button.setAttribute('aria-pressed', String(!reduce))
-    button.querySelector('.state')!.textContent = reduce ? 'Off' : 'On'
-    button.title = systemReduced.matches && !reduce
-      ? 'Your system asks for reduced motion; showing full motion because you chose it'
-      : 'Turn the scroll animations on or off'
-  }
-  // Sin movimiento, el disco del hero es el botón de play; si lo apagó el sistema, una línea explica por qué
-  const play = document.querySelector<HTMLElement>('.disc-cta')
-  if (play) play.hidden = !reduce
-  const note = document.querySelector<HTMLElement>('.motion-note')
-  if (note) note.hidden = !(reduce && choice === null)
-}
-
-document.querySelector('.motion')?.addEventListener('click', () => {
-  choose(root.classList.contains('reduce-motion') ? 'full' : 'reduced')
-})
-// La película empieza siempre en el primer fotograma
-document.querySelector('.disc-play')?.addEventListener('click', () => {
-  choose('full')
-  lenis?.scrollTo(0, { immediate: true })
-})
-systemReduced.addEventListener('change', apply)
 // Lo que ocupa la barra de scroll: lo que va a sangre (la tira de 02) mide la ventana sin ella
 const scrollbar = () => root.style.setProperty('--sbw', `${window.innerWidth - root.clientWidth}px`)
 window.addEventListener('resize', scrollbar)
@@ -134,7 +71,17 @@ if (signatureMark) {
 }
 // Los cables del flujo de 01 se dibujan siempre; la película solo los anima
 getFlow()
-apply()
+film()
+// La nota del hero dice en qué máquina va a correr: la gráfica y los núcleos de quien la lee, también sin película.
+// En el móvil la nota no se ve y no hace falta despertar la gráfica
+if (!matchMedia('(max-width: 760px)').matches) {
+  readMachine().then(({ gpu, cores }) => {
+    const note = document.querySelector<HTMLElement>('.machine-gpu')
+    if (note && gpu) note.textContent = `On your ${gpu}${cores ? `, ${cores} cores` : ''}.`
+  })
+}
+// Los enlaces a la app entran por el disco
+enterThroughDisc()
 
 // La app incrustada (05) solo se descarga en pantallas anchas con ratón: en móviles (también apaisados) y tabletas
 // táctiles el marco está oculto y sin src. Una vez cargada se queda, aunque la ventana cambie.
