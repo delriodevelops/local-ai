@@ -11,6 +11,7 @@ import { defaultArgs, firstLine, INPUT, toolFields } from '@/mcp/args'
 import { refreshServer, useMcp } from '@/mcp/store'
 import type { McpServer, ToolRef } from '@/mcp/types'
 import { LANGUAGES, VOICES } from '@/media/media'
+import { VIDEO_MODELS } from '@/media/video'
 import MediaView from '@/chat/MediaView'
 import type {
   AgentNode, AssistantNode, ConditionNode, DescribeNode, ImagineNode, InputNode, JoinNode, OutputNode, PortType,
@@ -342,12 +343,26 @@ export const SpeakNodeView = memo(({ id, data, selected }: NodeProps<SpeakNode>)
 })
 
 export const VideoNodeView = memo(({ id, data, selected }: NodeProps<VideoNode>) => {
+  const updateNode = useApp(s => s.updateNode)
   const step = useStep(id)
+  // Un modelo que no está en la lista (escrito a mano, o el LTX-Video de antes) se edita como texto
+  const listed = VIDEO_MODELS.some(m => m.id === data.model)
   return (
     <Shell id={id} kind="Create video" icon={<Clapperboard className="w-3 h-3" />} selected={selected} step={step} width="w-64" local={false}>
       <Title id={id} value={data.label} />
-      <Field id={id} label="fal.ai model" value={data.model} field="model" mono />
-      <p className="text-[11px] leading-relaxed text-neutral-400">Video models don't fit in a browser: this one runs on fal.ai with your key.</p>
+      <label className="flex flex-col gap-1 text-xs text-neutral-400">
+        fal.ai model
+        <select
+          value={listed ? data.model : ''}
+          onChange={e => updateNode(id, { model: e.target.value })}
+          className={cn(fieldClass, 'px-2 py-1.5')}
+        >
+          {VIDEO_MODELS.map(m => <option key={m.id} value={m.id}>{m.name} · {m.price}</option>)}
+          <option value="">Other fal.ai model…</option>
+        </select>
+      </label>
+      {!listed && <Field id={id} label="Model id" value={data.model} field="model" mono />}
+      <p className="text-[11px] leading-relaxed text-neutral-400">Video models don't fit in a browser: this one runs on fal.ai, billed to your key.</p>
       <Preview step={step} />
       <TypeTag type="video" />
       <Port type="target" id="in" kind="text" />

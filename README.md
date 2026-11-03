@@ -19,7 +19,7 @@ Build a flow on a canvas and MeshMind runs every model on your own GPU. No serve
 | **Create image** | text | image | Paints an image from a prompt |
 | **Transcribe** | audio | text | Speech to text |
 | **Speak** | text | audio | Text to a natural voice in English, Spanish, Portuguese, French or Korean |
-| **Create video** | text | video | Optional and **online**: runs on [fal.ai](https://fal.ai) with your own key |
+| **Create video** | text | video | Optional and **online**: runs on [fal.ai](https://fal.ai) with your own key. Pick a current model (MiniMax H3, FLUX 3, Kling 3…) by its price per clip, or type any fal model |
 | **MCP tool** | text or list | text or list, image | **Online**: calls one tool of an MCP server. Arguments are typed in the node; `{input}` is what reaches it. A list makes one call per item (only the first image goes out) |
 | **Agent** | text | text | **Online tools, local model**: an assistant that decides which MCP tools to call (up to 5 tools and 4 calls) |
 | **Answer** | anything | – | What reaches it is shown in the chat |

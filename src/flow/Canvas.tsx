@@ -16,6 +16,7 @@ import { edgeTypes } from './edges'
 import { fromVertical, toVertical, Vertical, VERTICAL_QUERY } from './orientation'
 import { ASSISTANTS, TEMPLATES, newId } from './presets'
 import { useSession } from '@/chat/session'
+import { DEFAULT_VIDEO_MODEL } from '@/media/video'
 import type { FlowNode } from './types'
 
 // Una copia traspuesta por cada nodo guardado: los que no cambian conservan la suya y React Flow no los repinta
@@ -177,7 +178,7 @@ function Flow() {
             <MenuItem icon={<Mic className="w-4 h-4" />} title="Transcribe" text="Audio → text with Whisper." onSelect={() => add({ type: 'transcribe', data: { label: 'Transcribe' } })} />
             <MenuItem icon={<AudioLines className="w-4 h-4" />} title="Speak" text="Text → natural voice." onSelect={() => add({ type: 'speak', data: { label: 'Speak', voice: 'af_heart' } })} />
             <p className="label px-2.5 pt-3 pb-1">Online · your key</p>
-            <MenuItem icon={<Clapperboard className="w-4 h-4" />} title="Create video" text="Text → video on fal.ai. Needs a fal key in Settings." onSelect={() => add({ type: 'video', data: { label: 'Create video', model: 'fal-ai/ltx-video' } })} />
+            <MenuItem icon={<Clapperboard className="w-4 h-4" />} title="Create video" text="Text → video on fal.ai. Needs a fal key in Settings." onSelect={() => add({ type: 'video', data: { label: 'Create video', model: DEFAULT_VIDEO_MODEL } })} />
             <p className="label px-2.5 pt-3 pb-1">MCP tools · online</p>
             <MenuItem icon={<Wrench className="w-4 h-4" />} title="MCP tool" text="Calls one tool of an MCP server you added." onSelect={() => add({ type: 'tool', data: { label: 'MCP tool', serverId: mcpServers[0]?.id ?? '', tool: '', args: {} } })} />
             <MenuItem icon={<Bot className="w-4 h-4" />} title="Agent" text="An assistant that decides which MCP tools to call." onSelect={() => add({ type: 'agent', data: { label: 'Agent', color: '#2dd4bf', instructions: '', tools: [], maxSteps: 3 } })} />
