@@ -1,11 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" fill="#111111"/>
-  <g stroke="#f2f2ef" stroke-width="4">
-    <line x1="16" y1="46" x2="32" y2="18"/>
-    <line x1="32" y1="18" x2="48" y2="46"/>
-    <line x1="16" y1="46" x2="48" y2="46"/>
-  </g>
-  <rect x="9" y="39" width="14" height="14" fill="#f2f2ef"/>
-  <rect x="41" y="39" width="14" height="14" fill="#f2f2ef"/>
-  <circle cx="32" cy="18" r="8" fill="#ff3a1f"/>
+  <!-- La M de MeshMind en tinta, gruesa y de esquinas rectas, delante del disco rojo de la landing, sobre papel -->
+  <rect width="64" height="64" fill="#f2f2ef"/>
+  <circle cx="43" cy="21" r="17" fill="#ff3a1f"/>
+  <path d="M6 58V26H18L28 43L38 26H50V58H40V42L31 57H25L16 42V58Z" fill="#111111"/>
 </svg>
