@@ -139,8 +139,9 @@ export async function build(f) {
     ${['draft my resignation letter', 'is this contract fair to me?', 'summarize my bank statements'].map(s => `<div class="ask-box far"><span class="ask-t">${s}</span><span class="ask-send">${icon('arrowUp', 30)}</span></div>`).join('')}
     <div class="ask-box mine"><span class="ask-ph">Ask anything</span><span class="ask-t"><span class="typed"></span></span><span class="ask-send">${icon('arrowUp', 30)}</span></div>
   </div>`);
-  const askN = f.node(ask, { x: -2600, y: 560, rx: 12, ry: -18, persp: 2200 });
-  askN.mod(tt => ({ ry: 6 * tw(tt, 0, t.send + .4, 'lin'), rx: -3 * tw(tt, 0, t.send + .4, 'lin') }));
+  // Girada y algo aplastada, en plano: con perspectiva Chrome la pintaría pequeña y el zoom la emborronaría
+  const askN = f.node(ask, { x: -2600, y: 560, rz: -7 });
+  askN.mod(tt => ({ rz: 3 * tw(tt, 0, t.send + .4, 'lin'), sy: .93, skx: -6 }));
   const far = $$(ask, '.far');
   [[-380, -330, .78], [520, 300, .66], [-760, 360, .58]].forEach(([x, y, s], i) => f.node(far[i], { place: false }).set({ x, y, s }).mod(tt => ({ y: 10 * Math.sin(tt * .8 + i * 2) })));
   const main = $(ask, '.mine'), typed = $(main, '.typed'), ph = $(main, '.ask-ph'), askSend = $(main, '.ask-send');
@@ -165,7 +166,7 @@ export async function build(f) {
       <div class="ln">user&nbsp;&nbsp;&nbsp;<b>u_7f3a…c91</b></div>
       <div class="ln">prompt <span class="me">"${PROMPT}"</span></div>
       <div class="ln">stored <b>30 days</b></div></div></div>`);
-  M.hideAt(f.node(srv, { x: 600, y: 600, rx: 4, ry: -24, persp: 2600 }), t.not);
+  M.hideAt(f.node(srv, { x: 600, y: 600, rz: -2 }).mod(() => ({ sky: -9 })), t.not);
   M.hideAt(askN, t.not);
   const leds = $$(srv, '.led'), slot = $(srv, '.unit.hit .slot'), logLines = $$(srv, '.ln');
   f.add(tt => leds.forEach((l, i) => l.classList.toggle('on', noise(tt * 3 + i * 1.7, i) > -.1)));
@@ -291,16 +292,22 @@ export async function build(f) {
     </div>
   </div>`);
 
-  // La ventana gira en 3D con cada plano: en cada corte salta a su ángulo y dentro del plano deriva despacio
+  // La ventana cambia de ángulo con cada plano: en cada corte salta al suyo y dentro del plano deriva despacio.
+  // De cerca, el ángulo es plano (girar y aplastar, como un isométrico): Chrome pinta lo que lleva perspectiva a su
+  // tamaño natural y luego lo amplía, y con el zoom de la cámara el texto saldría borroso. La perspectiva de verdad
+  // (rx, ry) queda para los planos abiertos, donde la ventana se ve a su tamaño o menos.
+  //          [rx, ry, rz, sx, sy, skx]
   d.node.persp = 1500;
+  css(d.node.inner, { transformStyle: 'flat' });
   const ROT = [
-    [t.wire, [54, 0, -9]], [t.browser, [49, 4, -11], 'lin'], [t.browser + 1.1, [7, -22, 0], 'inOut'],
-    [t.think - 1e-3, [7, -24, 0], 'lin'], [t.think, [12, 21, 0], J], [t.see - 1e-3, [11, 25, 0], 'lin'],
-    [t.see, [8, -19, 0], J], [t.listen - 1e-3, [8, -23, 0], 'lin'], [t.listen, [14, 17, 0], J], [t.speak - 1e-3, [13, 21, 0], 'lin'],
-    [t.speak, [8, -21, 0], J], [t.gpu - 1e-3, [8, -25, 0], 'lin'], [t.gpu, [10, -20, 0], J], [t.noServer, [7, -13, 0], 'lin'],
-    [t.machine - 1e-3, [7, -13, 0]], [t.machine, [7, -36, 0], J], [t.end, [4, -14, 0], 'inOut'],
+    [t.wire, [0, 0, -14, 1, .8, 0]], [t.browser, [0, 0, -12, 1, .83, 0], 'lin'],
+    [t.browser + .55, [0, 0, 0, 1, 1, 0], 'inOut'], [t.browser + 1.1, [7, -22, 0, 1, 1, 0], 'inOut'],
+    [t.think - 1e-3, [7, -24, 0, 1, 1, 0], 'lin'], [t.think, [0, 0, -7, 1, .9, 0], J], [t.see - 1e-3, [0, 0, -5, 1, .91, 0], 'lin'],
+    [t.see, [0, 0, 7, 1, .9, 0], J], [t.listen - 1e-3, [0, 0, 5, 1, .91, 0], 'lin'], [t.listen, [0, 0, -6, 1, .9, 0], J], [t.speak - 1e-3, [0, 0, -4, 1, .91, 0], 'lin'],
+    [t.speak, [0, 0, 6, 1, .9, 0], J], [t.gpu - 1e-3, [0, 0, 4, 1, .91, 0], 'lin'], [t.gpu, [0, 0, -5, 1, .94, 0], J], [t.noServer, [0, 0, -3, 1, .95, 0], 'lin'],
+    [t.machine - 1e-3, [0, 0, -3, 1, .95, 0]], [t.machine, [7, -36, 0, 1, 1, 0], J], [t.end, [4, -14, 0, 1, 1, 0], 'inOut'],
   ];
-  d.node.mod(tt => { const [rx, ry, rz] = keys(tt, ROT); return { rx, ry, rz }; });
+  d.node.mod(tt => { const [rx, ry, rz, sx, sy, skx] = keys(tt, ROT); return { rx, ry, rz, sx, sy, skx }; });
 
   // ---------- 5 y 6. el flujo: los nodos caen, los cables se tienden, la señal corre ----------
   const nodes = Object.fromEntries($$(app, '.node:not(.sense)').map(e => [e.dataset.id, e]));
@@ -424,7 +431,7 @@ export async function build(f) {
   const res = $(app, '.res'), dim = $(app, '.dim'), act = $(app, '.hbtn.act');
   const resN = f.node(res, { place: false });
   resN.mod(tt => ({ o: tt >= t.gpu && tt < t.noServer ? 1 : 0 }));
-  f.node(dim, { place: false }).mod(tt => ({ o: tt >= t.gpu && tt < t.noServer ? .82 : 0 }));
+  f.node(dim, { place: false }).mod(tt => ({ o: tt >= t.gpu && tt < t.noServer ? .66 : 0 }));
   f.add(tt => act.classList.toggle('on', tt >= t.gpu && tt < t.noServer));
   $$(res, '.dev').forEach((g, i) => {
     if (ROWS[i].dev !== 'GPU') return;
@@ -493,15 +500,16 @@ export async function build(f) {
   cam.whip(t.send + .5, slot, { dur: .85, zoom: 1.3, dx: 120, cue: false });
   f.cue(t.send + .2, 'whoosh', { gain: .65 });
   cam.drift(t.send + .9, t.not, .08);
-  // Rasante y de cerca: con la ventana tumbada, el lienzo se ve en escorzo y hace falta más zoom
-  cam.cut(t.wire, nodes.in, { zoom: 3.3, dx: 520, dy: 60 });
-  cam.move(f0 - .1, Math.min(f0 + .4, t.browser - .02), sigs[1], { zoom: 3.1 });
+  // De cerca sobre el lienzo inclinado; la cámara solo empuja despacio y la señal cruza el cuadro, así los nodos se
+  // leen (perseguir al punto pedía un barrido tan rápido que el desenfoque se comía el texto)
+  cam.cut(t.wire, nodes.in, { zoom: 2.6, dx: 520, dy: -40 });
+  cam.drift(t.wire, t.browser, .07);
   cam.move(t.browser, t.browser + 1.1, d.el, { pad: .06 });
   SENSES.forEach((s, i) => cam.cut(SENSE_AT[i], senses[i], { zoom: 3.5, dx: i % 2 === 0 ? -430 : 430 }));
   SENSE_AT.forEach((a, i) => cam.drift(a, (i < 3 ? SENSE_AT[i + 1] : t.gpu) - .02, .05, { release: 0 }));
   cam.cut(t.gpu, res, { zoom: 1.85, dx: -420 });
   cam.drift(t.gpu, t.noServer - .02, .04, { release: 0 });
-  cam.cut(t.machine, d.el, { zoom: .6, dx: -440 });
+  cam.cut(t.machine, d.el, { zoom: .7, dx: -470 });
   cam.drift(t.machine, f.duration, .05);
 
   // ---------- las dos puntas del viaje del punto, medidas con la cámara ya puesta ----------

@@ -44,6 +44,8 @@ node $K/scripts/finish.mjs .                         # out/MeshMind_launch.mp4
 node $K/scripts/check.mjs out/MeshMind_launch.mp4    # every gate must pass
 ```
 
+Close-ups give the window flat angles (a turn and a squash, like an isometric view) rather than perspective: Chrome paints a layer with perspective at its natural size and then magnifies it, so with the camera zoomed in its text goes soft. Real perspective is kept for the open shots, where the window shows at its own size or smaller. Check sharpness on full-size frames: contact sheets are too small to show it.
+
 The master takes 16 sub-frames per frame: with 8, the whip to the server, the push through the M and the red flood show separate copies of their edges. Six Chrome tabs render it steadily; one render with eight stalled before its first frame. A draft without blur (`--blur 1`) takes under a minute.
 
 `engine/` is the skill's engine, copied into the folder so the film renders the same everywhere. `icons.js` holds the app's own lucide icons.
