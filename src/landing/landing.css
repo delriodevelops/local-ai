@@ -55,15 +55,6 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .hud{grid-column:10 / span 3;justify-self:end;display:flex;gap:8px;align-items:baseline;white-space:nowrap;visibility:hidden;animation-delay:1.4s}
 .hud-n{font-weight:800;font-size:28px;line-height:1;letter-spacing:-0.02em;font-variation-settings:"wdth" 70;font-variant-numeric:tabular-nums}
 
-/* Con el movimiento apagado, el disco rojo es el botón que pone en marcha la película.
-   Si lo apagó el sistema y no el visitante, una línea abajo explica por qué está quieto */
-.disc-cta{position:absolute;z-index:3;right:4vw;top:8%;width:clamp(150px,25vw,380px);aspect-ratio:1;display:grid;place-items:center;pointer-events:none}
-.disc-cta[hidden]{display:none}
-.disc-play{pointer-events:auto;display:inline-flex;gap:10px;align-items:center;font:inherit;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;color:#f2f2ef;background:#111111;border:0;padding:14px 18px;cursor:pointer;transition:background-color .3s,color .3s}
-.disc-play:hover,.disc-play:focus-visible{background:#f2f2ef;color:#111111}
-.disc-play-icon{font-size:16px;line-height:1}
-.motion-note{position:absolute;z-index:4;left:40px;bottom:136px;max-width:540px;margin:0;font-size:15px;line-height:1.45;animation:note-in 1s cubic-bezier(.16,1,.3,1) both .6s}
-.motion-note[hidden]{display:none}
 
 /* La película: el contenedor alto da el recorrido y el escenario se queda fijo mientras dura.
    La apertura es el disco rojo que se abre hasta llenar la pantalla; dentro, la malla y las doce columnas que se van al final */
@@ -139,7 +130,7 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .film .manifesto-stage{min-height:100vh;min-height:100svh;padding-top:40px}
 
 /* 01: el flujo corre con el scroll. Los cables los dibuja landing/flow.ts a partir de dónde quedan los nodos */
-.flow{position:relative;margin-top:80px;display:flex;align-items:center;justify-content:center}
+.flow{position:relative;margin-top:80px;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .flow-cam{position:relative;width:100%;aspect-ratio:2.4;transform-origin:0 0}
 .flow-wires{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .flow-wire{fill:none;stroke:#111111;stroke-width:2}
@@ -159,8 +150,29 @@ a{color:#111111}a:hover{color:#ff3a1f}
 [data-node=critic]{--x:28.5%;--y:72%}
 [data-node=summarizer]{--x:56.5%;--y:40%}
 [data-node=answer]{--x:83.5%;--y:40%}
-.film .flow{height:100vh;height:100svh;margin-top:0;padding:32px 0;box-sizing:border-box}
-.film .flow-cam{width:min(100%,calc((100vh - 64px) * 2.4));width:min(100%,calc((100svh - 64px) * 2.4))}
+.film .flow{height:100vh;height:100svh;margin-top:0;padding:24px 0 196px;box-sizing:border-box}
+.film .flow-cam{width:min(100%,calc((100vh - 220px) * 2.4));width:min(100%,calc((100svh - 220px) * 2.4))}
+
+/* Los capítulos del flujo. Sin película son la leyenda de los pasos; con ella, la película los recorre: la pista
+   del capítulo en curso se llena de rojo y su frase sube encima (scenes/canvas.ts) */
+.chapters{width:100%;margin:48px 0 0;padding:16px 0 0;list-style:none;border-top:2px solid #111111;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px 24px}
+.chapter{font-size:13px;line-height:1.3}
+.chapter-n{color:#ff3a1f;font-variant-numeric:tabular-nums}
+.chapter-name{font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.chapter-text{display:block;margin-top:6px;font-size:15px;line-height:1.45;color:#444444}
+.chapter-track,.chapter-say{display:none}
+/* Por encima de la línea de la máquina y del contador, que van fijos al pie de la pantalla */
+.film .chapters{position:absolute;left:0;right:0;bottom:76px;margin:0;padding:0;border:0}
+.film .chapter{color:#8a8a86;transition:color .45s cubic-bezier(.16,1,.3,1)}
+.film .chapter.is-on,.film .chapter.is-done{color:#111111}
+.film .chapter-n{color:inherit}
+.film .chapter.is-on .chapter-n{color:#ff3a1f}
+.film .chapter-track{display:block;position:relative;height:2px;margin-bottom:12px;background:rgba(17,17,17,.15);overflow:hidden}
+.film .chapter-fill{position:absolute;inset:0;background:#ff3a1f;transform:scaleX(0);transform-origin:left}
+.film .chapter-text{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.film .chapter-say{display:block;position:absolute;left:0;right:0;bottom:128px;margin:0;overflow:hidden;padding-bottom:.08em;font-size:clamp(20px,1.9vw,30px);font-weight:600;line-height:1.15;letter-spacing:-0.02em}
+.chapter-say > span{display:block}
+.chapter-say b{margin-right:.4em;font-weight:800;letter-spacing:-0.01em;text-transform:uppercase}
 
 /* 02: los sentidos. Sin movimiento son filas; con él, una tira horizontal que el scroll hace pasar,
    con el verbo que se ensancha al llegar al centro y un pictograma que se anima en cada panel */
@@ -202,7 +214,6 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .film .sched-head{display:block;position:absolute;top:-10px;bottom:20px;left:126px;width:2px;background:#ff3a1f;pointer-events:none}
 .film .curtain,.film .count,.film .countdown{animation:none}
 .stat-wide{font-size:clamp(34px,5.2vw,84px)}
-.reduce-motion .count,.reduce-motion .countdown{animation:none}
 
 /* 04: pantalla partida. A la izquierda, fijo, el flujo de la plantilla que pasa por el centro de la lista;
    se transforma de una a otra. Solo en pantallas anchas y con movimiento; si no, queda la lista */
@@ -257,6 +268,23 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .film-hud.on-dark{color:#f2f2ef;background:#111111}
 .film-hud b{font-weight:800;font-size:28px;letter-spacing:-0.02em;font-variation-settings:"wdth" 70;font-variant-numeric:tabular-nums}
 
+/* La máquina de quien mira, en vivo, en la esquina opuesta al contador: su gráfica y sus núcleos, la hora y dónde
+   está el puntero (scenes/hud.ts). Cuatro marcas de corte enmarcan la pantalla, como un pliego de imprenta */
+.machine-hud,.marks{display:none}
+.film .machine-hud{position:fixed;z-index:40;left:max(28px,calc(50vw - 692px));bottom:24px;display:flex;gap:20px;align-items:baseline;padding:10px 12px;background:#f2f2ef;font-size:12px;line-height:1;letter-spacing:.12em;text-transform:uppercase;color:#111111;font-variant-numeric:tabular-nums;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .4s cubic-bezier(.16,1,.3,1),color .4s,background-color .4s}
+.film .machine-hud.is-on{opacity:1}
+.film .machine-hud.is-hidden{opacity:0}
+.machine-hud.on-dark{color:#f2f2ef;background:#111111}
+.mh-time{font-weight:800}
+.film .marks{position:fixed;inset:14px;z-index:40;display:block;color:#111111;pointer-events:none;transition:color .4s}
+.marks.on-dark{color:#f2f2ef}
+.marks span{position:absolute;width:16px;height:16px;border:0 solid currentColor}
+.marks span:nth-child(1){top:0;left:0;border-width:1.5px 0 0 1.5px}
+.marks span:nth-child(2){top:0;right:0;border-width:1.5px 1.5px 0 0}
+.marks span:nth-child(3){bottom:0;left:0;border-width:0 0 1.5px 1.5px}
+.marks span:nth-child(4){bottom:0;right:0;border-width:0 1.5px 1.5px 0}
+@media (max-width:1100px){.mh-xy{display:none}}
+
 /* ---------- 05: la app real en un marco que se endereza al entrar ---------- */
 .demo{transform-origin:50% 100%;border:1.5px solid #111111;background:#f2f2ef;animation:demo-in linear both;animation-timeline:view();animation-range:entry 0% cover 45%}
 .demo-bar{display:flex;gap:12px;align-items:center;padding:10px 14px;border-bottom:1.5px solid #111111;font-size:12px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;overflow:hidden;animation:demo-bar linear both;animation-timeline:view();animation-range:entry 30% cover 40%}
@@ -277,6 +305,9 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .demo:fullscreen .demo-frame{height:100%;min-height:0}
 .demo-alt{display:none;flex-direction:column;align-items:start;gap:24px;border-top:2px solid #111111;padding-top:24px}
 
+/* Entrar en la app: el anillo rojo y el fondo de la app que se abren desde el botón (landing/enter.ts) */
+.enter-veil{position:fixed;inset:0;z-index:100;pointer-events:none;clip-path:circle(0 at 50% 50%)}
+
 /* La velocidad del scroll inclina lo que se mueve (--v la pone landing/main.ts) */
 .skew{transform:skewY(calc(var(--v) * 3deg));transition:transform .4s cubic-bezier(.16,1,.3,1)}
 
@@ -286,12 +317,9 @@ a{color:#111111}a:hover{color:#ff3a1f}
 .btn{background-image:linear-gradient(#ff3a1f,#ff3a1f);background-size:0% 100%;background-repeat:no-repeat;transition:background-size .5s cubic-bezier(.16,1,.3,1),color .3s,transform .35s cubic-bezier(.16,1,.3,1)}
 .btn:hover{background-size:100% 100%;color:#111111 !important;transform:translateY(-3px)}
 .btn.on-red{background-image:linear-gradient(#f2f2ef,#f2f2ef)}
+.finale.is-paper .btn.on-red{background-image:linear-gradient(#ff3a1f,#ff3a1f)}
 .btn .arrow{display:inline-block;transition:transform .35s cubic-bezier(.16,1,.3,1)}
 .btn:hover .arrow{transform:translate(4px,-4px)}
-.motion{font:inherit;font-size:12px;letter-spacing:.12em;text-transform:uppercase;background:none;border:1.5px solid #111111;color:#111111;padding:10px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;transition:background-color .3s,color .3s}
-.motion:hover{background:#111111;color:#f2f2ef}
-.motion .dot{width:8px;height:8px;border-radius:50%;background:#ff3a1f}
-.reduce-motion .motion .dot{background:transparent;box-shadow:inset 0 0 0 1.5px currentColor}
 .meta-cell{transition:border-color .3s,translate .45s cubic-bezier(.16,1,.3,1)}
 .meta-cell:hover{border-top-color:#ff3a1f !important;translate:0 -6px}
 .ticker-band:hover .ticker{animation-play-state:paused}
@@ -313,11 +341,15 @@ a{color:#111111}a:hover{color:#ff3a1f}
   .hero-foot{grid-template-columns:minmax(0,1fr) auto}
   .hero-note{display:none}
   .cue-wrap,.hud{grid-column:auto}
-  .motion-note{right:40px}
   .film .hero-pin{height:320vh}
   .manifesto-lead,.manifesto-body{grid-column:1 / -1}
   .flow-cam{aspect-ratio:.62;max-width:420px}
-  .film .flow-cam{width:min(100%,calc((100vh - 64px) * .62))}
+  .film .flow{padding-bottom:178px}
+  .film .flow-cam{width:min(100%,calc((100vh - 202px) * .62));width:min(100%,calc((100svh - 202px) * .62))}
+  .chapters{grid-template-columns:minmax(0,1fr)}
+  .film .chapters{bottom:28px;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+  .film .chapter-name{display:none}
+  .film .chapter-say{bottom:72px;font-size:19px;line-height:1.2}
   .flow-node{width:30%;height:12%;padding:8px}
   .flow-kind{font-size:9px}
   .flow-name{font-size:13px}
@@ -330,7 +362,6 @@ a{color:#111111}a:hover{color:#ff3a1f}
   [data-node=answer]{--x:35%;--y:86%}
   .sense{grid-template-columns:44px minmax(0,1fr);grid-template-areas:"n verb" ". meta" ". device";row-gap:8px}
   .sense-device{text-align:left}
-  .disc-cta{top:auto;bottom:-76px;right:auto;left:0;width:auto;aspect-ratio:auto}
   .job-verb{display:none}
   .film .sense{width:86vw;padding:24px}
   .film .sense .verb{font-size:calc((86vw - 48px) / 4.5)}
@@ -339,8 +370,8 @@ a{color:#111111}a:hover{color:#ff3a1f}
   .sched-lane{grid-template-columns:84px minmax(0,1fr);gap:10px}
   .sched-axis{margin-left:94px}
   .film .sched-head{left:94px}
-  /* En el móvil el contador taparía el texto de abajo: el del hero basta */
-  .film .film-hud{display:none}
+  /* En el móvil el contador y la línea de la máquina taparían el texto de abajo: el del hero basta */
+  .film .film-hud,.film .machine-hud,.film .marks{display:none}
 }
 /* En móviles (también apaisados) y tabletas táctiles la app no se carga: landing/main.ts usa esta misma consulta */
 @media (max-width:760px),(pointer:coarse){
@@ -348,23 +379,10 @@ a{color:#111111}a:hover{color:#ff3a1f}
   .demo-alt{display:flex}
 }
 
-/* ---------- Movimiento reducido ---------- */
-/* Sin JavaScript no hay clase en <html>: se sigue la preferencia del sistema tal cual */
+/* ---------- Sin JavaScript ---------- */
+/* No hay película: la página queda en su estado final y, si el sistema pide menos movimiento, se calman las animaciones de CSS */
 @media (prefers-reduced-motion:reduce){
-  :root:not(.film):not(.reduce-motion) :is(.breathe,.disc,.ticker,.cue,.cta-disc,.scrub,.cta-word,.ghost,.ch,.live,.count,.countdown){animation:none}
-  :root:not(.film):not(.reduce-motion) :is(.ltr-in,.mask,.reveal,.tpl,.num,.curtain,.iris,.demo,.demo-bar){animation-name:fade}
-  :root:not(.film):not(.reduce-motion) .gridline::before{animation-name:fade}
+  :root:not(.film) :is(.breathe,.disc,.ticker,.cue,.cta-disc,.scrub,.cta-word,.ghost,.ch,.live,.count,.countdown){animation:none}
+  :root:not(.film) :is(.ltr-in,.mask,.reveal,.tpl,.num,.curtain,.iris,.demo,.demo-bar){animation-name:fade}
+  :root:not(.film) .gridline::before{animation-name:fade}
 }
-/* Lo decide landing/main.ts (y el script del <head>): la preferencia del sistema, salvo que el visitante
-   pulse el botón Motion. Sin desplazamientos grandes ni movimiento continuo; quedan fundidos y colores */
-.reduce-motion .breathe,.reduce-motion .disc,.reduce-motion .ticker,.reduce-motion .cue,.reduce-motion .cta-disc,
-.reduce-motion .scrub,.reduce-motion .cta-word,.reduce-motion .ghost,.reduce-motion .ch,
-.reduce-motion .demo-bar .live{animation:none}
-.reduce-motion .gridline::before,.reduce-motion .ltr-in,.reduce-motion .hero-foot > *,.reduce-motion .motion-note,
-.reduce-motion .mask,.reduce-motion .reveal,.reduce-motion .tpl,.reduce-motion .num,
-.reduce-motion .curtain,.reduce-motion .iris,.reduce-motion .demo,.reduce-motion .demo-bar{animation-name:fade}
-.reduce-motion .ltr-in{transition:none}
-.reduce-motion .ltr-in:hover{font-variation-settings:inherit}
-
-.reduce-motion .skew{transform:none}
-.reduce-motion .btn:hover,.reduce-motion .node:hover,.reduce-motion .meta-cell:hover{transform:none;translate:none}

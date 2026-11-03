@@ -12,6 +12,7 @@ import { useScheme } from '@/ui/theme'
 import { useMedia } from '@/lib/useMedia'
 import { checkConnection, edgeType, PORT_COLOR } from './graph'
 import { nodeTypes } from './nodes'
+import { edgeTypes } from './edges'
 import { fromVertical, toVertical, Vertical, VERTICAL_QUERY } from './orientation'
 import { ASSISTANTS, TEMPLATES, newId } from './presets'
 import { useSession } from '@/chat/session'
@@ -108,17 +109,19 @@ function Flow() {
     requestAnimationFrame(() => fitView({ padding: 0.2 }))
   }, [vertical, updateNodeInternals, fitView])
 
-  // Las conexiones toman el color de lo que transportan; mientras pasa la señal, la señal es roja, como en la landing
+  // Las conexiones toman el color de lo que transportan; mientras pasa la señal, un punto rojo las recorre
+  // (edges.tsx), como en el lienzo de la landing
   const styledEdges = useMemo<Edge[]>(() => edges.map(edge => {
     const type = edgeType(edge, nodes, edges)
     const source = steps?.find(s => s.nodeId === edge.source)
     const target = steps?.find(s => s.nodeId === edge.target)
-    const active = running && target?.state === 'running' && (source?.state === 'done' || !source)
+    const active = !!running && target?.state === 'running' && (source?.state === 'done' || !source)
     const dead = source?.state === 'skipped' || (source?.branch && edge.sourceHandle !== source.branch)
     return {
       ...edge,
-      animated: active,
-      style: { stroke: active ? '#ff3a1f' : PORT_COLOR[type], strokeWidth: active ? 2.5 : 1.5, opacity: dead ? 0.15 : active ? 1 : 0.75 },
+      type: 'signal',
+      data: { active },
+      style: { stroke: PORT_COLOR[type], strokeWidth: active ? 2.5 : 1.5, opacity: dead ? 0.15 : active ? 1 : 0.75 },
     }
   }), [edges, nodes, steps, running])
 
@@ -137,6 +140,7 @@ function Flow() {
         nodes={shownNodes}
         edges={styledEdges}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         onNodesChange={onShownNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={(c: Connection) => connect(c)}

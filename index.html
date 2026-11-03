@@ -11,14 +11,6 @@
   <meta property="og:type" content="website" />
   <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
   <script>
-    // Antes de pintar: movimiento reducido si el sistema lo pide, salvo que el visitante eligiera otra cosa.
-    // Así la página no salta de alto al cargar landing/main.ts
-    (function () {
-      var choice = null
-      try { choice = localStorage.getItem('mm-motion') } catch (e) {}
-      var reduce = choice === 'reduced' || (choice !== 'full' && matchMedia('(prefers-reduced-motion: reduce)').matches)
-      if (reduce) document.documentElement.classList.add('reduce-motion')
-    })()
     // Registra ya el service worker de aislamiento: así la app abre con todos los núcleos sin recargar
     if (window.isSecureContext && 'serviceWorker' in navigator) navigator.serviceWorker.register('%BASE_URL%isolation-sw.js')
   </script>
@@ -38,7 +30,6 @@
       <a href="#start" style="text-decoration: none">04 Start</a>
       <a href="#try" style="text-decoration: none">05 Try</a>
     </nav>
-    <button class="motion" type="button" aria-pressed="true" hidden><span class="dot" aria-hidden="true"></span>Motion <span class="state">On</span></button>
     <a class="btn" href="./app/" style="display: inline-block; background-color: #111111; color: #f2f2ef; padding: 14px 20px; text-decoration: none; font-weight: 600">Open the app <span class="arrow">↗</span></a>
   </header>
 
@@ -51,7 +42,6 @@
 
         <div class="hero-title-wrap">
           <div class="disc-wrap" aria-hidden="true"><div class="disc"></div></div>
-          <div class="disc-cta" hidden><button type="button" class="disc-play"><span class="disc-play-icon" aria-hidden="true">▶</span>Play the film</button></div>
           <h1 id="hero-title" class="hero-title">
             <span class="sr-only">MeshMind</span>
             <span class="line-l breathe" aria-hidden="true"><span class="ltr" style="--k: 0"><span class="ltr-in">M</span></span><span class="ltr" style="--k: 1"><span class="ltr-in">E</span></span><span class="ltr" style="--k: 2"><span class="ltr-in">S</span></span><span class="ltr" style="--k: 3"><span class="ltr-in">H</span></span></span>
@@ -59,15 +49,13 @@
           </h1>
         </div>
 
-        <p class="motion-note" hidden>Your system asks for less motion, so the scroll film waits until you press play.</p>
-
         <div class="hero-foot">
           <div class="cue-wrap" aria-hidden="true">
             <span class="cue-track"><span class="cue"></span></span>
             <span>Scroll</span>
           </div>
           <p class="hero-note">Text, image, sound, tools.<br>Wired into one flow.</p>
-          <p class="hero-note">On your own graphics card.<br>No server, no account, no key.</p>
+          <p class="hero-note"><span class="machine-gpu">On your own graphics card.</span><br>No server, no account, no key.</p>
           <div class="hud" aria-hidden="true"><span>Frame</span><span class="hud-n">000</span><span>/ 240</span></div>
         </div>
       </div>
@@ -136,8 +124,8 @@
       </div>
     </div>
 
-    <div class="flow" role="img" aria-label="A flow: a message goes to three assistants at once, and a fourth merges their answers into one reply">
-      <div class="flow-cam">
+    <div class="flow">
+      <div class="flow-cam" role="img" aria-label="A flow: a message goes to three assistants at once, and a fourth merges their answers into one reply">
         <svg class="flow-wires" viewBox="0 0 1200 500" aria-hidden="true"><g class="flow-fallback"><path class="flow-wire" d="M198 250C270 250 270 90 342 90"/><path class="flow-wire" d="M198 250H342"/><path class="flow-wire" d="M198 250C270 250 270 410 342 410"/><path class="flow-wire" d="M522 90C600 90 600 250 678 250"/><path class="flow-wire" d="M522 250H678"/><path class="flow-wire" d="M522 410C600 410 600 250 678 250"/><path class="flow-wire" d="M858 250H1002"/></g></svg>
         <div class="flow-node" data-node="message"><span class="flow-kind">Message</span><span class="flow-text">A bakery run by a fox</span></div>
         <div class="flow-node" data-node="researcher"><span class="flow-kind">Assistant</span><span class="flow-name">Researcher</span><span class="flow-bar"></span></div>
@@ -146,6 +134,14 @@
         <div class="flow-node" data-node="summarizer"><span class="flow-kind">Assistant</span><span class="flow-name">Summarizer</span><span class="flow-bar"></span></div>
         <div class="flow-node is-answer" data-node="answer"><span class="flow-kind">Answer</span><span class="flow-text">One clear reply</span></div>
       </div>
+      <p class="chapter-say" aria-hidden="true"></p>
+      <ol class="chapters">
+        <li class="chapter"><span class="chapter-track" aria-hidden="true"><span class="chapter-fill"></span></span><span class="chapter-n">01</span> <span class="chapter-name">Message</span><span class="chapter-text">What you type, a photo or a voice note enters the flow.</span></li>
+        <li class="chapter"><span class="chapter-track" aria-hidden="true"><span class="chapter-fill"></span></span><span class="chapter-n">02</span> <span class="chapter-name">Split</span><span class="chapter-text">Three assistants get the same message at once.</span></li>
+        <li class="chapter"><span class="chapter-track" aria-hidden="true"><span class="chapter-fill"></span></span><span class="chapter-n">03</span> <span class="chapter-name">Think</span><span class="chapter-text">They think in parallel, on your own graphics card.</span></li>
+        <li class="chapter"><span class="chapter-track" aria-hidden="true"><span class="chapter-fill"></span></span><span class="chapter-n">04</span> <span class="chapter-name">Merge</span><span class="chapter-text">A fourth reads all three and merges them into one.</span></li>
+        <li class="chapter"><span class="chapter-track" aria-hidden="true"><span class="chapter-fill"></span></span><span class="chapter-n">05</span> <span class="chapter-name">Answer</span><span class="chapter-text">One clear reply. Nothing left your machine.</span></li>
+      </ol>
     </div>
   </section>
 
@@ -367,6 +363,8 @@
   </footer>
 
   <div class="film-hud" aria-hidden="true"><span class="film-hud-scene"></span><span class="film-hud-frame">Frame <b>0000</b></span></div>
+  <div class="machine-hud" aria-hidden="true"><span class="mh-gpu"></span><span class="mh-time"></span><span class="mh-xy"></span></div>
+  <div class="marks" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
 </main>
 </body>
 </html>
