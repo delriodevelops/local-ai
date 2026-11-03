@@ -10,7 +10,7 @@ import sys
 import tempfile
 
 TARGET = -14.0
-CEILING = 0.79  # -2 dBFS de pico de muestra: deja sitio al pico real y al codificador AAC
+CEILING = 0.74  # -2,6 dBFS de pico de muestra: deja sitio al pico real y a lo que sube el codificador AAC
 
 
 def ffmpeg(*args):
